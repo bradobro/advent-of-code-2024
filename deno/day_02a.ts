@@ -1,6 +1,5 @@
 import { assert } from "@std/assert/assert";
 import { Puzzle } from "./Puzzle.ts";
-import { TextLineStream } from "@std/streams";
 import { fileLines } from "./lib.ts";
 
 type Report = number[];
