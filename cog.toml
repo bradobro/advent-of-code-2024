@@ -9,8 +9,9 @@ disable_changelog = false
 from_latest_tag = false
 generate_mono_repository_global_tag = true
 branch_whitelist = []
+ignore_merge_commits = true
 skip_ci = "[skip ci]"
-skip_untracked = false
+skip_untracked = true
 tag_prefix = "v"
 
 # install with `cog install-hook -a -o`
