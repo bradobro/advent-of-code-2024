@@ -56,6 +56,6 @@ export class Puzzle02 extends Puzzle {
 
   override async solve(): Promise<void> {
     const inputs = await this.load();
-    console.log(this.simularity(inputs));
+    console.log({ simularity: this.simularity(inputs) });
   }
 }

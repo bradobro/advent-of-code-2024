@@ -8,7 +8,7 @@ export class Puzzle {
   readonly dataFilePath: string;
 
   constructor(readonly puzzleNumber: number, dataFileName = "") {
-    console.log(`DataDir: ${this.dataDir}`);
+    // console.log(`DataDir: ${this.dataDir}`);
     this.puzzleId = puzzleNumber.toString().padStart(2, "0");
     this.dataFilePath = dataFileName
       ? join(this.dataDir, dataFileName)
