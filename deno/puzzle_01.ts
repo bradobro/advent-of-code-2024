@@ -61,7 +61,7 @@ export class Puzzle01 extends Puzzle {
       const adiff = Math.abs(diff);
       sumD += diff;
       sumA += adiff;
-      console.log({ a, b, diff, adiff });
+      // console.debug({ a, b, diff, adiff });
     }
     return { sumD, sumA };
   }

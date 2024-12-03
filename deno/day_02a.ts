@@ -1,6 +1,7 @@
 import { assert } from "@std/assert/assert";
 import { Puzzle } from "./Puzzle.ts";
 import { TextLineStream } from "@std/streams";
+import { fileLines } from "./lib.ts";
 
 type Report = number[];
 
@@ -18,15 +19,6 @@ function parseReport(line: string): Report {
   // console.log(numberStrings, numberStrings.map(parseInt));
   // return line.trim().split(/\s+/).map(parseInt);
   return numberStrings.map((s) => parseInt(s));
-}
-
-async function* fileLines(path: string) {
-  const file = await Deno.open(path, { read: true });
-  const lines = file
-    .readable
-    .pipeThrough(new TextDecoderStream())
-    .pipeThrough(new TextLineStream());
-  for await (const line of lines) yield line;
 }
 
 export class Day02a extends Puzzle {
@@ -67,11 +59,11 @@ export class Day02a extends Puzzle {
       result.total += 1;
       if (this.safe(rpt)) {
         result.safe += 1;
-        console.log("safe", rpt);
+        // console.log("safe", rpt);
       } else if (this.dampable(rpt)) {
         result.dampable += 1;
       } else {
-        console.log("unsafe", rpt);
+        // console.log("unsafe", rpt);
       }
     }
     result.safish = result.safe + result.dampable;
