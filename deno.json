@@ -1,10 +1,12 @@
 {
   "tasks": {
-    "dev": "deno run --allow-read --allow-net --watch aoc.ts 1"
+    "dev": "deno run --allow-read --allow-net --watch aoc.ts 1",
+    "testw": "deno test --allow-read --allow-net --watch"
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1",
     "@std/fs": "jsr:@std/fs@^1.0.6",
-    "@std/path": "jsr:@std/path@^1.0.8"
+    "@std/path": "jsr:@std/path@^1.0.8",
+    "@std/streams": "jsr:@std/streams@^1.0.8"
   }
 }

@@ -2,9 +2,11 @@
   "version": "4",
   "specifiers": {
     "jsr:@std/assert@1": "1.0.8",
+    "jsr:@std/bytes@^1.0.3": "1.0.4",
     "jsr:@std/fs@^1.0.6": "1.0.6",
     "jsr:@std/internal@^1.0.5": "1.0.5",
     "jsr:@std/path@^1.0.8": "1.0.8",
+    "jsr:@std/streams@^1.0.8": "1.0.8",
     "npm:@types/node@*": "22.5.4"
   },
   "jsr": {
@@ -13,6 +15,9 @@
       "dependencies": [
         "jsr:@std/internal"
       ]
+    },
+    "@std/bytes@1.0.4": {
+      "integrity": "11a0debe522707c95c7b7ef89b478c13fb1583a7cfb9a85674cd2cc2e3a28abc"
     },
     "@std/fs@1.0.6": {
       "integrity": "42b56e1e41b75583a21d5a37f6a6a27de9f510bcd36c0c85791d685ca0b85fa2",
@@ -25,6 +30,12 @@
     },
     "@std/path@1.0.8": {
       "integrity": "548fa456bb6a04d3c1a1e7477986b6cffbce95102d0bb447c67c4ee70e0364be"
+    },
+    "@std/streams@1.0.8": {
+      "integrity": "b41332d93d2cf6a82fe4ac2153b930adf1a859392931e2a19d9fabfb6f154fb3",
+      "dependencies": [
+        "jsr:@std/bytes"
+      ]
     }
   },
   "npm": {
@@ -42,7 +53,8 @@
     "dependencies": [
       "jsr:@std/assert@1",
       "jsr:@std/fs@^1.0.6",
-      "jsr:@std/path@^1.0.8"
+      "jsr:@std/path@^1.0.8",
+      "jsr:@std/streams@^1.0.8"
     ]
   }
 }

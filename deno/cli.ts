@@ -1,7 +1,7 @@
-import { Puzzle02 } from "./puzzle_02.ts";
+import { Day02a } from "./day_02a.ts";
 
 export async function cli() {
   console.log(`Running ${Deno.args}`);
-  const puz = new Puzzle02();
+  const puz = new Day02a();
   await puz.solve();
 }

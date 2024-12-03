@@ -1,6 +1,7 @@
-import { assertEquals } from "@std/assert";
-import { add } from "./main.ts";
+import { Puzzle01 } from "./deno/puzzle_01.ts";
+import { Puzzle02 } from "./deno/puzzle_02.ts";
 
-Deno.test(function addTest() {
-  assertEquals(add(2, 3), 5);
+Deno.test(async function runAllDays() {
+  await new Puzzle01().solve();
+  await new Puzzle02().solve();
 });

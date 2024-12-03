@@ -1,5 +1,5 @@
 import { assert } from "@std/assert/assert";
-import { Puzzle } from "./types.ts";
+import { Puzzle } from "./Puzzle.ts";
 
 interface Input {
   lista: number[];
