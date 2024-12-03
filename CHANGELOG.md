@@ -2,6 +2,23 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v1.1.0 - 2024-12-03
+#### Documentation
+- add blank README - (e01b441) - Brad Olson
+#### Features
+- finish day 3 (puzzles 5, 6) - (66140bc) - Brad Olson
+- solve day 3 part 1 - (67f6c53) - Brad Olson
+- finish day 2 (puzzles 3, 4) - (4b8cf72) - Brad Olson
+#### Miscellaneous Chores
+- ignore merge commits - (ae5534a) - Brad Olson
+- clean up tests - (b0c65ca) - Brad Olson
+#### Refactoring
+- rename puzzle class file - (58f8160) - Brad Olson
+#### Tests
+- clean up tests - (3a53efa) - Brad Olson
+
+- - -
+
 ## v1.0.0 - 2024-12-03
 #### Features
 - solved puzzle 2 - (f0eb8df) - Brad Olson
