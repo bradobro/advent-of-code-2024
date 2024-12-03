@@ -32,7 +32,7 @@ export class Day03 extends Puzzle {
   conditionallyProcessLine(line: string) {
     let total = 0;
     for (const match of line.matchAll(conditionalRE)) {
-      console.debug(match[0]);
+      // console.debug(match[0]);
       const instr = match[0];
       if (instr.startsWith("mul(")) {
         if (this.enabled) {
@@ -71,6 +71,6 @@ export class Day03 extends Puzzle {
 
   override async solve(): Promise<void> {
     const result = await this.processLines();
-    console.log(result);
+    console.log({ day: 3, ...result });
   }
 }
