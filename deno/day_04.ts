@@ -1,6 +1,6 @@
 import { assert } from "@std/assert/assert";
 import { fileLines } from "./lib.ts";
-import { Puzzle } from "./Puzzle.ts";
+import { Puzzle, Results } from "./Puzzle.ts";
 
 type Lines = string[];
 
@@ -125,7 +125,7 @@ export function countXmasIn(a: Lines, tx: transformer): number {
   return result;
 }
 
-export class Day04 extends Puzzle {
+export class Day04 extends Puzzle<Results> {
   constructor() {
     super(7, "day_04.txt");
   }
@@ -146,7 +146,7 @@ export class Day04 extends Puzzle {
     return { data, lineCount };
   }
 
-  override async solve(): Promise<void> {
+  override async solve(): Promise<Results> {
     const { lineCount, data } = await this.load();
     const horizontal = countXmasIn(data, transformHorizontal);
     const vertical = countXmasIn(data, transformVertical);
@@ -154,16 +154,7 @@ export class Day04 extends Puzzle {
     const diagBackslash = countXmasIn(data, transformBackslash);
     const totalXmas = horizontal + vertical + diagBackslash + diagSlash;
     const totalMasX = countCrossedMAS(data);
-
-    console.log({
-      day: 4,
-      lineCount,
-      totalXmas,
-      totalMasX,
-      // horizontal,
-      // vertical,
-      // diagSlash,
-      // diagBackslash,
-    });
+    const results = { lineCount, totalXmas, totalMasX };
+    return { day: 4, hash: await this.hash(results), results };
   }
 }

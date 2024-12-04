@@ -1,12 +1,12 @@
 import { assert } from "@std/assert/assert";
 import { fileLines } from "./lib.ts";
-import { Puzzle } from "./Puzzle.ts";
+import { Puzzle, Results } from "./Puzzle.ts";
 
 const instructionRE = /mul\((\d{1,3}),(\d{1,3})\)/g;
 
 const conditionalRE = /mul\((\d{1,3}),(\d{1,3})\)|(do)\(\)|(don't)\(\)/g;
 
-export class Day03 extends Puzzle {
+export class Day03 extends Puzzle<Results> {
   enabled = true;
 
   constructor() {
@@ -69,9 +69,9 @@ export class Day03 extends Puzzle {
     return { lines, matches, total, enabledTotal };
   }
 
-  override async solve(): Promise<void> {
-    const result = await this.processLines();
-    const { total, enabledTotal } = result;
-    console.log({ day: 3, total, enabledTotal });
+  override async solve(): Promise<Results> {
+    const { total, enabledTotal } = await this.processLines();
+    const results = { total, enabledTotal };
+    return { day: 3, hash: await this.hash(results), results };
   }
 }

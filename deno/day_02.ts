@@ -1,15 +1,8 @@
 import { assert } from "@std/assert/assert";
-import { Puzzle } from "./Puzzle.ts";
+import { Puzzle, Results } from "./Puzzle.ts";
 import { fileLines } from "./lib.ts";
 
 type Report = number[];
-
-interface Results {
-  total: number;
-  safe: number;
-  dampable: number;
-  safish: number;
-}
 
 function parseReport(line: string): Report {
   const numberStrings = line.trim().split(/\s+/);
@@ -20,7 +13,7 @@ function parseReport(line: string): Report {
   return numberStrings.map((s) => parseInt(s));
 }
 
-export class Day02 extends Puzzle {
+export class Day02 extends Puzzle<Results> {
   constructor() {
     super(3, "day_02.txt");
   }
@@ -51,8 +44,8 @@ export class Day02 extends Puzzle {
     return false;
   }
 
-  async load(): Promise<Results> {
-    const result: Results = { total: 0, safe: 0, dampable: 0, safish: 0 };
+  async load() {
+    const result = { total: 0, safe: 0, dampable: 0, safish: 0 };
     for await (const line of fileLines(this.dataFilePath)) {
       const rpt = parseReport(line);
       result.total += 1;
@@ -69,8 +62,8 @@ export class Day02 extends Puzzle {
     return result;
   }
 
-  override async solve() {
+  override async solve(): Promise<Results> {
     const results = await this.load();
-    console.log({ day: 2, ...results });
+    return { day: 2, hash: await this.hash(results), results };
   }
 }

@@ -1,5 +1,5 @@
 import { assert } from "@std/assert/assert";
-import { Puzzle } from "./Puzzle.ts";
+import { Puzzle, Results } from "./Puzzle.ts";
 
 interface Input {
   lista: number[];
@@ -7,7 +7,8 @@ interface Input {
   freqb: { [k: number]: number };
 }
 
-export class Day01 extends Puzzle {
+// deno-lint-ignore no-explicit-any
+export class Day01 extends Puzzle<Results> {
   constructor() {
     super(1, "day_01.txt");
   }
@@ -45,11 +46,7 @@ export class Day01 extends Puzzle {
   }
 
   sumDiff(inputs: Input): number {
-    // return inputs.lista.reduce((acc: number, a: number, i: number) =>
-    //   acc + a - inputs.listb[i]
-    // );
     return inputs.lista.reduce((acc, a, i) => {
-      // console.debug(acc);
       return acc + a - inputs.listb[i];
     }, 0);
   }
@@ -92,17 +89,21 @@ export class Day01 extends Puzzle {
     return simularity;
   }
 
-  override async solve(): Promise<void> {
+  override async solve() {
     const inputs = await this.load();
     inputs.lista.sort();
     inputs.listb.sort();
-    console.log({
-      day: 1,
+    const results = {
       // len: inputs.lista.length,
       // diff: ,
       absDiff: this.sumAbsDiff(inputs),
       // hardDiff: this.sumHardWay(inputs),
       simularity: this.simularity(inputs),
-    });
+    };
+    return {
+      day: 1,
+      hash: await this.hash(results),
+      results,
+    };
   }
 }
