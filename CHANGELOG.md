@@ -2,6 +2,14 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v1.2.0 - 2024-12-04
+#### Features
+- finish day 4 - (5a8d01b) - Brad Olson
+#### Refactoring
+- rename day2 file and class - (74c12bf) - Brad Olson
+
+- - -
+
 ## v1.1.0 - 2024-12-03
 #### Documentation
 - add blank README - (e01b441) - Brad Olson
