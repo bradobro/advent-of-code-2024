@@ -71,6 +71,7 @@ export class Day03 extends Puzzle {
 
   override async solve(): Promise<void> {
     const result = await this.processLines();
-    console.log({ day: 3, ...result });
+    const { total, enabledTotal } = result;
+    console.log({ day: 3, total, enabledTotal });
   }
 }

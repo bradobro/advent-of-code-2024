@@ -137,7 +137,7 @@ export class Day04 extends Puzzle {
     for await (const line of fileLines(this.dataFilePath)) {
       if (len < 0) {
         len = line.length;
-        console.debug("line length = ", len);
+        // console.debug("line length = ", len);
       } else assert(line.length === len, "lengths should match");
       data.push(line);
       lineCount++;
@@ -153,17 +153,17 @@ export class Day04 extends Puzzle {
     const diagSlash = countXmasIn(data, transformSlash);
     const diagBackslash = countXmasIn(data, transformBackslash);
     const totalXmas = horizontal + vertical + diagBackslash + diagSlash;
-    const totalMaxX = countCrossedMAS(data);
+    const totalMasX = countCrossedMAS(data);
 
     console.log({
       day: 4,
       lineCount,
-      totalMaxX,
       totalXmas,
-      horizontal,
-      vertical,
-      diagSlash,
-      diagBackslash,
+      totalMasX,
+      // horizontal,
+      // vertical,
+      // diagSlash,
+      // diagBackslash,
     });
   }
 }

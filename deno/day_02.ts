@@ -71,6 +71,6 @@ export class Day02 extends Puzzle {
 
   override async solve() {
     const results = await this.load();
-    console.log({ results });
+    console.log({ day: 2, ...results });
   }
 }
