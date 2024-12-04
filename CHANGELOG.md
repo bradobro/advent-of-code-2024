@@ -3,9 +3,6 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 ## v2.0.0 - 2024-12-04
-#### Miscellaneous Chores
-- Merge pull request #3 from bradobro/cleanup - (d6c3d8f) - Brad Olson
-- remove obsolete puzzle1 puzzle2 - (f3d89dd) - Brad Olson
 #### Refactoring
 - combine day 1 parts - (6be2f1d) - Brad Olson
 #### Tests
@@ -16,32 +13,19 @@ All notable changes to this project will be documented in this file. See [conven
 ## v1.2.0 - 2024-12-04
 #### Features
 - finish day 4 - (5a8d01b) - Brad Olson
-#### Refactoring
-- rename day2 file and class - (74c12bf) - Brad Olson
 
 - - -
 
 ## v1.1.0 - 2024-12-03
-#### Documentation
-- add blank README - (e01b441) - Brad Olson
 #### Features
 - finish day 3 (puzzles 5, 6) - (66140bc) - Brad Olson
-- solve day 3 part 1 - (67f6c53) - Brad Olson
 - finish day 2 (puzzles 3, 4) - (4b8cf72) - Brad Olson
-#### Miscellaneous Chores
-- ignore merge commits - (ae5534a) - Brad Olson
-- clean up tests - (b0c65ca) - Brad Olson
-#### Refactoring
-- rename puzzle class file - (58f8160) - Brad Olson
-#### Tests
-- clean up tests - (3a53efa) - Brad Olson
 
 - - -
 
 ## v1.0.0 - 2024-12-03
 #### Features
-- solved puzzle 2 - (f0eb8df) - Brad Olson
-- finish puzzle 01 - (032867c) - Brad Olson
+- solved day 1 - (f0eb8df) - Brad Olson
 #### Miscellaneous Chores
 - add cog - (d3e71ec) - Brad Olson
 - initial commit - (5af6d5b) - Brad Olson
