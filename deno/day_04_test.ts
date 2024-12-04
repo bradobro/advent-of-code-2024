@@ -29,12 +29,12 @@ Deno.test(function testFinder() {
   assertEquals(2, xmasCount("XXXXSMSMSSXXSAMXMASSSSSSSSS"));
 });
 
-Deno.test(function testVertical() {
-  // assertEquals(x4, transformHorizontal(x4).join(","));
-  // assertEquals(x4, transformVertical(x4).join(","));
-  console.debug(x4.join("\n"));
-  console.debug(transformHorizontal(x4));
-  console.debug(transformVertical(x4));
-  console.debug(transformSlash(x4));
-  console.debug(transformBackslash(x4));
-});
+// Deno.test(function testVertical() {
+// assertEquals(x4, transformHorizontal(x4).join(","));
+// assertEquals(x4, transformVertical(x4).join(","));
+// console.debug(x4.join("\n"));
+// console.debug(transformHorizontal(x4));
+// console.debug(transformVertical(x4));
+// console.debug(transformSlash(x4));
+// console.debug(transformBackslash(x4));
+// });

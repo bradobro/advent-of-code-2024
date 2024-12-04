@@ -20,7 +20,7 @@ function parseReport(line: string): Report {
   return numberStrings.map((s) => parseInt(s));
 }
 
-export class Day02a extends Puzzle {
+export class Day02 extends Puzzle {
   constructor() {
     super(3, "day_02.txt");
   }
