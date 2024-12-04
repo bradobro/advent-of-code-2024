@@ -1,18 +1,12 @@
-import { assert, assertEquals } from "@std/assert";
-import {
-  transformBackslash,
-  transformHorizontal,
-  transformSlash,
-  transformVertical,
-  xmasCount,
-} from "./day_04.ts";
+import { assertEquals } from "@std/assert";
+import { xmasCount } from "./day_04.ts";
 
-const x4: string[] = [
-  "ABCD",
-  "EFGH",
-  "IJKL",
-  "MNOP",
-];
+// const x4: string[] = [
+//   "ABCD",
+//   "EFGH",
+//   "IJKL",
+//   "MNOP",
+// ];
 
 Deno.test(function testFinder() {
   assertEquals(1, xmasCount("XMAS"));
