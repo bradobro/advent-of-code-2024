@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.0.0 - 2024-12-04
+#### Miscellaneous Chores
+- Merge pull request #3 from bradobro/cleanup - (d6c3d8f) - Brad Olson
+- remove obsolete puzzle1 puzzle2 - (f3d89dd) - Brad Olson
+#### Refactoring
+- combine day 1 parts - (6be2f1d) - Brad Olson
+#### Tests
+- add hashed regression checks - (7919329) - Brad Olson
+
+- - -
+
 ## v1.2.0 - 2024-12-04
 #### Features
 - finish day 4 - (5a8d01b) - Brad Olson
