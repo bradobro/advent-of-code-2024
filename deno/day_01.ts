@@ -1,19 +1,21 @@
 import { assert } from "@std/assert/assert";
-import { Puzzle } from "./Puzzle.ts";
+import { Puzzle, Results } from "./Puzzle.ts";
 
 interface Input {
   lista: number[];
   listb: number[];
+  freqb: { [k: number]: number };
 }
 
-export class Puzzle01 extends Puzzle {
+// deno-lint-ignore no-explicit-any
+export class Day01 extends Puzzle<Results> {
   constructor() {
-    super(1);
+    super(1, "day_01.txt");
   }
 
   async load(): Promise<Input> {
     // console.log(`dataFile = ${this.getDataFileName()}`);
-    const result: Input = { lista: [], listb: [] };
+    const result: Input = { lista: [], listb: [], freqb: {} };
     const raw = await this.getRawData();
     for (const line of raw.split("\n")) {
       const line2 = line.trim();
@@ -27,6 +29,11 @@ export class Puzzle01 extends Puzzle {
         assert(!isNaN(b), `parts[1] should be a number ${parts[1]}`);
         result.lista.push(a);
         result.listb.push(b);
+        if (b in result.freqb) {
+          result.freqb[b] = result.freqb[b] + 1;
+        } else {
+          result.freqb[b] = 1;
+        }
       } catch (err) {
         console.error("error processing line", line, err);
       }
@@ -39,14 +46,16 @@ export class Puzzle01 extends Puzzle {
   }
 
   sumDiff(inputs: Input): number {
-    return inputs.lista.reduce((acc: number, a: number, i: number) =>
-      acc + a - inputs.listb[i]
-    );
+    return inputs.lista.reduce((acc, a, i) => {
+      return acc + a - inputs.listb[i];
+    }, 0);
   }
 
   sumAbsDiff(inputs: Input): number {
-    return inputs.lista.reduce((acc: number, a: number, i: number) =>
-      acc + Math.abs(a - inputs.listb[i])
+    return inputs.lista.reduce(
+      (acc: number, a: number, i: number) =>
+        acc + Math.abs(a - inputs.listb[i]),
+      0,
     );
   }
 
@@ -66,12 +75,35 @@ export class Puzzle01 extends Puzzle {
     return { sumD, sumA };
   }
 
-  override async solve(): Promise<void> {
+  simularity(inputs: Input) {
+    const n = inputs.lista.length;
+    let simularity = 0;
+    for (let i = 0; i < n; i++) {
+      const a = inputs.lista[i];
+      const freq = inputs.freqb[a] || 0;
+      const s = a * freq;
+      // const adiff = Math.abs(diff);
+      // console.log({ a, freq, s });
+      simularity += s;
+    }
+    return simularity;
+  }
+
+  override async solve() {
     const inputs = await this.load();
     inputs.lista.sort();
     inputs.listb.sort();
-    const diff = this.sumDiff(inputs);
-    const absDiff = this.sumAbsDiff(inputs);
-    console.log({ diff, absDiff, hardDiff: this.sumHardWay(inputs) });
+    const results = {
+      // len: inputs.lista.length,
+      // diff: ,
+      absDiff: this.sumAbsDiff(inputs),
+      // hardDiff: this.sumHardWay(inputs),
+      simularity: this.simularity(inputs),
+    };
+    return {
+      day: 1,
+      hash: await this.hash(results),
+      results,
+    };
   }
 }
