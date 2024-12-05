@@ -1,4 +1,4 @@
-import { assertEquals } from "@std/assert";
+import { assert, assertEquals, assertFalse } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
 
@@ -19,8 +19,61 @@ interface InputData {
   jobs: Jobs; // print runs
 }
 
+function followsOrderRules(rules: Rules) {
+  return function (job: PageList): boolean {
+    for (let i = 0; i < job.length; i++) {
+      const pg = job[i];
+      const me = rules[pg];
+      // console.debug({ i, me });
+      const before = job.slice(0, i);
+      const after = job.slice(i + 1);
+      console.debug({ pg, before, after });
+      // const before = new Set<Page>()
+    }
+    return job.length < 15;
+  };
+}
+
 function linesToRules(lines: string[]): Rules {
-  return {};
+  const result: Rules = {};
+  function addRules(left: Page, right: Page) {
+    // ensure entries for each page
+    if (!(left in result)) {
+      result[left] = { beforeMe: new Set(), afterMe: new Set() };
+    }
+    if (!(right in result)) {
+      result[right] = { beforeMe: new Set(), afterMe: new Set() };
+    }
+    result[left].afterMe.add(right);
+    result[right].beforeMe.add(left);
+  }
+  for (const line of lines) {
+    const lr = line.trim().split("|").map((s) => parseInt(s) as Page);
+    assertEquals(lr.length, 2, `expected two entries in rule line ${line}`);
+    addRules(lr[0], lr[1]);
+  }
+  // audit rules, check for illogicals
+  for (const [pg, { beforeMe, afterMe }] of Object.entries(result)) {
+    const common = beforeMe.intersection(afterMe);
+    assertEquals(
+      common.size,
+      0,
+      `ERROR: page ${pg} has shared before and after entries: ${common}`,
+    );
+    const pgN = parseInt(pg) as Page;
+    assert(pgN > 0, "expecting a positive page");
+    assertFalse(
+      beforeMe.has(pgN),
+      `page ${pg} appears in it's own beforeMe list`,
+    );
+    assertFalse(
+      afterMe.has(pgN),
+      `page ${pg} appears in it's own afterMe list`,
+    );
+    // console.debug(beforeMe);
+  }
+
+  return result;
 }
 
 function linesToJobs(lines: string[]): Jobs {
@@ -89,7 +142,13 @@ export class Day05 extends Puzzle<Results> {
 
   override async solve(): Promise<Results> {
     const { rules, jobs } = await this.load();
-    const results = { rules: Object.keys(rules).length, jobs: jobs.length };
+    const correct = jobs.slice(0, 4).filter(followsOrderRules(rules));
+    // midpoint, sum
+    const results = {
+      rules: Object.keys(rules).length,
+      jobs: jobs.length,
+      correct: correct.length,
+    };
     return { day: 5, hash: await this.hash(results), results };
   }
 }
