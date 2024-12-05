@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.1.0 - 2024-12-05
+#### Features
+- **(green)** finished day 5 - (60304a9) - Brad Olson
+- **(green)** add lib.beforeMeAfter iterator - (f3fa8b4) - Brad Olson
+- solved day 5 part 1 - (fdb4dcf) - Brad Olson
+#### Miscellaneous Chores
+- Merge pull request #4 from bradobro/day-5 - (da53d71) - Brad Olson
+- get day 5 data - (1f65ec7) - Brad Olson
+- clean up Changelog - (10bc5ea) - Brad Olson
+
+- - -
+
 ## v2.0.0 - 2024-12-04
 #### Refactoring
 - combine day 1 parts - (6be2f1d) - Brad Olson
