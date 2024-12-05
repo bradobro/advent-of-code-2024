@@ -44,8 +44,8 @@ function followsOrderRules(rules: Rules) {
         `expected afters to be disjoint from allowable befores`,
       );
       // console.debug({ correct: true, job });
-      return true;
     }
+    return true;
   };
 }
 
