@@ -4,11 +4,8 @@ All notable changes to this project will be documented in this file. See [conven
 - - -
 ## v2.1.0 - 2024-12-05
 #### Features
-- **(green)** finished day 5 - (60304a9) - Brad Olson
+- finish day 5 - (60304a9) - Brad Olson
 - **(green)** add lib.beforeMeAfter iterator - (f3fa8b4) - Brad Olson
-- solved day 5 part 1 - (fdb4dcf) - Brad Olson
-#### Miscellaneous Chores
-- clean up Changelog - (10bc5ea) - Brad Olson
 
 - - -
 
@@ -28,17 +25,14 @@ All notable changes to this project will be documented in this file. See [conven
 
 ## v1.1.0 - 2024-12-03
 #### Features
-- finish day 3 (puzzles 5, 6) - (66140bc) - Brad Olson
-- finish day 2 (puzzles 3, 4) - (4b8cf72) - Brad Olson
+- finish day 3 - (66140bc) - Brad Olson
+- finish day 2 - (4b8cf72) - Brad Olson
 
 - - -
 
 ## v1.0.0 - 2024-12-03
 #### Features
-- solved day 1 - (f0eb8df) - Brad Olson
-#### Miscellaneous Chores
-- add cog - (d3e71ec) - Brad Olson
-- initial commit - (5af6d5b) - Brad Olson
+- finish day 1 - (f0eb8df) - Brad Olson
 
 - - -
 

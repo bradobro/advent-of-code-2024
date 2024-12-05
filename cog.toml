@@ -25,6 +25,7 @@ cog check
 [commit_types]
 begin = { changelog_title = "Work Begun", omit_from_changelog = true }
 wip = { changelog_title = "Work in Process", omit_from_changelog = true }
+chore = {changelog_title = "Miscellaneous Chores", omit_from_changelog = true}
 
 [changelog]
 path = "CHANGELOG.md"

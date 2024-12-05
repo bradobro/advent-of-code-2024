@@ -5,6 +5,7 @@ import { Day03 } from "./deno/day_03.ts";
 import { Day04 } from "./deno/day_04.ts";
 import { Day05 } from "./deno/day_05.ts";
 import { DayNext } from "./deno/day_next.ts";
+import { Day06 } from "./deno/day_06.ts";
 
 Deno.test(async function day1() {
   const day1 = await new Day01().solve();
@@ -43,9 +44,15 @@ Deno.test(async function day4() {
 });
 
 Deno.test(async function day5() {
-  return; // skip
   assertEquals(
     (await new Day05().solve()).hash,
+    "fa11a385431c628a5c2cb46fae2c655af732bbaafa911360f96fb144c2d7e9dc",
+  );
+});
+
+Deno.test(async function day6() {
+  assertEquals(
+    (await new Day06().solve()).hash,
     "110f15bf65c41e4fc6d521baf898f62b89cecffb250714f33a407a8b73e2c900",
   );
 });
