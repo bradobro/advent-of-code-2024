@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertFalse } from "@std/assert";
-import { beforeMeAfter, fileLines } from "./lib.ts";
+import { beforeMeAfter, fileLines, meRest } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
 
 type Page = number;
@@ -17,6 +17,33 @@ type Rules = Record<Page, PageRule>;
 interface InputData {
   rules: Rules;
   jobs: Jobs; // print runs
+}
+
+function frontmost(
+  job: PageList,
+  rules: Rules,
+): { front: Page; rest: PageList } {
+  for (const { me: front, rest } of meRest(job)) {
+    if (new Set(rest).isSubsetOf(rules[front].afterMe)) {
+      return { front, rest };
+    }
+  }
+  throw new Error(`couldn't find frontmost of ${job}`);
+}
+
+function correctlyOrder(rules: Rules) {
+  return function (job: PageList): PageList {
+    const result: PageList = [];
+    let pages = job.slice(0); // clone pages
+    while (pages.length > 0) {
+      // result.push(pages.pop() || -1);
+      const { front, rest } = frontmost(pages, rules);
+      result.push(front);
+      pages = rest;
+    }
+    // console.debug({ job, result });
+    return result;
+  };
 }
 
 function followsOrderRules(rules: Rules) {
@@ -98,6 +125,14 @@ function linesToRules(lines: string[]): Rules {
     // console.debug(beforeMe);
   }
 
+  // Research: can't order by sorts
+  // const sorts = Object.keys(result).map((k) => {
+  //   const pg = parseInt(k);
+  //   const r = result[pg];
+  //   return [pg, r.beforeMe.size, r.afterMe.size];
+  // });
+  // console.debug(sorts);
+  // console.debug(result[11]);
   return result;
 }
 
@@ -123,13 +158,13 @@ function linesToJobs(lines: string[]): Jobs {
     if (len < min) min = len;
     if (len > max) max = len;
   });
-  console.debug({
-    what: "job lengths",
-    min,
-    max,
-    n,
-    avg: sum / n,
-  });
+  // console.debug({
+  //   what: "job lengths",
+  //   min,
+  //   max,
+  //   n,
+  //   avg: sum / n,
+  // });
   return result;
 }
 
@@ -138,7 +173,7 @@ export class Day05 extends Puzzle<Results> {
     super(5);
   }
 
-  async load(): Promise<InputData> {
+  async load() {
     let loadSection = 0; // 0-rules, 1-print jobs (lists of pages)
     const ruleLines: string[] = [];
     const jobLines: string[] = [];
@@ -159,24 +194,48 @@ export class Day05 extends Puzzle<Results> {
           throw new Error("what! a third section?");
       }
     }
+    const rules = linesToRules(ruleLines);
+    const pages = Object.keys(rules).map((s) => parseInt(s)).toSorted();
+    // console.debug(pages);
     return {
-      rules: linesToRules(ruleLines),
+      rules,
       jobs: linesToJobs(jobLines),
+      pages,
     };
   }
 
   override async solve(): Promise<Results> {
     const { rules, jobs } = await this.load();
-    const correct = jobs.filter(followsOrderRules(rules));
-    const midpoints = correct.map(middleOne);
-    const sumMidpoints = midpoints.reduce((acc, a) => acc + a, 0);
-    // console.debug(midpoints);
+    const { nCorrect, sumCorrectMidpoints } = this.calcPuzzle1(jobs, rules);
+    const { nCorrected, sumCorrectedMidpoints } = this.calcPuzzle2(jobs, rules);
     const results = {
       rules: Object.keys(rules).length,
       jobs: jobs.length,
-      correct: correct.length,
-      sumMidpoints,
+      nCorrect,
+      sumCorrectMidpoints,
+      nCorrected,
+      sumCorrectedMidpoints,
     };
     return { day: 5, hash: await this.hash(results), results };
+  }
+
+  calcPuzzle1(jobs: Jobs, rules: Rules) {
+    const correct = jobs.filter(followsOrderRules(rules));
+    const midpoints = correct.map(middleOne);
+    const sumCorrectMidpoints = midpoints.reduce((acc, a) => acc + a, 0);
+    const nCorrect = correct.length;
+    return { nCorrect, sumCorrectMidpoints };
+  }
+
+  calcPuzzle2(jobs: Jobs, rules: Rules) {
+    const correctFilter = followsOrderRules(rules);
+    const incorrectFilter = (job: PageList): boolean => !correctFilter(job);
+    const incorrect = jobs.filter(incorrectFilter);
+    const corrected = incorrect.map(correctlyOrder(rules));
+    // const corrected = incorrect;
+    const midpoints = corrected.map(middleOne);
+    const sumCorrectedMidpoints = midpoints.reduce((acc, a) => acc + a, 0);
+    const nCorrected = corrected.length;
+    return { nCorrected, sumCorrectedMidpoints };
   }
 }
