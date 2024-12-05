@@ -8,8 +8,6 @@ All notable changes to this project will be documented in this file. See [conven
 - **(green)** add lib.beforeMeAfter iterator - (f3fa8b4) - Brad Olson
 - solved day 5 part 1 - (fdb4dcf) - Brad Olson
 #### Miscellaneous Chores
-- Merge pull request #4 from bradobro/day-5 - (da53d71) - Brad Olson
-- get day 5 data - (1f65ec7) - Brad Olson
 - clean up Changelog - (10bc5ea) - Brad Olson
 
 - - -
