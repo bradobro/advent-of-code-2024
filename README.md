@@ -9,6 +9,7 @@ I love computer languages. These repos look interesting:
 - Zig: https://github.com/p88h/aoc2024
 - Deno Contest: https://github.com/denoland/advent-of-code-2024
 - Mix of languages C, Java, Python, Rust: https://github.com/Friends-of-AoC/Advent-of-Code-2024-exchange
+- Interesting stats: https://jeroenheijmans.github.io/advent-of-code-surveys/
 
 ## Work Log
 
