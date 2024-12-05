@@ -1,6 +1,14 @@
 # Advent of Code 2024
 
-I plan to solve the puzzles in Deno.
+I plan to solve the puzzles in Deno because fit's the standard library I'm fastest with at the moment, though I could probably also reach for Go.
+
+## Repos to Watch
+
+I love computer languages. These repos look interesting:
+
+- Zig: https://github.com/p88h/aoc2024
+- Deno Contest: https://github.com/denoland/advent-of-code-2024
+- Mix of languages C, Java, Python, Rust: https://github.com/Friends-of-AoC/Advent-of-Code-2024-exchange
 
 ## Work Log
 
