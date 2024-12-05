@@ -20,12 +20,14 @@ export async function* fileLines(path: string) {
  *     - before is the list of items before "me"
  *     - after is the list of items after "me"
  */
-export function* beforeMeAfter<T>(all: T[]): Generator<(T[] | T)[]> {
+export function* beforeMeAfter<T>(
+  all: T[],
+): Generator<{ before: T[]; me: T; after: T[] }> {
   const n = all.length;
   for (let i = 0; i < n; i++) {
     const before: T[] = all.slice(0, i); // all the items before current item
     const me = all[i]; // ME; current item
     const after: T[] = all.slice(i + 1); // all the items after the current item
-    yield [before, me, after];
+    yield { before, me, after };
   }
 }

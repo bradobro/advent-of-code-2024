@@ -1,5 +1,5 @@
 import { assert, assertEquals, assertFalse } from "@std/assert";
-import { fileLines } from "./lib.ts";
+import { beforeMeAfter, fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
 
 type Page = number;
@@ -21,17 +21,42 @@ interface InputData {
 
 function followsOrderRules(rules: Rules) {
   return function (job: PageList): boolean {
-    for (let i = 0; i < job.length; i++) {
-      const pg = job[i];
-      const me = rules[pg];
-      // console.debug({ i, me });
-      const before = job.slice(0, i);
-      const after = job.slice(i + 1);
-      console.debug({ pg, before, after });
-      // const before = new Set<Page>()
+    for (const { before, me: pg, after } of beforeMeAfter(job)) {
+      const { beforeMe, afterMe } = rules[pg];
+      const beforeSet = new Set(before);
+      const afterSet = new Set(after);
+      if (!beforeSet.isSubsetOf(beforeMe)) {
+        // const violation = beforeSet.difference(beforeMe);
+        // console.debug({ job, message: "bad before", pg, violation });
+        return false;
+      }
+      if (!afterSet.isSubsetOf(afterMe)) {
+        // const violation = afterSet.difference(afterMe);
+        // console.debug({ job, message: "bad after", pg, violation });
+        return false;
+      }
+      assert(
+        beforeSet.isDisjointFrom(afterMe),
+        `expected befores to be disjoint from allowable afters`,
+      );
+      assert(
+        afterSet.isDisjointFrom(beforeMe),
+        `expected afters to be disjoint from allowable befores`,
+      );
+      // console.debug({ correct: true, job });
+      return true;
     }
-    return job.length < 15;
   };
+}
+
+function middleOne<T>(a: T[]): T {
+  const n = a.length;
+  assertEquals(
+    n % 2,
+    1,
+    `ERROR: list must have odd number of members to have a middle: ${a}`,
+  );
+  return a[(n - 1) / 2];
 }
 
 function linesToRules(lines: string[]): Rules {
@@ -142,12 +167,15 @@ export class Day05 extends Puzzle<Results> {
 
   override async solve(): Promise<Results> {
     const { rules, jobs } = await this.load();
-    const correct = jobs.slice(0, 4).filter(followsOrderRules(rules));
-    // midpoint, sum
+    const correct = jobs.filter(followsOrderRules(rules));
+    const midpoints = correct.map(middleOne);
+    const sumMidpoints = midpoints.reduce((acc, a) => acc + a, 0);
+    // console.debug(midpoints);
     const results = {
       rules: Object.keys(rules).length,
       jobs: jobs.length,
       correct: correct.length,
+      sumMidpoints,
     };
     return { day: 5, hash: await this.hash(results), results };
   }
