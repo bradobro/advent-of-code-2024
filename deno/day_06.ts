@@ -8,6 +8,21 @@ interface Location {
   guard: boolean;
 }
 
+enum MoveType {
+  turn, // x,y is same location
+  move, // x,y is new location
+  leave, // x,y is the (old) location left
+}
+
+type Lab = Matrix<Location>;
+
+interface Move {
+  kind: MoveType;
+  facing: Facing;
+  x: number;
+  y: number;
+}
+
 enum Facing {
   N = 0,
   S,
@@ -19,10 +34,16 @@ class Guard {
   facing = Facing.N;
 
   constructor(
-    private lab: Matrix<Location>,
     public x: number,
     public y: number,
   ) {}
+
+  visit(lab: Lab) {
+    lab.getXY(this.x, this.y).visited = true;
+  }
+
+  iterMoves(lab: Lab) {
+  }
 }
 
 export class Day06 extends Puzzle<Results> {
@@ -57,6 +78,7 @@ export class Day06 extends Puzzle<Results> {
       await this.load();
     assert(lab.getXY(guardX, guardY).guard, "We should have the guard here");
     const results1 = this.solvePuzzle1(lab, guardX, guardY);
+    console.debug("results1=", results1);
     const results = {
       nX,
       nY,
@@ -65,12 +87,16 @@ export class Day06 extends Puzzle<Results> {
       spaces,
       guardX,
       guardY,
-      results1,
     };
     return { day: 5, hash: await this.hash(results), results };
   }
 
   solvePuzzle1(lab: Matrix<Location>, guardX: number, guardY: number) {
-    return { guardX, guardY };
+    const guard = new Guard(guardX, guardY);
+    guard.visit(lab);
+    for (move of guard.iterMoves(lab)) {
+      console.debug(move);
+    }
+    return { guard };
   }
 }
