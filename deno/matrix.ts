@@ -1,5 +1,6 @@
 import {
   assert,
+  assertEquals,
   assertGreater,
   assertGreaterOrEqual,
   assertLess,
@@ -86,7 +87,21 @@ export class Matrix<T> {
 }
 
 export async function readMatrix(path: string): Promise<Matrix<string>> {
+  let len = -1;
   const store: string[][] = [];
-  for await (const line of fileLines(path)) store.push(line.split(""));
+  for await (const line of fileLines(path)) {
+    const trimmed = line.trim();
+    if (trimmed === "") continue;
+    const row = trimmed.split("");
+    const rowLen = row.length;
+    assertGreater(rowLen, 0, `I'm expecting chars in the row string`);
+    if (len < 0) len = rowLen;
+    else {assertEquals(
+        rowLen,
+        len,
+        `row.length = ${rowLen}, expected ${len}: "${trimmed}`,
+      );}
+    store.push(row);
+  }
   return new Matrix(store);
 }

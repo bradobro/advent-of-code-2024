@@ -57,7 +57,16 @@ export class Day06 extends Puzzle<Results> {
       await this.load();
     assert(lab.getXY(guardX, guardY).guard, "We should have the guard here");
     const results1 = this.solvePuzzle1(lab, guardX, guardY);
-    const results = { nX, nY, guards, obstacles, spaces, guardX, guardY };
+    const results = {
+      nX,
+      nY,
+      guards,
+      obstacles,
+      spaces,
+      guardX,
+      guardY,
+      results1,
+    };
     return { day: 5, hash: await this.hash(results), results };
   }
 
