@@ -2,6 +2,15 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.3.0 - 2024-12-09
+#### Features
+- solve day 7 - (3f4e174) - Brad Olson
+- adding combiner utility - (abab3c5) - Brad Olson
+#### Refactoring
+- **(green)** move combination() to lib - (894e585) - Brad Olson
+
+- - -
+
 ## v2.2.0 - 2024-12-09
 #### Bug Fixes
 - add sanity checking to matrix read - (8b776be) - Brad Olson
