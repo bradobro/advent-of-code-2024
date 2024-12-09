@@ -1,8 +1,12 @@
 import { assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { Matrix, readMatrix, XY } from "./matrix.ts";
+import { Matrix, readMatrix, XY, xyAdd, xySub } from "./matrix.ts";
 
+export function antinodes(a: XY, b: XY): XYs {
+  const diff = xySub(a, b);
+  return [xyAdd(a, diff), xySub(b, diff)];
+}
 export interface Location {
   transmitterId?: string;
   antinodes: Set<string>;
@@ -34,11 +38,6 @@ export class Map {
     this.nFreqs = this.freqs.size;
 
     const lcLetters = "abcdefghijklmnopqrstuvwxyz".split("");
-    // const LC = new Set(lcLetters);
-    // const UC = new Set(lcLetters.map((s) => s.toUpperCase()));
-    // this.unusedLetters = UC.difference(this.freqs).union(
-    //   LC.difference(this.freqs),
-    // );
     this.unusedLetters =
       (new Set(lcLetters.flatMap((lc) => [lc.toUpperCase(), lc]))).difference(
         this.freqs,
