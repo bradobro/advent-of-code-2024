@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.2.0 - 2024-12-09
+#### Bug Fixes
+- add sanity checking to matrix read - (8b776be) - Brad Olson
+#### Documentation
+- add stats link to readme - (30ac5d5) - Brad Olson
+- add to readme - (1273d8f) - Brad Olson
+#### Features
+- solve day 6 - (24ad40b) - Brad Olson
+- change matrix XY to a tuple - (016e3a7) - Brad Olson
+
+- - -
+
 ## v2.1.0 - 2024-12-05
 #### Features
 - finish day 5 - (60304a9) - Brad Olson
