@@ -1,6 +1,7 @@
 // helpers for AoC
 import { TextLineStream } from "@std/streams";
 import { assertEquals } from "@std/assert/equals";
+import { assertGreaterOrEqual, assertLess } from "@std/assert";
 
 /**
  * @param path fileLines returns an async iterator that steps through the lines of a file
@@ -84,4 +85,36 @@ export function* meRest<T>(
   for (const { i, before, me, after } of beforeMeAfter(all)) {
     yield { i, me, rest: before.concat(after) };
   }
+}
+
+/**
+ * @param count how many you want
+ * @param choices the possible things to chose from
+ * @param combo ord of the combination a number from 0...choices.length**count
+ *    combo is interpreted as an integer in base choices.length whose digits,
+ *    correspond to choice[digit] in least-significant order
+ * @returns combination of choices
+ */
+export function combination<T>(
+  count: number,
+  choices: T[],
+  combo: number,
+): T[] {
+  const result: T[] = []; // Least significant first (like LSB)
+
+  const base = choices.length;
+  const maxI = base ** count;
+  assertGreaterOrEqual(combo, 0, `instance must be 0..${maxI}`);
+  assertLess(combo, maxI, `instance must be 0..${maxI}`);
+
+  // strip off choices using the convert-to-base algorithm
+  // formatInt might be faster
+  let rest = combo;
+  for (let i = 0; i < count; i++) {
+    const digit = rest % base;
+    result.push(choices[digit]);
+    rest = (rest / base) | 0; // bitwise integer division https://www.basedash.com/blog/how-to-do-integer-division-in-javascript
+  }
+
+  return result;
 }

@@ -1,41 +1,6 @@
-import {
-  assert,
-  assertEquals,
-  assertGreater,
-  assertGreaterOrEqual,
-  assertLess,
-} from "@std/assert";
-import { fileLines } from "./lib.ts";
+import { assertEquals, assertGreaterOrEqual } from "@std/assert";
+import { combination, fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
-
-/**
- * @param count how many you want
- * @param choices the possible things to chose from
- * @param combo ord of the combination a number from 0...choices.length**count
- */
-export function combination<T>(
-  count: number,
-  choices: T[],
-  combo: number,
-): T[] {
-  const result: T[] = []; // Least significant first (like LSB)
-
-  const base = choices.length;
-  const maxI = base ** count;
-  assertGreaterOrEqual(combo, 0, `instance must be 0..${maxI}`);
-  assertLess(combo, maxI, `instance must be 0..${maxI}`);
-
-  // strip off choices using the convert-to-base algorithm
-  // formatInt might be faster
-  let rest = combo;
-  for (let i = 0; i < count; i++) {
-    const digit = rest % base;
-    result.push(choices[digit]);
-    rest = (rest / base) | 0; // bitwise integer division https://www.basedash.com/blog/how-to-do-integer-division-in-javascript
-  }
-
-  return result;
-}
 
 export type IntOp = (a: number, b: number) => number;
 
@@ -46,12 +11,12 @@ export type OpCombo = IntOp[];
 export type Factors = number[];
 
 export function applyOps(factors: Factors, ops: OpCombo): number {
-  assertGreaterOrEqual(factors.length, 2, `expecting at least two factors`);
-  assertEquals(
-    factors.length - 1,
-    ops.length,
-    `expecting one fewer ops than factors`,
-  );
+  // assertGreaterOrEqual(factors.length, 2, `expecting at least two factors`);
+  // assertEquals(
+  //   factors.length - 1,
+  //   ops.length,
+  //   `expecting one fewer ops than factors`,
+  // );
   return factors.reduce((acc: number, b: number, i: number) => {
     // console.log({ i });
     // return acc + b;
@@ -63,7 +28,7 @@ export function* iterOpCombosOn(
   factors: Factors,
   ops: OpSet,
 ): Generator<[number, OpCombo]> {
-  assertGreaterOrEqual(factors.length, 2, `expecting at least two factors`);
+  // assertGreaterOrEqual(factors.length, 2, `expecting at least two factors`);
   const nOps = factors.length - 1;
   const nCombos = ops.length ** nOps;
   for (let i = 0; i < nCombos; i++) {

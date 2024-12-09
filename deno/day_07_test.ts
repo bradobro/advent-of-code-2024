@@ -1,7 +1,8 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { applyOps, combination, IntOp, iterOpCombosOn, Row } from "./day_07.ts";
+import { applyOps, IntOp, iterOpCombosOn, Row } from "./day_07.ts";
 import { assertThrows } from "@std/assert/throws";
+import { combination } from "./lib.ts";
 
 const raw1 = [
   "25056746772: 4 47 136 21 79 49",
@@ -86,6 +87,7 @@ describe("combining functions and applying", () => {
     expect(applyOps(factors, combination(2, choices, 2))).toEqual(9);
     expect(applyOps(factors, combination(2, choices, 3))).toEqual(6);
 
-    expect(Array.from(iterOpCombosOn(factors, choices))).toEqual([6, 5, 9, 6]);
+    expect(Array.from(iterOpCombosOn(factors, choices)).map((a) => a[0]))
+      .toEqual([6, 5, 9, 6]);
   });
 });
