@@ -115,6 +115,14 @@ export class Matrix<T> {
     return new Matrix(store);
   }
 
+  *iterCells(): Generator<T> {
+    for (const row of this.store) {
+      for (const cell of row) {
+        yield cell;
+      }
+    }
+  }
+
   look(locA: XY, d: Direction): XY | null {
     const locB = xyAdd(locA, directionVectors[d]);
     if (this.validXY(locB)) return locB;
