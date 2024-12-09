@@ -1,6 +1,6 @@
 import { assert } from "@std/assert/assert";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { Matrix, readMatrix } from "./matrix.ts";
+import { Direction, Matrix, readMatrix } from "./matrix.ts";
 
 interface Location {
   visited: boolean;
@@ -9,6 +9,7 @@ interface Location {
 }
 
 enum MoveType {
+  start, // used to start iterations
   turn, // x,y is same location
   move, // x,y is new location
   leave, // x,y is the (old) location left
@@ -18,20 +19,13 @@ type Lab = Matrix<Location>;
 
 interface Move {
   kind: MoveType;
-  facing: Facing;
+  facing: Direction;
   x: number;
   y: number;
 }
 
-enum Facing {
-  N = 0,
-  S,
-  E,
-  W,
-}
-
 class Guard {
-  facing = Facing.N;
+  facing = Direction.N;
 
   constructor(
     public x: number,
@@ -43,6 +37,17 @@ class Guard {
   }
 
   iterMoves(lab: Lab) {
+    let move: Move = {
+      kind: MoveType.start,
+      x: this.x,
+      y: this.y,
+      facing: Direction.N,
+    };
+    while (move.kind !== MoveType.leave) {
+      const loc1 = lab.getXY(move.x, move.y);
+      loc1.visited = true;
+      let loc2 = lab.look;
+    }
   }
 }
 

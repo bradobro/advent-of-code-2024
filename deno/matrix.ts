@@ -7,6 +7,28 @@ import {
 } from "@std/assert";
 import { fileLines } from "./lib.ts";
 
+export enum Direction {
+  N = 0,
+  E,
+  S,
+  W,
+}
+
+type XY = [number, number];
+
+export function xyAdd(a: XY, b: XY): XY {
+  return [a[0] + b[0], a[1] + b[1]];
+}
+
+export const directionVectors: Record<Direction, XY> = {
+  0: [0, 1],
+  1: [1, 0],
+  2: [0, -1],
+  3: [-1, 0],
+};
+
+// directionVectors[Direction.N] = [0, 1];
+
 export class Matrix<T> {
   private nrows = 0;
   private ncols = 0;
@@ -29,7 +51,7 @@ export class Matrix<T> {
     this.ncols = this.nrows < 1 ? 0 : this.store[0].length;
   }
 
-  sizeXY() {
+  sizeXY(): XY {
     return [this.ncols, this.nrows];
   }
 
@@ -42,7 +64,7 @@ export class Matrix<T> {
     assertLess(column, this.ncols, `cl. must be < ${this.ncols}`);
   }
 
-  validXY(x: number, y: number): boolean {
+  validXY([x, y]: XY): boolean {
     assert(
       this.ncols > 0 && this.nrows > 0,
       `any index into a null matrix is invalid`,
@@ -66,7 +88,7 @@ export class Matrix<T> {
     );
   }
 
-  getXY(x: number, y: number): T {
+  getXY([x, y]: XY): T {
     return this.getRC(this.nrows - 1 - y, x);
   }
 
@@ -84,6 +106,8 @@ export class Matrix<T> {
     );
     return new Matrix(store);
   }
+
+  // look();
 }
 
 export async function readMatrix(path: string): Promise<Matrix<string>> {
