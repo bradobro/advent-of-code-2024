@@ -2,9 +2,9 @@ import { assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
 
-export class DayNext extends Puzzle<Results> {
+export class Day07 extends Puzzle<Results> {
   constructor() {
-    super(1);
+    super(7);
   }
 
   async load() {
