@@ -15,51 +15,6 @@ export async function* fileLines(path: string) {
   for await (const line of lines) yield line;
 }
 
-// read a file of equal length lines into matrix map
-// transforming lines and rows such that it is addressed in cartesian quadrant 1
-// +x,+y coordinates
-// export type XyMatrix2 = string[][];
-
-// export async function readXyMatrix(path: string): Promise<XyMatrix2> {
-//   let nX = -1; // x dimension
-//   let nY = 0; // y dimension
-//   const rawLines: string[] = []; // UNSHIFTED, so built in inverse (y positive) order
-//   for await (const line of fileLines(path)) {
-//     // Track dimensions
-//     if (nX < 0) nX = line.length; // first line establishes length
-//     else {assertEquals(
-//         line.length,
-//         nX,
-//         `expecting line.length to be ${nX}: """\n${line}\m"""`,
-//       );}
-//     nY++;
-//     rawLines.unshift(line);
-//   }
-//   const result: XyMatrix2 = [];
-//   for (let x = 0; x < nX; x++) {
-//     const col = rawLines.map((rowY) => rowY[x]);
-//     console.debug(col);
-//     result.push(col);
-//   }
-//   return result;
-// }
-
-// function dimensionsXY(mat: XyMatrix2): [number, number] {
-//   return [mat.length, mat[0].length];
-// }
-
-// /**
-//  * @param mat an XyMatrix
-//  * @iterates printable rows descending y
-//  */
-// export function* xyMatrixLines(mat: XyMatrix2): Generator<string[]> {
-//   const [_, nY] = dimensionsXY(mat);
-//   for (let y = nY - 1; y >= 0; y--) {
-//     const line: string[] = mat.map((colX) => colX[y]);
-//     yield line;
-//   }
-// }
-
 /**
  * @param all an array of the same type of elements
  * @iterates [before, me, after] where:
@@ -117,4 +72,15 @@ export function combination<T>(
   }
 
   return result;
+}
+
+export function* iterPairsOf<T>(items: T[]): Generator<[T, T]> {
+  const n = items.length;
+  assertGreaterOrEqual(n, 2, `can't take pairs of less than 2 items`);
+  for (let i = 0; i < n - 1; i++) {
+    const a = items[i];
+    for (let j = i + 1; j < n; j++) {
+      yield [a, items[j]];
+    }
+  }
 }

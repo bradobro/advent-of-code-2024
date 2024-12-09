@@ -1,6 +1,6 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { beforeMeAfter, meRest } from "./lib.ts";
+import { beforeMeAfter, iterPairsOf, meRest } from "./lib.ts";
 
 describe("list split iterators", () => {
   const a = [0, 1, 2, 3, 4, 5];
@@ -22,4 +22,22 @@ describe("list split iterators", () => {
     { i: 4, me: 4, rest: [0, 1, 2, 3, 5] },
     { i: 5, me: 5, rest: [0, 1, 2, 3, 4] },
   ]);
+});
+
+describe("iter pairs", () => {
+  const shortList = [0, 1, 2];
+  const longList = ["a", "b", "c", "d", "e", "f"];
+  it("iterates pairs", () => {
+    expect(new Set(Array.from(iterPairsOf(shortList)))).toEqual(
+      new Set([
+        [0, 1],
+        [0, 2],
+        [1, 2],
+      ]),
+    );
+    expect(Array.from(iterPairsOf(longList)).map((p) => p.join("")).join(","))
+      .toEqual(
+        "ab,ac,ad,ae,af,bc,bd,be,bf,cd,ce,cf,de,df,ef",
+      );
+  });
 });
