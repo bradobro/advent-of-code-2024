@@ -1,6 +1,92 @@
-import { assertEquals } from "@std/assert";
+import { assert, assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
+
+interface Span {
+  id: number; // -1 means free space
+  len: number; // skipping 0 length I think
+}
+
+type Spans = Span[];
+
+export class Disk {
+  readonly nSpans: number; // original number of spans
+  readonly size: number; // original sum of span lengths
+
+  constructor(public spans: Spans) {
+    this.nSpans = spans.length;
+    this.size = spans.reduce((acc, span) => acc + span.len, 0);
+  }
+
+  freeSpans(): number {
+    return this.spans.reduce((acc, span) => acc + (span.id < 0 ? 1 : 0), 0);
+  }
+
+  fileSpans(): number {
+    return this.spans.reduce((acc, span) => acc + (span.id < 0 ? 0 : 1), 0);
+  }
+
+  firstFreeI(): number {
+    const n = this.spans.length;
+    for (let i = 0; i < n; i++) {
+      if (this.spans[i].id < 0) return i;
+    }
+    assert(false, "there should always be a first free");
+  }
+
+  firstFree(): [number, Span] {
+    const n = this.spans.length;
+    for (let i = 0; i < n; i++) {
+      if (this.spans[i].id < 0) return [i, this.spans[i]];
+    }
+    assert(false, "there should always be a first free");
+  }
+
+  lastFreeI(): number {
+    const n = this.spans.length;
+    for (let i = n - 1; i >= 0; i--) {
+      if (this.spans[i].id < 0) return i;
+    }
+    assert(false, "there should always be a first free");
+  }
+
+  lastFileI() {
+    const n = this.spans.length;
+    for (let i = n - 1; i >= 0; i--) {
+      if (this.spans[i].id >= 0) return i;
+    }
+    assert(false, "there should always be a first free");
+  }
+
+  lastFile(): [number, Span] {
+    const n = this.spans.length;
+    for (let i = n - 1; i >= 0; i--) {
+      if (this.spans[i].id >= 0) return [i, this.spans[i]];
+    }
+    assert(false, "there should always be a first free");
+  }
+
+  static async read(path: string): Promise<Disk> {
+    const spans: Spans = [];
+    let id = 0;
+    let isFree = false;
+    for await (const line of fileLines(path)) {
+      for (const digit of line) {
+        const len = parseInt(digit);
+        if (isNaN(len)) {
+          console.error("skipping non-digit", { digit });
+        }
+        if (isFree) spans.push({ id: -1, len });
+        else {
+          spans.push({ id, len });
+          id++;
+        }
+        isFree = !isFree; // digits alternate
+      }
+    }
+    return new Disk(spans);
+  }
+}
 
 export class Day09 extends Puzzle<Results> {
   constructor() {
@@ -8,19 +94,29 @@ export class Day09 extends Puzzle<Results> {
   }
 
   async load() {
-    let lineCount = 0;
-    const lines: string[] = [];
-    for await (const line of fileLines(this.dataFilePath)) {
-      lines.push(line);
-      lineCount++;
-    }
-    assertEquals(lineCount, lines.length);
-    return { lines, lineCount };
+    return await Disk.read(this.dataFilePath);
+  }
+
+  async solve1() {
+    const data = await this.load();
+    const { nSpans, size } = data;
+    const [lastFileI, lastFile] = data.lastFile();
+    return {
+      nSpans,
+      size,
+      nFree: data.freeSpans(),
+      nFile: data.fileSpans(),
+      firstFree: data.firstFreeI(),
+      lastFree: data.lastFreeI(),
+      lastFile: data.lastFileI(),
+      lastFileI,
+      lastFileId: lastFile.id,
+    };
   }
 
   override async solve(): Promise<Results> {
-    const { lineCount, lines } = await this.load();
-    const results = { lineCount, lines: lines.length };
+    const results1 = await this.solve1();
+    const results = { ...results1 };
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
 }
