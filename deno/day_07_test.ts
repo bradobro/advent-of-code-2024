@@ -1,8 +1,6 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { beforeMeAfter, meRest } from "./lib.ts";
-import { combination, IntOp, Row } from "./day_07.ts";
-import { DIGEST_ALGORITHM_NAMES } from "@std/crypto/crypto";
+import { applyOps, combination, IntOp, iterOpCombosOn, Row } from "./day_07.ts";
 import { assertThrows } from "@std/assert/throws";
 
 const raw1 = [
@@ -80,5 +78,14 @@ describe("combining functions and applying", () => {
     expect(combination(2, choices, 3)).toEqual([mul, mul]);
   });
 
-  it("we can apply those combinations to reduce an array", () => {});
+  it("we can apply those combinations to reduce an array", () => {
+    const factors = [1, 2, 3];
+    expect(applyOps(factors, [add, add])).toEqual(6);
+    expect(applyOps(factors, combination(2, choices, 0))).toEqual(6);
+    expect(applyOps(factors, combination(2, choices, 1))).toEqual(5);
+    expect(applyOps(factors, combination(2, choices, 2))).toEqual(9);
+    expect(applyOps(factors, combination(2, choices, 3))).toEqual(6);
+
+    expect(Array.from(iterOpCombosOn(factors, choices))).toEqual([6, 5, 9, 6]);
+  });
 });
