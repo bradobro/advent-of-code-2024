@@ -1,4 +1,4 @@
-import { assert, assertEquals } from "@std/assert";
+import { assert, assertEquals, assertGreater } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
 
@@ -13,7 +13,7 @@ export class Disk {
   readonly nSpans: number; // original number of spans
   readonly size: number; // original sum of span lengths
 
-  constructor(public spans: Spans) {
+  constructor(public spans: Spans, public zeroLenFrees: number) {
     this.nSpans = spans.length;
     this.size = spans.reduce((acc, span) => acc + span.len, 0);
   }
@@ -105,29 +105,58 @@ export class Disk {
     return toI;
   }
 
-  compactAll(): void {
+  compactAllSlow(): void {
     while (this.compactNext() >= 0) { /* */ }
+  }
+
+  compactAll(): void {
+    while (true) {
+      const [fileI, fileSpan] = this.lastFile();
+      const [freeI, freeSpan] = this.firstFree();
+      const freeLen = freeSpan.len;
+      const fileLen = fileSpan.len;
+      if (fileI < freeI) break;
+      if (fileLen === freeLen) { // simple swap
+        freeSpan.id = fileSpan.id;
+        fileSpan.id = -1;
+      } else if (fileLen > freeLen) { // file will fill free with leftover
+        freeSpan.id = fileSpan.id;
+        fileSpan.len = fileLen - freeLen;
+      } else { // empty space absorbs file with spare
+        // either way, we need to add a span
+        // FAKE IT
+        freeSpan.id = fileSpan.id;
+        fileSpan.id = -1;
+      }
+    }
   }
 
   static async read(path: string): Promise<Disk> {
     const spans: Spans = [];
     let id = 0;
     let isFree = false;
+    let zeroLenFrees = 0;
     for await (const line of fileLines(path)) {
       for (const digit of line) {
         const len = parseInt(digit);
         if (isNaN(len)) {
           console.error("skipping non-digit", { digit });
         }
-        if (isFree) spans.push({ id: -1, len });
-        else {
+        if (isFree) {
+          if (len < 1) {
+            zeroLenFrees++;
+            // continue;
+          } else spans.push({ id: -1, len });
+        } else {
+          assertGreater(len, 0, `unexpected zero-length file at ${id}`);
           spans.push({ id, len });
           id++;
         }
         isFree = !isFree; // digits alternate
       }
     }
-    return new Disk(spans);
+    // console.debug(`${zeroLenFrees} zeroLenFrees`);
+    return new Disk(spans, zeroLenFrees);
   }
 }
 
@@ -143,12 +172,13 @@ export class Day09 extends Puzzle<Results> {
   async solve1() {
     const data = await this.load();
     const { nSpans, size } = data;
-    const [lastFileI, lastFile] = data.lastFile();
     const checksumBefore = data.checksum();
     data.compactAll();
     const checksumAfter = data.checksum();
+    const [lastFileI, lastFile] = data.lastFile();
     return {
       nSpans,
+      nSkipped: data.zeroLenFrees,
       size,
       nFree: data.freeSpans(),
       nFile: data.fileSpans(),
