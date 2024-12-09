@@ -66,6 +66,49 @@ export class Disk {
     assert(false, "there should always be a first free");
   }
 
+  *iterBlocks(): Generator<number> {
+    for (const span of this.spans) {
+      if (span.id < 0) continue; // skip free blocks
+      const n = span.len;
+      for (let i = 0; i < n; i++) {
+        yield span.id;
+      }
+    }
+  }
+
+  checksum() {
+    let result = 0;
+    let i = 0;
+    for (const id of this.iterBlocks()) {
+      // i++; // 8240638239285
+      result += id * i++; // 8240390321336: postincrement seems correct
+      // i++; // 8240390321336
+    }
+    return result;
+  }
+
+  swapSameLengthSpans(
+    fileI: number,
+    fileSpan: Span,
+    freeI: number,
+  ) {
+    this.spans[freeI].id = fileSpan.id;
+    this.spans[fileI].id = -1;
+  }
+
+  compactNext(): number {
+    const [fromI, fromSpan] = this.lastFile();
+    const [toI, toSpan] = this.firstFree();
+    if (fromI < toI) return -1; // DONE
+    // otherwise, compact
+    this.swapSameLengthSpans(fromI, fromSpan, toI);
+    return toI;
+  }
+
+  compactAll(): void {
+    while (this.compactNext() >= 0) { /* */ }
+  }
+
   static async read(path: string): Promise<Disk> {
     const spans: Spans = [];
     let id = 0;
@@ -101,6 +144,9 @@ export class Day09 extends Puzzle<Results> {
     const data = await this.load();
     const { nSpans, size } = data;
     const [lastFileI, lastFile] = data.lastFile();
+    const checksumBefore = data.checksum();
+    data.compactAll();
+    const checksumAfter = data.checksum();
     return {
       nSpans,
       size,
@@ -111,6 +157,8 @@ export class Day09 extends Puzzle<Results> {
       lastFile: data.lastFileI(),
       lastFileI,
       lastFileId: lastFile.id,
+      checksumBefore,
+      checksumAfter,
     };
   }
 
