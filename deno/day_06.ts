@@ -143,7 +143,7 @@ export class Day06 extends Puzzle<Results> {
       ...results1,
       ...results2,
     };
-    return { day: 5, hash: await this.hash(results), results };
+    return { day: 6, hash: await this.hash(results), results };
   }
 
   solvePuzzle1(lab: Matrix<Location>, startXY: XY) {
