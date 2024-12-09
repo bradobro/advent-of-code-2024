@@ -1,6 +1,7 @@
 {
   "tasks": {
     "dev": "deno run --allow-read --allow-net --watch aoc.ts 1",
+    "run": "deno run --allow-read --allow-net aoc.ts 1",
     "testw": "deno test --allow-read --allow-net --watch"
   },
   "imports": {

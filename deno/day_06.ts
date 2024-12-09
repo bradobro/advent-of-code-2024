@@ -189,6 +189,15 @@ export class Day06 extends Puzzle<Results> {
         if (this.addedObstacleCausesLoop(lab, startXY, [x, y])) {
           loopOpportunities++;
         }
+        // Quick and dirty fix didn't work
+        // It hangs at: looping { obstacle: [ 17, 88 ], move: { kind: 3, xy: [ 33, 69 ], facing: 1 } }
+        // { runNumber: 2299, loopOpportunities: 98 }
+        // probably a loop our detection method didn't catch
+        // clear ephemeral data; better design would have put this in the guard
+        lab.mapCells((cell) => {
+          cell.visited = false;
+          cell.lastFacing = undefined;
+        });
         console.debug({ runNumber, loopOpportunities });
         assertEquals(
           lab.getXY([x, y]).obstacle,
