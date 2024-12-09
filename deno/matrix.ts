@@ -14,10 +14,14 @@ export enum Direction {
   W,
 }
 
-type XY = [number, number];
+export type XY = [number, number];
 
 export function xyAdd(a: XY, b: XY): XY {
   return [a[0] + b[0], a[1] + b[1]];
+}
+
+export function xyEqual(a: XY, b: XY): boolean {
+  return a[0] === b[0] && a[1] === b[1];
 }
 
 export const directionVectors: Record<Direction, XY> = {
@@ -107,7 +111,11 @@ export class Matrix<T> {
     return new Matrix(store);
   }
 
-  // look();
+  look(locA: XY, d: Direction): XY | null {
+    const locB = xyAdd(locA, directionVectors[d]);
+    if (this.validXY(locB)) return locB;
+    return null;
+  }
 }
 
 export async function readMatrix(path: string): Promise<Matrix<string>> {
