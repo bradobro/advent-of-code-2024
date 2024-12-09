@@ -20,6 +20,10 @@ export function xyAdd(a: XY, b: XY): XY {
   return [a[0] + b[0], a[1] + b[1]];
 }
 
+export function xySub(a: XY, b: XY): XY {
+  return [a[0] - b[0], a[1] - b[1]];
+}
+
 export function xyEqual(a: XY, b: XY): boolean {
   return a[0] === b[0] && a[1] === b[1];
 }
@@ -109,6 +113,14 @@ export class Matrix<T> {
       row.map((cell, c) => fn(cell, c, this.nrows - 1 - r))
     );
     return new Matrix(store);
+  }
+
+  *iterCells(): Generator<T> {
+    for (const row of this.store) {
+      for (const cell of row) {
+        yield cell;
+      }
+    }
   }
 
   look(locA: XY, d: Direction): XY | null {
