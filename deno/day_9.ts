@@ -123,10 +123,14 @@ export class Disk {
         freeSpan.id = fileSpan.id;
         fileSpan.len = fileLen - freeLen;
       } else { // empty space absorbs file with spare
-        // either way, we need to add a span
-        // FAKE IT
+        const newSpan: Span = { id: -1, len: freeLen - fileLen };
         freeSpan.id = fileSpan.id;
+        freeSpan.len = fileSpan.len;
         fileSpan.id = -1;
+        // now add free space AFTER the old free span
+        const before = this.spans.slice(0, freeI + 1);
+        const after = this.spans.slice(freeI + 1);
+        this.spans = [...before, newSpan, ...after];
       }
     }
   }
