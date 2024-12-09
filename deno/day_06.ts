@@ -5,7 +5,8 @@ import { assertEquals } from "@std/assert/equals";
 
 interface Location {
   visited: boolean;
-  lastFacing?: Direction; // needs to be redone
+  // lastFacing?: Direction; // needs to be redone
+  facings: Set<Direction>;
   obstacle: boolean;
   guard: boolean;
 }
@@ -50,15 +51,23 @@ class Guard {
     while (true) {
       const loc1 = lab.getXY(move.xy);
       loc1.visited = true;
-      loc1.lastFacing = move.facing;
-      const xy2 = lab.look(move.xy, move.facing);
 
-      // if exiting map, exit loop
+      // EXIT if we're looping
+      // if we've already been here, facing this way, we're looping
+      if (loc1.facings.has(move.facing)) {
+        move.kind = MoveType.looping;
+        yield { ...move };
+        break; // EXIT
+      }
+      loc1.facings.add(move.facing);
+
+      // EXIT if we're leaving the map
+      const xy2 = lab.look(move.xy, move.facing);
       if (xy2 === null) { //leaving map
         this.xy = [-1, -1]; // off map
         move.kind = MoveType.leave;
         yield { ...move };
-        break;
+        break; //EXIT
       }
 
       const loc2 = lab.getXY(xy2);
@@ -67,10 +76,10 @@ class Guard {
         this.turns++;
         move.facing = (move.facing + 1) % 4; // rotate right 90 degrees
         this.facing = move.facing;
-      } else if (loc2.visited && loc2.lastFacing === move.facing) { // we're looping
-        move.kind = MoveType.looping;
-        yield { ...move };
-        break; // EXITING because loop detected
+        // } else if (loc2.visited && loc2.lastFacing === move.facing) { // we're looping
+        //   move.kind = MoveType.looping;
+        //   yield { ...move };
+        //   break; // EXITING because loop detected
       } else { //simple move in direction facing
         move.kind = MoveType.move;
         this.moves++;
@@ -101,6 +110,7 @@ export class Day06 extends Puzzle<Results> {
         visited: false,
         obstacle: s === "#",
         guard: s === "^",
+        facings: new Set<Direction>(),
         // addedObstacleCausesLoop: false,
       };
       if (cell.obstacle) obstacles++;
@@ -163,7 +173,7 @@ export class Day06 extends Puzzle<Results> {
       const guard = new Guard(startXY);
       for (const move of guard.iterMoves(lab, startXY, Direction.N)) {
         if (move.kind === MoveType.looping) {
-          console.debug("looping", { obstacle, move });
+          // console.debug("looping", { obstacle, move });
           newObstacle.obstacle = false;
           return true;
         }
@@ -188,6 +198,7 @@ export class Day06 extends Puzzle<Results> {
         runNumber++;
         if (this.addedObstacleCausesLoop(lab, startXY, [x, y])) {
           loopOpportunities++;
+          // console.debug({ runNumber, loopOpportunities });
         }
         // Quick and dirty fix didn't work
         // It hangs at: looping { obstacle: [ 17, 88 ], move: { kind: 3, xy: [ 33, 69 ], facing: 1 } }
@@ -196,9 +207,8 @@ export class Day06 extends Puzzle<Results> {
         // clear ephemeral data; better design would have put this in the guard
         lab.mapCells((cell) => {
           cell.visited = false;
-          cell.lastFacing = undefined;
+          cell.facings = new Set<Direction>();
         });
-        console.debug({ runNumber, loopOpportunities });
         assertEquals(
           lab.getXY([x, y]).obstacle,
           hadObstacle,
