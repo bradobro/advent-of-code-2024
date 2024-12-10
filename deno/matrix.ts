@@ -14,6 +14,13 @@ export enum Direction {
   W,
 }
 
+export const Directions: Direction[] = [
+  Direction.N,
+  Direction.E,
+  Direction.S,
+  Direction.W,
+];
+
 export type XY = [number, number];
 
 export function xyAdd(a: XY, b: XY): XY {
@@ -100,8 +107,18 @@ export class Matrix<T> {
     return this.getRC(this.nrows - 1 - y, x);
   }
 
-  *iterRows() {
+  *iterRows(): Generator<T[]> {
     for (const row of this.store) yield row.slice(0);
+  }
+
+  formatRow(formatter: (cell: T) => string, row: T[]): string {
+    return row.map(formatter).join("");
+  }
+
+  print(formatter: (cell: T) => string) {
+    for (const row of this.store) {
+      console.log(this.formatRow(formatter, row));
+    }
   }
 
   rows() {
@@ -123,29 +140,97 @@ export class Matrix<T> {
     }
   }
 
+  /**
+   * Iterates the cells ascending X over each ascending row
+   * @generator [cell, XY]
+   */
+  *iterCellsC(): Generator<[T, XY]> {
+    const [nx, ny] = this.sizeXY();
+    for (let y = 0; y < ny; y++) {
+      const row = this.store[ny - 1 - y];
+      for (let x = 0; x < nx; x++) {
+        yield [row[x], [x, y]];
+      }
+    }
+  }
+
   look(locA: XY, d: Direction): XY | null {
     const locB = xyAdd(locA, directionVectors[d]);
     if (this.validXY(locB)) return locB;
     return null;
   }
-}
 
-export async function readMatrix(path: string): Promise<Matrix<string>> {
-  let len = -1;
-  const store: string[][] = [];
-  for await (const line of fileLines(path)) {
+  static async read(path: string): Promise<Matrix<string>> {
+    let len = -1;
+    const store: string[][] = [];
+    for await (const line of fileLines(path)) {
+      const trimmed = line.trim();
+      if (trimmed === "") continue;
+      const row = trimmed.split("");
+      const rowLen = row.length;
+      assertGreater(rowLen, 0, `I'm expecting chars in the row string`);
+      if (len < 0) len = rowLen;
+      else {assertEquals(
+          rowLen,
+          len,
+          `row.length = ${rowLen}, expected ${len}: "${trimmed}`,
+        );}
+      store.push(row);
+    }
+    return new Matrix(store);
+  }
+
+  static tryAddLine(line: string, store: string[][], len: number): number {
     const trimmed = line.trim();
-    if (trimmed === "") continue;
+    if (trimmed === "") return len; // skip blank line
     const row = trimmed.split("");
     const rowLen = row.length;
+
+    // consistency and sanity checking
     assertGreater(rowLen, 0, `I'm expecting chars in the row string`);
-    if (len < 0) len = rowLen;
-    else {assertEquals(
+    if (len > 0) { // if previous len has been noted, check it
+      assertEquals(
         rowLen,
         len,
         `row.length = ${rowLen}, expected ${len}: "${trimmed}`,
-      );}
+      );
+    }
     store.push(row);
+    return rowLen; // we've now captured a length and will check deviations
   }
-  return new Matrix(store);
+
+  static parse(multiLineSource: string): Matrix<string> {
+    let len = -1;
+    const store: string[][] = [];
+    for (const line of multiLineSource.split(/[\r\n]+/)) {
+      len = Matrix.tryAddLine(line, store, len);
+    }
+    return new Matrix(store);
+  }
+}
+
+/**
+ * @deprecated
+ * @param path
+ * @returns
+ */
+export function readMatrix(path: string): Promise<Matrix<string>> {
+  return Matrix.read(path);
+  // let len = -1;
+  // const store: string[][] = [];
+  // for await (const line of fileLines(path)) {
+  //   const trimmed = line.trim();
+  //   if (trimmed === "") continue;
+  //   const row = trimmed.split("");
+  //   const rowLen = row.length;
+  //   assertGreater(rowLen, 0, `I'm expecting chars in the row string`);
+  //   if (len < 0) len = rowLen;
+  //   else {assertEquals(
+  //       rowLen,
+  //       len,
+  //       `row.length = ${rowLen}, expected ${len}: "${trimmed}`,
+  //     );}
+  //   store.push(row);
+  // }
+  // return new Matrix(store);
 }
