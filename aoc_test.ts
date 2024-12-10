@@ -64,6 +64,6 @@ Deno.test(async function day6() {
 Deno.test(async function dayNext() {
   assertEquals(
     (await new DayNext().solve()).hash,
-    "110f15bf65c41e4fc6d521baf898f62b89cecffb250714f33a407a8b73e2c900",
+    "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
   );
 });

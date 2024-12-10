@@ -19,8 +19,8 @@ export class DayNext extends Puzzle<Results> {
   }
 
   override async solve(): Promise<Results> {
-    const data = await this.load();
-    console.debug(data);
+    const _data = await this.load();
+    // console.debug(_data);
     const results = {};
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
