@@ -104,7 +104,7 @@ export class Map {
       for (const anti of multinodes((xy: XY) => this.locs.validXY(xy), a, b)) {
         marked += 1;
         this.locs.getXY(anti).antinodes.add(freq);
-        console.debug(".");
+        // console.debug(".");
       }
     }
 
@@ -114,7 +114,7 @@ export class Map {
   allMultiNodes(): number {
     let total = 0; // non-distinct
     for (const freq of this.freqs) {
-      console.debug({ freq });
+      // console.debug({ freq });
       total += this.freqMultiNodes(freq);
     }
     return total;

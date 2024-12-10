@@ -70,20 +70,30 @@ export class LavaMap {
     }
   }
 
+  extendRatings() {
+    for (let el = 9; el > 0; el--) {
+      for (const [locA, xyA] of this.iterLocsAtLevel(el)) {
+        // if summit, initialize: all summits have rating 1: one path to themselves
+        if (el === 9) locA.rating = 1;
+
+        // OPTIMIZATION no need to propagate dead ends
+        if (locA.rating < 1) continue;
+
+        // for (const xyB of locA.nexts) {
+        for (const xyB of Directions.map((d) => this.grid.look(xyA, d))) {
+          if (xyB === null) continue; // off map, so skip
+          const locB = this.grid.getXY(xyB);
+          // if appropriate level, propagate ratings
+          if (locB.el === el - 1) locB.rating += locA.rating;
+        }
+      }
+    }
+  }
+
   *iterLocsAtLevel(elevation: number): Generator<[Location, XY]> {
     for (const [loc, xy] of this.grid.iterCellsC()) {
       if (loc.el === elevation) yield [loc, xy];
     }
-  }
-
-  private static parseCell(s: string): Location {
-    return {
-      el: parseInt(s),
-      nexts: [],
-      trailheads: new Set<XY>(),
-      summits: new Set<XY>(),
-      rating: 0,
-    };
   }
 
   // Display
@@ -118,6 +128,16 @@ export class LavaMap {
 
   // LOAD AND PARSE
 
+  private static parseCell(s: string): Location {
+    return {
+      el: parseInt(s),
+      nexts: [],
+      trailheads: new Set<XY>(),
+      summits: new Set<XY>(),
+      rating: 0,
+    };
+  }
+
   static parse(src: string): LavaMap {
     const grid = Matrix.parse(src).mapCells(LavaMap.parseCell);
     return new LavaMap(grid);
@@ -136,21 +156,15 @@ export class Day10 extends Puzzle<Results> {
 
   async load() {
     const lavamap = await LavaMap.read(this.dataFilePath);
-    lavamap.extendPaths();
     return lavamap;
   }
 
   async solve1() {
     const data = await this.load();
-    // data.extendPaths();
-    // console.debug("=====SummitCount=====");
-    // data.printSummitCount();
-    // console.debug("=====TrailheadCount=====");
-    // data.printTrailheadCount(0, 0);
+    data.extendPaths();
     const totalSumitsFromTrailhead = Array.from(data.trailheads).map((th) =>
       data.grid.getXY(th).summits.size
     ).reduce((acc, n) => acc + n);
-    // console.debug(totalSumitsFromTrailhead);
     return {
       nTrailheads: data.trailheads.size,
       nSummits: data.summits.size,
@@ -160,6 +174,7 @@ export class Day10 extends Puzzle<Results> {
 
   async solve2() {
     const data = await this.load();
+    data.extendRatings();
     const ratings = Array.from(data.trailheads).map((th) =>
       data.grid.getXY(th).rating
     );
@@ -168,11 +183,11 @@ export class Day10 extends Puzzle<Results> {
   }
 
   override async solve(): Promise<Results> {
-    // const results1 = await this.solve1();
+    const results1 = await this.solve1();
     // console.log(results1);
     const results2 = await this.solve2();
-    console.log(results2);
-    const results = {};
+    // console.log(results2);
+    const results = { ...results1, ...results2 };
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
 }
