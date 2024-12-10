@@ -135,6 +135,65 @@ export class Disk {
     }
   }
 
+  fileById(id: number): [number, Span] {
+    for (let i = this.spans.length; i >= 0; i--) {
+      if (this.spans[i]?.id === id) return [i, this.spans[i]];
+    }
+    assert(false, `couldn't find id ${id}`);
+  }
+
+  firstFreeAtLeast(size: number, lastI: number): [number, Span] {
+    for (let i = 0; i < lastI; i++) {
+      const span = this.spans[i];
+      if (span.id < 0 && span.len >= size) return [i, span];
+    }
+    return [-1, { id: -1, len: 0 }]; // no space found, and a safe span
+  }
+
+  compactAllWithoutFrags() {
+    const lastId = this.lastFile()[1].id;
+    // console.debug({ lastId });
+    // file[0] is already at span[0] so don't bother
+    for (let i = lastId; i > 0; i--) {
+      console.debug(i);
+      const [fileI, fileSpan] = this.fileById(i);
+
+      const [freeI, freeSpan] = this.firstFreeAtLeast(fileSpan.len, fileI); // 6301809973895 too low
+      // const [freeI, freeSpan] = this.firstFreeAtLeast( fileSpan.len, this.spans.length, ); //5495614564285 too low
+      if (freeI < 0) { // no adequate space found
+        // console.debug(`no freespace found for `, { fileI, fileSpan });
+        continue;
+      } else {
+        // console.debug("found space for", { fileI, freeI, fileSpan });
+      }
+      assertGreater(fileI, freeI, `don't search for free space after a file`);
+      if (fileSpan.len === freeSpan.len) { // perfect match
+        // console.debug("EQUISWAP", { fileI, fileSpan, freeI, freeSpan });
+        freeSpan.id = fileSpan.id;
+        fileSpan.id = -1;
+        // console.debug("AFTER SWAP", { freeSpan, fileSpan });
+      } else { // too much free space
+        assertGreater(
+          freeSpan.len,
+          fileSpan.len,
+          `logic should have more than enough free space here`,
+        );
+        const newSpan: Span = { id: -1, len: freeSpan.len - fileSpan.len };
+        // console.debug("sizes", { fileSpan, freeSpan, newSpan });
+
+        freeSpan.id = fileSpan.id;
+        freeSpan.len = fileSpan.len;
+        fileSpan.id = -1;
+        // console.debug("underswap", { fileI, freeI, fileSpan, freeSpan });
+        // now add free space AFTER the old free span
+        // without this: 6354517739881 "NOT RIGHT"
+        const before = this.spans.slice(0, freeI + 1);
+        const after = this.spans.slice(freeI + 1);
+        this.spans = [...before, newSpan, ...after];
+      }
+    }
+  }
+
   static async read(path: string): Promise<Disk> {
     const spans: Spans = [];
     let id = 0;
@@ -173,6 +232,15 @@ export class Day09 extends Puzzle<Results> {
     return await Disk.read(this.dataFilePath);
   }
 
+  async solve2() {
+    const data = await this.load();
+    data.compactAllWithoutFrags();
+    const checksumAfter = data.checksum();
+    return {
+      checksumAfter2: checksumAfter,
+    };
+  }
+
   async solve1() {
     const data = await this.load();
     const { nSpans, size } = data;
@@ -192,13 +260,15 @@ export class Day09 extends Puzzle<Results> {
       lastFileI,
       lastFileId: lastFile.id,
       checksumBefore,
-      checksumAfter,
+      checksumAfter1: checksumAfter,
     };
   }
 
   override async solve(): Promise<Results> {
-    const results1 = await this.solve1();
-    const results = { ...results1 };
+    // const results1 = await this.solve1();
+    const results2 = await this.solve2();
+    // const results = { ...results1, ...results2 };
+    const results = results2;
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
 }
