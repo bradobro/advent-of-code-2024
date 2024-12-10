@@ -66,9 +66,12 @@ export class Disk {
     assert(false, "there should always be a first free");
   }
 
+  /**
+   * @generator: fileId: number (-1 means free space)
+   */
   *iterBlocks(): Generator<number> {
     for (const span of this.spans) {
-      if (span.id < 0) continue; // skip free blocks
+      // if (span.id < 0) continue; // skip free blocks
       const n = span.len;
       for (let i = 0; i < n; i++) {
         yield span.id;
@@ -81,7 +84,8 @@ export class Disk {
     let i = 0;
     for (const id of this.iterBlocks()) {
       // i++; // 8240638239285
-      result += id * i++; // 8240390321336: postincrement seems correct
+      if (id < 0) i++; // no sum for empty blocks
+      else result += id * i++; // 8240390321336: postincrement seems correct
       // i++; // 8240390321336
     }
     return result;
@@ -155,9 +159,7 @@ export class Disk {
     // console.debug({ lastId });
     // file[0] is already at span[0] so don't bother
     for (let i = lastId; i > 0; i--) {
-      console.debug(i);
       const [fileI, fileSpan] = this.fileById(i);
-
       const [freeI, freeSpan] = this.firstFreeAtLeast(fileSpan.len, fileI); // 6301809973895 too low
       // const [freeI, freeSpan] = this.firstFreeAtLeast( fileSpan.len, this.spans.length, ); //5495614564285 too low
       if (freeI < 0) { // no adequate space found
@@ -208,14 +210,13 @@ export class Disk {
         if (isFree) {
           if (len < 1) {
             zeroLenFrees++;
-            // continue;
           } else spans.push({ id: -1, len });
         } else {
           assertGreater(len, 0, `unexpected zero-length file at ${id}`);
           spans.push({ id, len });
           id++;
         }
-        isFree = !isFree; // digits alternate
+        isFree = !isFree; // digits alternate meaning: File, Free, File, Free, ...
       }
     }
     // console.debug(`${zeroLenFrees} zeroLenFrees`);
@@ -232,10 +233,19 @@ export class Day09 extends Puzzle<Results> {
     return await Disk.read(this.dataFilePath);
   }
 
+  checkSolution2(c: number): void {
+    function bail(msg: string) {
+      throw new Error(msg);
+    }
+    if (c <= 6301809973895) bail("too low");
+    if (c === 6354517739881) bail(`Said "Not Right"`);
+  }
+
   async solve2() {
     const data = await this.load();
     data.compactAllWithoutFrags();
     const checksumAfter = data.checksum();
+    this.checkSolution2(checksumAfter);
     return {
       checksumAfter2: checksumAfter,
     };
@@ -265,10 +275,10 @@ export class Day09 extends Puzzle<Results> {
   }
 
   override async solve(): Promise<Results> {
-    // const results1 = await this.solve1();
+    const results1 = await this.solve1();
     const results2 = await this.solve2();
-    // const results = { ...results1, ...results2 };
-    const results = results2;
+    const results = { ...results1, ...results2 };
+    // const results = results2;
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
 }
