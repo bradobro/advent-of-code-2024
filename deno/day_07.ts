@@ -124,7 +124,7 @@ export class Day07 extends Puzzle<Results> {
 
   override async solve(): Promise<Results> {
     const { lineCount, rows } = await this.load();
-    console.debug("add", Object.getOwnPropertyNames(add), add.length, add.name);
+    // console.debug("add", Object.getOwnPropertyNames(add), add.length, add.name);
     const { satisfiable: count1, satisfiableSum: answer1 } = solution1(
       rows,
       false,
