@@ -9,6 +9,7 @@ export interface Location {
   nexts: XY[]; // coords of neighbors that are one elevation higher.
   trailheads: Set<XY>; //trailheads reachable from here
   summits: Set<XY>; // only valid for trailheads: summits reachable
+  rating: number; // number of full trails originating from here;
 }
 
 export class LavaMap {
@@ -45,7 +46,6 @@ export class LavaMap {
 
   extendPaths() {
     for (let el = 0; el < 10; el++) {
-      console.debug("extending level", { el });
       for (const [locA, xyA] of this.iterLocsAtLevel(el)) {
         // if a trailhead, initialize-- trailheads  all originate at themselves
         if (el === 0) locA.trailheads.add(xyA);
@@ -82,6 +82,7 @@ export class LavaMap {
       nexts: [],
       trailheads: new Set<XY>(),
       summits: new Set<XY>(),
+      rating: 0,
     };
   }
 
@@ -134,20 +135,22 @@ export class Day10 extends Puzzle<Results> {
   }
 
   async load() {
-    return await LavaMap.read(this.dataFilePath);
+    const lavamap = await LavaMap.read(this.dataFilePath);
+    lavamap.extendPaths();
+    return lavamap;
   }
 
   async solve1() {
     const data = await this.load();
-    data.extendPaths();
+    // data.extendPaths();
     // console.debug("=====SummitCount=====");
     // data.printSummitCount();
     // console.debug("=====TrailheadCount=====");
     // data.printTrailheadCount(0, 0);
     const totalSumitsFromTrailhead = Array.from(data.trailheads).map((th) =>
       data.grid.getXY(th).summits.size
-    ).reduce((acc, n) => acc + n, 0);
-    console.debug(totalSumitsFromTrailhead);
+    ).reduce((acc, n) => acc + n);
+    // console.debug(totalSumitsFromTrailhead);
     return {
       nTrailheads: data.trailheads.size,
       nSummits: data.summits.size,
@@ -155,16 +158,20 @@ export class Day10 extends Puzzle<Results> {
     };
   }
 
-  override async solve(): Promise<Results> {
-    const results1 = await this.solve1();
-    // console.debug("=====Elevations=====");
-    // data.printElevations();
-    // console.debug("=====Endpoints=====");
-    // data.printEndpoints();
-    // console.debug("=====NextCount=====");
-    // data.printNextCount();
+  async solve2() {
+    const data = await this.load();
+    const ratings = Array.from(data.trailheads).map((th) =>
+      data.grid.getXY(th).rating
+    );
+    const totalTrailheadRatings = ratings.reduce((acc, n) => acc + n);
+    return { totalTrailheadRatings };
+  }
 
-    console.log(results1);
+  override async solve(): Promise<Results> {
+    // const results1 = await this.solve1();
+    // console.log(results1);
+    const results2 = await this.solve2();
+    console.log(results2);
     const results = {};
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
