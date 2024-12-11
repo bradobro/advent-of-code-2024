@@ -44,7 +44,7 @@ export function blinks(gen1: Stones, n: number): Stones {
   return result;
 }
 
-const MAX_BLINKS = 10;
+const MAX_BLINKS = 2; // higher numbers increase GC but decrease recursion depth
 
 /**
  * Avoid RAM requirements of instantiating all the stones by subdividing the list
@@ -56,6 +56,7 @@ const MAX_BLINKS = 10;
 export function population1(genA: Stones, generations: number): number {
   let result = 0;
   const remainingGenerations = generations - MAX_BLINKS;
+  // console.debug({ generations });
   for (const stoneA of genA) {
     // if it's small enough, sum the links of generations for each member;
     if (generations <= MAX_BLINKS) {
@@ -88,12 +89,19 @@ export class Day11 extends Puzzle<Results> {
     const pop1 = population1(gen0, 25);
     return { pop1 };
   }
+  async solve2() {
+    const gen0 = await this.load();
+    const pop2 = population1(gen0, 75);
+    return { pop2 };
+  }
 
   override async solve(): Promise<Results> {
     // const _data = await this.load();
     // console.debug(_data);
-    const results1 = await this.solve1();
-    console.debug(results1);
+    // const results1 = await this.solve1();
+    // console.debug(results1);
+    const results2 = await this.solve2();
+    console.debug(results2);
     const results = {};
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
