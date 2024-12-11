@@ -2,6 +2,13 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.7.0 - 2024-12-11
+#### Features
+- solve day 11 - (5e5196d) - Brad Olson
+- solve 11a - (9cdfe8b) - Brad Olson
+
+- - -
+
 ## v2.6.0 - 2024-12-10
 #### Features
 - solve day 10 - (c829d26) - Brad Olson
