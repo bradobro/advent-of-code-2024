@@ -1,6 +1,13 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { blink, blinks, parse, population1 } from "./day_11.ts";
+import {
+  blink,
+  blinks,
+  parse,
+  population1,
+  population2,
+  population3,
+} from "./day_11.ts";
 
 describe("first example", () => {
   // deno-fmt-ignore
@@ -34,11 +41,30 @@ describe("first example", () => {
     }
     expect(population1(gen0, 25)).toEqual(55312);
   });
-  it("can handle the GC pressure", () => {
-    // expect(blinks(gen0, 0)).toEqual(gen0);
-    // const bN = blinks(["125", "17"], 10);
-    // const bNlen = bN.length;
-    // console.debug({ bNlen });
+  it("new algorithm matches old", () => {
+    const N = 25;
+    for (let i = 10; i < N; i++) {
+      expect(population3(gen0, i)).toEqual(population1(gen0, i));
+    }
+  });
+  it.skip("handles 0, 1, 2024 specially", () => {
+    const results = new Set<string>();
+    let genA: string[] = ["0"];
+    for (let i = 0; i < 100; i++) {
+      const genB: string[] = [];
+      for (const sA of genA) {
+        if (results.has(sA)) continue;
+        results.add(sA);
+        for (const sB of blink([sA])) if (!results.has(sB)) genB.push(sB);
+      }
+      genA = genB;
+    }
+    const res: number[] = Array.from(results).map((s) => parseInt(s));
+    res.sort();
+    console.log({
+      uniques: results.size,
+      results: res,
+    });
   });
 
   // CAN'T HANDLE THE GARBAGE:
