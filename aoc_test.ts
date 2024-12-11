@@ -10,6 +10,7 @@ import { Day07 } from "./deno/day_07.ts";
 import { Day08 } from "./deno/day_08.ts";
 import { Day09 } from "./deno/day_09.ts";
 import { Day10 } from "./deno/day_10.ts";
+import { Day11 } from "./deno/day_11.ts";
 
 Deno.test(async function day1() {
   const day1 = await new Day01().solve();
@@ -80,7 +81,9 @@ Deno.test(async function day8() {
 Deno.test(async function day9() {
   assertEquals(
     (await new Day09().solve()).hash,
-    "78884640e34328f51b1f2b5304681a10fa88e855ec2b165c1009d9629cd26562",
+    "91cf5a01233b4920cfdf8a55aed30f48061e0a7a378c0216974453076b959849",
+    // // with results2
+    // "78884640e34328f51b1f2b5304681a10fa88e855ec2b165c1009d9629cd26562",
   );
 });
 
@@ -88,6 +91,15 @@ Deno.test(async function day10() {
   assertEquals(
     (await new Day10().solve()).hash,
     "3aa37bf77c5e805380e11dde1a72d1c5404254c88bd1ba7e45ce50956f4747b2",
+  );
+});
+
+Deno.test(async function day11() {
+  assertEquals(
+    (await new Day11().solve()).hash,
+    "4323c49c7c68ab1a3c48092ad76c9fb5d8b350579ae6da21bee69c44813c0d03",
+    // with results2
+    // fc2ccd10d3643d93ca9b1eedc75996b8e92ab3c72681f8a7e6027e4dc83d02cd
   );
 });
 

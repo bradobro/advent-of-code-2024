@@ -276,9 +276,10 @@ export class Day09 extends Puzzle<Results> {
 
   override async solve(): Promise<Results> {
     const results1 = await this.solve1();
-    const results2 = await this.solve2();
-    const results = { ...results1, ...results2 };
-    // const results = results2;
+    // omit slow results from regression tests
+    // const results2 = await this.solve2();
+    // const results = { ...results1, ...results2 };
+    const results = results1;
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
 }
