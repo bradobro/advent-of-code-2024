@@ -27,9 +27,50 @@ export function blink(gen1: Stones): Stones {
   return gen2;
 }
 
+/**
+ * blinks instantiates the array, which can't handle huge combinatorial explosion
+ *
+ * Might be able to reduce GC pressure by statically allocating only 2 arrays and pin-ponging,
+ * but JS doesn't excel at that
+ *
+ * See population() for one solution
+ * @param gen1
+ * @param n
+ * @returns
+ */
 export function blinks(gen1: Stones, n: number): Stones {
   let result: Stones = gen1.slice(0);
   for (let i = 0; i < n; i++) result = blink(result);
+  return result;
+}
+
+const MAX_BLINKS = 2;
+
+/**
+ * Avoid RAM requirements of instantiating all the stones by subdividing the list
+ * as necessary;
+ * @param gen1
+ * @param generations
+ * @returns
+ */
+export function population1(genA: Stones, generations: number): number {
+  let result = 0;
+  const remainingGenerations = generations - MAX_BLINKS;
+  for (const stoneA of genA) {
+    // if it's small enough, sum the links of generations for each member;
+    if (generations <= MAX_BLINKS) {
+      // console.debug({ stoneA });
+      result += blinks([stoneA], generations).length;
+      continue;
+    }
+
+    // otherwise, divide the list
+    const genB = blinks([stoneA], MAX_BLINKS);
+    // console.debug({ remainingGenerations, genB });
+    for (const stoneB of genB) {
+      result += population1([stoneB], remainingGenerations);
+    }
+  }
   return result;
 }
 

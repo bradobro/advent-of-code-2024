@@ -1,11 +1,10 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { blink, blinks, parse } from "./day_11.ts";
+import { blink, blinks, parse, population1 } from "./day_11.ts";
 
 describe("first example", () => {
-  it("reproduces the first example", () => {
-    // deno-fmt-ignore
-    const expected = [
+  // deno-fmt-ignore
+  const example1 = [
       [ "125", "17" ],
       [ "253000", "1", "7" ],
       [ "253", "0", "2024", "14168" ],
@@ -14,18 +13,35 @@ describe("first example", () => {
       [ "1036288", "7", "2", "20", "24", "4048", "1", "4048", "8096", "28", "67", "60", "32" ],
       [ "2097446912", "14168", "4048", "2", "0", "2", "4", "40", "48", "2024", "40", "48", "80", "96", "2", "8", "6", "7", "6", "0", "3", "2" ]
     ];
-    expect(blink(expected[0])).toEqual(expected[1]);
-    expect(blink(expected[1])).toEqual(expected[2]);
-    expect(blink(expected[2])).toEqual(expected[3]);
-    expect(blink(expected[3])).toEqual(expected[4]);
-    expect(blink(expected[4])).toEqual(expected[5]);
-    expect(blink(expected[5])).toEqual(expected[6]);
-    expect(expected[6].length).toEqual(22);
+  const gen0 = example1[0];
+  it("reproduces the first example", () => {
+    expect(blink(example1[0])).toEqual(example1[1]);
+    expect(blink(example1[1])).toEqual(example1[2]);
+    expect(blink(example1[2])).toEqual(example1[3]);
+    expect(blink(example1[3])).toEqual(example1[4]);
+    expect(blink(example1[4])).toEqual(example1[5]);
+    expect(blink(example1[5])).toEqual(example1[6]);
+    expect(example1[6].length).toEqual(22);
+  });
+  it("can blink multiple times accurately", () => {
+    for (let i = 0; i < example1.length; i++) {
+      expect(blinks(gen0, i)).toEqual(example1[i]);
+    }
+  });
+  it("reproduces the counts of the first example", () => {
+    // const gen = 25;
+    // const pop = population1(gen0, gen);
+    // console.debug({ gen, pop });
+    for (let i = 0; i < example1.length; i++) {
+      expect(population1(gen0, i)).toEqual(example1[i].length);
+    }
+    expect(population1(gen0, 25)).toEqual(55312);
   });
   it("can handle the GC pressure", () => {
-    const bN = blinks(["125", "17"], 10);
-    const bNlen = bN.length;
-    console.debug({ bNlen });
+    // expect(blinks(gen0, 0)).toEqual(gen0);
+    // const bN = blinks(["125", "17"], 10);
+    // const bNlen = bN.length;
+    // console.debug({ bNlen });
   });
 
   // CAN'T HANDLE THE GARBAGE:
