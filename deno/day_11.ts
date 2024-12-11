@@ -44,7 +44,7 @@ export function blinks(gen1: Stones, n: number): Stones {
   return result;
 }
 
-const MAX_BLINKS = 2;
+const MAX_BLINKS = 10;
 
 /**
  * Avoid RAM requirements of instantiating all the stones by subdividing the list
@@ -83,9 +83,17 @@ export class Day11 extends Puzzle<Results> {
     return Promise.resolve(parse(PUZZLE_DATA));
   }
 
+  async solve1() {
+    const gen0 = await this.load();
+    const pop1 = population1(gen0, 25);
+    return { pop1 };
+  }
+
   override async solve(): Promise<Results> {
-    const _data = await this.load();
-    console.debug(_data);
+    // const _data = await this.load();
+    // console.debug(_data);
+    const results1 = await this.solve1();
+    console.debug(results1);
     const results = {};
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }

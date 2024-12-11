@@ -29,9 +29,6 @@ describe("first example", () => {
     }
   });
   it("reproduces the counts of the first example", () => {
-    // const gen = 25;
-    // const pop = population1(gen0, gen);
-    // console.debug({ gen, pop });
     for (let i = 0; i < example1.length; i++) {
       expect(population1(gen0, i)).toEqual(example1[i].length);
     }
