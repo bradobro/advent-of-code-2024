@@ -170,27 +170,33 @@ describe("basic algorithms 2 (sides calc)", () => {
   });
 });
 
-// describe.skip("part 2 handles the extra examples", () => {
-//   const pf4 = PuzzleField.parse(`
-// EEEEE
-// EXXXX
-// EEEEE
-// EXXXX
-// EEEEE
-// `);
-//   const discounted4 = 236;
+describe("part 2 handles the extra examples", () => {
+  it("handles example 4", () => {
+    const pf4 = PuzzleField.parse(`
+      EEEEE
+      EXXXX
+      EEEEE
+      EXXXX
+      EEEEE
+      `);
+    const discounted4 = 236;
+    expect(pf4.totalDiscountedCost).toEqual(discounted4);
+  });
 
-//   // tests the diagonal edge condition with A's in the center
-//   const pf5 = PuzzleField.parse(`
-// AAAAAA
-// AAABBA
-// AAABBA
-// ABBAAA
-// ABBAAA
-// AAAAAA
-// `);
-//   const discounted5 = 368;
-// });
+  it("handles example 5", () => {
+    // tests the diagonal edge condition with A's in the center
+    const pf5 = PuzzleField.parse(`
+AAAAAA
+AAABBA
+AAABBA
+ABBAAA
+ABBAAA
+AAAAAA
+`);
+    const discounted5 = 368;
+    expect(pf5.totalDiscountedCost).toEqual(discounted5);
+  });
+});
 
 // describe("alternate part1 implementation for example 3", () => {
 //   it("iterates the first region", () => {
