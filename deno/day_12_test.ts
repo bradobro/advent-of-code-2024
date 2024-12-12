@@ -152,6 +152,11 @@ describe("basic algorithms 2 (sides calc)", () => {
     expect(regionSet2(pf1.regions)).toEqual(regionSet2(regions1));
     expect(pf1.totalDiscountedCost).toEqual(discounted1);
   });
+  it("finds the sides count of example 2", () => {
+    const pf2 = PuzzleField.parse(src2);
+    expect(regionSet2(pf2.regions)).toEqual(regionSet2(regions2));
+    expect(pf2.totalDiscountedCost).toEqual(discounted2);
+  });
   it("finds the sides count of example 3", () => {
     const pf3 = PuzzleField.parse(src3);
     expect(regionSet2(pf3.regions)).toEqual(regionSet2(regions3));
