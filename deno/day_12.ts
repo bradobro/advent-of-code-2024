@@ -1,5 +1,4 @@
 import { assertEquals, assertGreater } from "@std/assert";
-import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
 import { Direction, Directions, Matrix, XY } from "./matrix.ts";
 // https://adventofcode.com/2024/day/12
@@ -7,13 +6,16 @@ import { Direction, Directions, Matrix, XY } from "./matrix.ts";
 export interface Region {
   crop: string;
   perim: number; // perimeter
+  sides: number;
   area: number; // Locs contained
-  cost: number; // perim * area
+  cost: number; // perim * area, answer for part 1
+  discounted: number; // answer for part 2
 }
 
 type RegionId = number;
 
 export interface RegionIdd extends Region {
+  start: XY;
   id: RegionId;
 }
 
@@ -35,22 +37,26 @@ export class PuzzleField {
   readonly RegionNeighbors: Direction[] = [Direction.S, Direction.W];
   public regions: RegionIdd[] = [];
   readonly totalCost: number;
+  readonly totalDiscountedCost: number;
 
   constructor(public grid: FieldMap) {
     this.calcPerims();
     this.collectRegions();
-    this.totalCost = this.calcCosts();
+    [this.totalCost, this.totalDiscountedCost] = this.calcCosts();
   }
 
-  calcCosts(): number {
-    let result = 0;
+  calcCosts(): [number, number] {
+    let cost = 0;
+    let discounted = 0;
     for (let i = 0; i < this.regions.length; i++) {
       const region = this.regions[i];
       assertEquals(region.id, i, "expecting regions id's to ascend and match");
       region.cost = region.area * region.perim;
-      result += region.cost;
+      region.discounted = region.area * region.sides;
+      cost += region.cost;
+      discounted += region.discounted;
     }
-    return result;
+    return [cost, discounted];
   }
 
   calcPerims() {
@@ -73,14 +79,17 @@ export class PuzzleField {
     return null;
   }
 
-  newRegion(crop: string): RegionIdd {
+  newRegion(loc: Loc, xy: XY): RegionIdd {
     // create region and do initial bookeeping
     const r: RegionIdd = {
+      start: xy,
       id: this.regions.length,
-      crop: crop,
+      crop: loc.crop,
       perim: 0,
+      sides: 0,
       area: 0,
       cost: 0,
+      discounted: 0,
     };
     this.regions.push(r);
     return r;
@@ -120,7 +129,7 @@ export class PuzzleField {
 
       // create new region
       const [loc0, xy0] = nxt;
-      const r = this.newRegion(loc0.crop);
+      const r = this.newRegion(loc0, xy0);
 
       // add cells to it (iterator includes origin cell)
       for (const [loca, _] of this.iterRegionCells(r.id, xy0)) {
@@ -138,36 +147,6 @@ export class PuzzleField {
     //   loca.region = this.findOrMakeRegion(loca, xya, xypred);
     // }
     this.iterRegions().forEach((r, i) => assertEquals(r.id, i));
-  }
-
-  findOrMakeRegion(loca: Loc, xya: XY, xypred: XY | null): RegionId {
-    for (const xyb of [xypred, this.grid.look(xya, Direction.S)]) {
-      if (!xyb) continue;
-      const locb = this.grid.getXY(xyb);
-      if (locb.crop === loca.crop) {
-        assertGreater(
-          locb.region,
-          NO_REGION,
-          "if the crops match, should already have a region",
-        );
-        // add to region , area, and perim maybe? zip up costs after we're done
-        const region = this.regions[locb.region];
-        region.area += 1;
-        region.perim += loca.perim;
-        return locb.region;
-      }
-    }
-    const region: RegionIdd = {
-      id: this.regions.length,
-      crop: loca.crop,
-      perim: loca.perim,
-      area: 1,
-      cost: 0,
-    };
-    loca.region = region.id;
-    // console.debug("found new region", loca, xya);
-    this.regions.push(region);
-    return region.id;
   }
 
   // Loading
