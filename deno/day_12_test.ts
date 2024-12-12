@@ -152,9 +152,9 @@ describe("basic algorithms 2 (sides calc)", () => {
     expect(regionSet2(pf1.regions)).toEqual(regionSet2(regions1));
     expect(pf1.totalDiscountedCost).toEqual(discounted1);
     // example 1 has no islands
-    // for (const r of pf1.regions) expect(r.island).toBeFalsy();
+    for (const r of pf1.regions) expect(r.island).toBeFalsy();
   });
-  it.skip("finds the sides count of example 2", () => {
+  it("finds the sides count of example 2", () => {
     const pf2 = PuzzleField.parse(src2);
     expect(regionSet2(pf2.regions)).toEqual(regionSet2(regions2));
     expect(pf2.totalDiscountedCost).toEqual(discounted2);
@@ -166,9 +166,7 @@ describe("basic algorithms 2 (sides calc)", () => {
     const pf3 = PuzzleField.parse(src3);
     expect(regionSet2(pf3.regions)).toEqual(regionSet2(regions3));
     expect(pf3.totalDiscountedCost).toEqual(discounted3);
-    // for (const r of pf3.regions) {
-    //   if (r.island) console.debug(r);
-    // }
+    for (const r of pf3.regions) expect(r.island).toBeFalsy();
   });
 });
 

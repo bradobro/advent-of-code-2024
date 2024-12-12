@@ -54,7 +54,10 @@ export class PuzzleField {
     this.calcPerims();
     this.collectRegions();
     for (const r of this.regions) r.sides = this.externalSideCount(r);
-    // then add in island sides
+    for (const r of this.regions) {
+      // islands "carve their sides out of another"
+      if (r.island) this.regions[r.islandIn].sides += r.sides;
+    }
     [this.totalCost, this.totalDiscountedCost] = this.calcCosts();
   }
 
@@ -73,6 +76,7 @@ export class PuzzleField {
   }
 
   externalSideCount(reg: RegionWithMeta): number {
+    // const neighbors = new Set<RegionId>();  // test for islands a byproducs
     const xy0 = reg.start;
     const loc0 = this.grid.getXY(xy0);
     // console.debug(`starting from ${xy0}`, reg, loc0);
@@ -84,6 +88,7 @@ export class PuzzleField {
     let dir = Direction.N; // walk the perimiter starting North
 
     while (true) {
+      // check for stop conditions
       if (xyEqual(xya, reg.start)) {
         // console.debug("We're backc home!");
         if (corners > 0) {
@@ -98,6 +103,30 @@ export class PuzzleField {
           // console.debug("but we have no corners");
         }
       }
+
+      // we still think this region could be an island. Let's check
+      // if that's still true
+      if (reg.island) {
+        for (const d of Directions) {
+          const xyn = this.grid.look(xya, d);
+          // found an edge, it's not an island
+          if (!xyn) reg.island = false;
+          else {
+            const locn = this.grid.getXY(xyn);
+            // found a different region...
+            if (locn.region !== reg.id) {
+              if (reg.islandIn === NO_REGION) {
+                // first we've seen, so mark it
+                reg.islandIn = locn.region;
+              } else if (locn.region !== reg.islandIn) {
+                // bordering a second region, so not an island
+                reg.island = false;
+              }
+            }
+          }
+        }
+      }
+
       if (count++ > 1000) {
         console.debug(reg);
         assert(false, `looped too many times on on ${xya}`);
