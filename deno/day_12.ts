@@ -294,17 +294,26 @@ export class Day12 extends Puzzle<Results> {
   }
 
   async solve2() {
-    const data = await this.load();
-    return { data };
+    const mistakes: Record<number, string> = {
+      "918740": "too high",
+    };
+    const { totalDiscountedCost: discounted2 } = await this.load();
+    if (discounted2 in mistakes) {
+      console.error(
+        "already gave that answer",
+        discounted2,
+        mistakes[discounted2],
+      );
+    }
+    Deno.exit(1);
+    return { discounted2 };
   }
 
   override async solve(): Promise<Results> {
-    const which = 1;
+    const which = 3;
     const results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
-    console.debug(results1);
     const results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
-    // console.debug({ results1, results2 });
-    const results = {};
+    const results = { ...results1, ...results2 };
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
 }
