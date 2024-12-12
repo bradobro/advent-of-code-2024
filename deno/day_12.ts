@@ -148,64 +148,6 @@ export class PuzzleField {
     return corners;
   }
 
-  externalSideCountProbs1(reg: RegionWithMeta): number {
-    const xy0 = reg.start;
-    const loc0 = this.grid.getXY(xy0);
-    console.debug(`starting from ${xy0}`, reg, loc0);
-    return 1;
-    // let count = 0;
-    // const seen = new Set<XY>(); // prevent counterclockwise loops
-    // let xya = reg.start; // start here and finish here facing the same way
-    // let corners = 0; // found one corner
-    // let dir = Direction.N; // walk the perimiter starting North
-    // // only stop if we have some corners, are facing North at the start
-    // while (true) {
-    //   // if (xya === reg.start && count > 0) break;
-    //   if (count++ > 5) {
-    //     console.debug(reg);
-    //     assert(false, `looped too many times on on ${xya}`);
-    //   } else {
-    //     console.debug({ dir, xya, regId: reg.id, crop: reg.crop });
-    //   }
-    //   seen.add(xya);
-
-    //   // if I can turn left, do so and add a corner to the count
-    //   // const xyL = this.grid.lookL(xya, dir);
-    //   // if (xyL && this.grid.getXY(xyL).region === reg.id) {
-    //   //   dir = left(dir);
-    //   //   corners++;
-    //   // }
-
-    //   // else, go forward if I can along this side
-    //   const xyAhead = this.grid.look(xya, dir);
-    //   if (xyAhead) { // there's a space forward
-    //     const ahead = this.grid.getXY(xyAhead);
-    //     if (ahead.region === reg.id) {
-    //       console.debug(
-    //         `looks like ahead is the same region: ${xyAhead}, ${reg.start}`,
-    //         reg,
-    //         ahead,
-    //       );
-    //     }
-    //   }
-    //   // const locAhead = this.gridLook(xya, dir);
-    //   // if (xyAhead && this.grid.getXY(xyAhead).region === reg.id) {
-    //   //   if (seen.has(xyAhead)) {
-    //   //     console.debug(reg);
-    //   //     console.debug(
-    //   //       `looks like region is looping from ${xya} to ${xyAhead}`,
-    //   //     );
-    //   //   }
-    //   //   xya = xyAhead;
-    //   // }
-    //   // dir = right(dir);
-    //   // corners++;
-    //   // console.debug("Fallthrough break");
-    //   // break;
-    // }
-    // return corners;
-  }
-
   calcPerims() {
     for (const [loc, xy] of this.grid.iterCellsC()) {
       loc.perim = this.perimCount(loc, xy);
@@ -291,10 +233,6 @@ export class PuzzleField {
   }
 
   collectRegions() {
-    // for (const [loca, xya, xypred] of this.grid.iterSnake()) {
-    //   // loca.perim = this.perimCount(loca, xya);
-    //   loca.region = this.findOrMakeRegion(loca, xya, xypred);
-    // }
     this.iterRegions().forEach((r, i) => assertEquals(r.id, i));
   }
 
