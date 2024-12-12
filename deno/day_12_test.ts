@@ -1,6 +1,7 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { PuzzleField, Region, RegionIdd } from "./day_12.ts";
+import { NO_REGION, PuzzleField, Region, RegionIdd } from "./day_12.ts";
+import { XY } from "./matrix.ts";
 
 const src1 = `
 AAAA
@@ -110,9 +111,67 @@ describe("basic algorithms 1", () => {
   });
   it("finds the regions in example 3", () => {
     const pf3 = PuzzleField.parse(src3);
-    console.debug("expected 3", regionSet(regions3));
-    console.debug("got 3", regionSet(pf3.regions));
+    for (const r of pf3.iterRegions()) {
+      console.log(r);
+    }
     expectRegionsMatch(pf3.regions, regions3);
     expect(pf3.totalCost).toEqual(cost3);
+  });
+});
+
+describe("alternate implementation for example 3", () => {
+  it("iterates the first region", () => {
+    const pf3 = PuzzleField.parse(src3);
+    for (const l of pf3.grid.iterCells()) {
+      l.region = NO_REGION;
+    }
+    const nxt = pf3.nextLocWithoutRegion();
+    expect(nxt).toEqual([{ crop: "M", region: -1, perim: 2 }, [0, 0]]);
+    const ci = pf3.iterRegionCells(0, [0, 0]);
+    expect(ci.next().value[1]).toEqual([0, 0]);
+    expect(ci.next().value[1]).toEqual([0, 1]);
+    expect(ci.next().value[1]).toEqual([1, 0]);
+    expect(ci.next().value[1]).toEqual([0, 2]);
+    expect(ci.next().value[1]).toEqual([2, 0]);
+    expect(ci.next().done).toBeTruthy();
+  });
+  it("iterates the second region", () => {
+    const pf3 = PuzzleField.parse(src3);
+    for (const l of pf3.grid.iterCells()) {
+      l.region = NO_REGION;
+    }
+    const cells = Array.from(pf3.iterRegionCells(0, [3, 0]));
+    // console.debug(cells);
+    expect(cells[0][0].crop).toEqual("I");
+    expect(new Set<XY>(cells.map((c) => c[1]))).toEqual(
+      new Set([
+        [1, 1],
+        [1, 2],
+        [2, 1],
+        [2, 2],
+        [2, 3],
+        [2, 4],
+        [3, 0],
+        [3, 1],
+        [3, 2],
+        [3, 3],
+        [4, 2],
+        [4, 3],
+        [5, 1],
+        [5, 2],
+      ]),
+    );
+  });
+  it("iterates over the first tricky C region", () => {
+    const pf3 = PuzzleField.parse(src3);
+    for (const l of pf3.grid.iterCells()) {
+      l.region = NO_REGION;
+    }
+    const cells = Array.from(pf3.iterRegionCells(0, [5, 3]));
+    expect(cells[0][0].crop).toEqual("C");
+    expect(cells.length).toEqual(14);
+    const cells2 = Array.from(pf3.iterRegionCells(1, [7, 5]));
+    expect(cells2[0][0].crop).toEqual("C");
+    expect(cells2.length).toEqual(1);
   });
 });
