@@ -1,6 +1,6 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { PuzzleField, Region } from "./day_12.ts";
+import { PuzzleField, Region, RegionIdd } from "./day_12.ts";
 
 const src1 = `
 AAAA
@@ -11,11 +11,11 @@ EEEC
 
 // [perim, area]
 const regions1: Region[] = [
-  { crop: "A", perim: 4, area: 10, cost: 40 },
-  { crop: "B", perim: 4, area: 8, cost: 32 },
-  { crop: "C", perim: 4, area: 10, cost: 40 },
-  { crop: "D", perim: 1, area: 4, cost: 4 },
-  { crop: "E", perim: 3, area: 8, cost: 24 },
+  { crop: "A", area: 4, perim: 10, cost: 40 },
+  { crop: "B", area: 4, perim: 8, cost: 32 },
+  { crop: "C", area: 4, perim: 10, cost: 40 },
+  { crop: "D", area: 1, perim: 4, cost: 4 },
+  { crop: "E", area: 3, perim: 8, cost: 24 },
 ];
 
 const cost1 = 140;
@@ -82,9 +82,23 @@ describe("test data", () => {
   });
 });
 
+function regionSet(r: Region[]): Set<string> {
+  return new Set(r.map((r) => `${r.crop}-a${r.area}-p${r.perim}-c${r.cost}`));
+}
+
+function expectRegionsMatch(actual: RegionIdd[], expected: Region[]) {
+  // const actualSet = new Set<Region>(actual.map((
+  //   { crop, perim, area, cost },
+  // ) => ({ crop, perim, area, cost })));
+  expect(regionSet(actual)).toEqual(regionSet(expected));
+}
+
 describe("basic algorithms 1", () => {
   it("finds the regions in example 1", () => {
     const pf1 = PuzzleField.parse(src1);
     expect(pf1.regions.length).toEqual(regions1.length);
+    expectRegionsMatch(pf1.regions, regions1);
+    expect(pf1.totalCost).toEqual(cost1);
+    // console.debug(regionSet(regions1));
   });
 });

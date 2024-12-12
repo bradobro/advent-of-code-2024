@@ -159,6 +159,28 @@ export class Matrix<T> {
     }
   }
 
+  /**
+   * Iterate  ascending y, +x|-x alternating
+   *
+   * @generator: [cell, cellXY, predecessor XY|null]
+   */
+  *iterSnake(): Generator<[T, XY, XY | null]> {
+    const [nx, ny] = this.sizeXY();
+    let xDirection = 1;
+    for (let y = 0; y < ny; y++) {
+      const row = this.store[ny - 1 - y];
+      let pred: XY | null = null;
+      for (let x = 0; x < nx; x++) {
+        const actualX = xDirection > 0 ? x : nx - 1 - x;
+        const cell = row[actualX];
+        const xy: XY = [actualX, y];
+        yield [cell, xy, pred];
+        pred = xy;
+      }
+      xDirection *= -1;
+    }
+  }
+
   look(locA: XY, d: Direction): XY | null {
     const locB = xyAdd(locA, directionVectors[d]);
     if (this.validXY(locB)) return locB;
