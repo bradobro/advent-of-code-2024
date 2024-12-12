@@ -42,7 +42,7 @@ export const directionVectors: Record<Direction, XY> = {
   3: [-1, 0],
 };
 
-// directionVectors[Direction.N] = [0, 1];
+type CellFormatter<T> = (cell: T) => string;
 
 export class Matrix<T> {
   private nrows = 0;
@@ -111,14 +111,19 @@ export class Matrix<T> {
     for (const row of this.store) yield row.slice(0);
   }
 
-  formatRow(formatter: (cell: T) => string, row: T[]): string {
+  formatRow(formatter: CellFormatter<T>, row: T[]): string {
     return row.map(formatter).join("");
   }
 
-  print(formatter: (cell: T) => string) {
+  print(formatter: CellFormatter<T>) {
     for (const row of this.store) {
       console.log(this.formatRow(formatter, row));
     }
+  }
+
+  format(formatter: CellFormatter<T>): string {
+    const rows = this.store.map((row) => this.formatRow(formatter, row));
+    return rows.join("\n");
   }
 
   rows() {
