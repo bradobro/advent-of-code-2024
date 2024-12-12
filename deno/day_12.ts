@@ -53,12 +53,16 @@ export class PuzzleField {
   constructor(public grid: FieldMap) {
     this.calcPerims();
     this.collectRegions();
+    this.countSidesByTrapsing();
+    [this.totalCost, this.totalDiscountedCost] = this.calcCosts();
+  }
+
+  private countSidesByTrapsing() {
     for (const r of this.regions) r.sides = this.externalSideCount(r);
     for (const r of this.regions) {
       // islands "carve their sides out of another"
       if (r.island) this.regions[r.islandIn].sides += r.sides;
     }
-    [this.totalCost, this.totalDiscountedCost] = this.calcCosts();
   }
 
   calcCosts(): [number, number] {
@@ -295,7 +299,8 @@ export class Day12 extends Puzzle<Results> {
 
   async solve2() {
     const mistakes: Record<number, string> = {
-      "918740": "too high",
+      878118: "too low",
+      918740: "too high",
     };
     const { totalDiscountedCost: discounted2 } = await this.load();
     if (discounted2 in mistakes) {
@@ -304,8 +309,8 @@ export class Day12 extends Puzzle<Results> {
         discounted2,
         mistakes[discounted2],
       );
+      Deno.exit(1);
     }
-    Deno.exit(1);
     return { discounted2 };
   }
 
