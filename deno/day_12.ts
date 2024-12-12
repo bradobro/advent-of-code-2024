@@ -194,7 +194,8 @@ export class Day12 extends Puzzle<Results> {
 
   async solve1() {
     const data = await this.load();
-    return data.grid.format((c: Loc) => c.crop);
+    // return data.grid.format((c: Loc) => c.crop);
+    return { cost1: data.totalCost };
   }
 
   async solve2() {
