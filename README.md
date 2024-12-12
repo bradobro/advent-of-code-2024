@@ -10,13 +10,15 @@ I love computer languages. These repos look interesting:
 - Deno Contest: https://github.com/denoland/advent-of-code-2024
 - Mix of languages C, Java, Python, Rust: https://github.com/Friends-of-AoC/Advent-of-Code-2024-exchange
 - Interesting stats: https://jeroenheijmans.github.io/advent-of-code-surveys/
+- Here are some repos with nice Deno answers:
+  - https://github.com/mabenj/aoc-deno-ts: I tend to look at this one when I'm done and say, Wow, I should've thought of that. Terse and to the point.
 
-## Work Log
+## Thoughts Along the Way
 
-This is a stream-of-thoughts as I work.
+I used some of the exercises to play with iterators and async iterators. I've used them a fair bit in other languages but haven't so much in TypeScript.
 
-Day 1: This is my first time actually solving AoC puzzles, though I've perused solutions in past years. I started out setting up a helper class to do stuff common to each puzzle. After doing 2 puzzles, I'm seeing this is going to be as little more quick-and-dirty. I probably won't even label the output nicely; just get the answer and move on.
+I'm also playing with a mix of OOP and bare functions. I hesitate to call anything I do FP because so far I haven't grabbed any libs that would support a more FP approach. I do find myself using reduce() a lot more than I usually do, although sometimes I end up unrolling it into a for...of loop to get better progress insights.
 
-Tomorrow I might take bit more functional approach.
+I don't like state-heavy OOP; I tend to use it more for namespacing experiments. On day 11, when I had to iterate on the algorithms for calculating magic stones, I didn't use OOP and wished I had as a way to namespace some approaches. I had one that worked but was too slow to handle part 2. I used the part1 version to test other approaches. I wasn't very creative with names.
 
-I've been working on constrained devices lately, and that had me looking for a Deno file lines iterator to see if I can do some of these, where possible, without loading all the data into the RAM.
+I really like the AOC design. The part2 curve balls remind me of the sort of stuff that comes at devs day-to-day, at least in the start ups where I've worked. It's a great exercise in balancing flexible design without overengineering.
