@@ -1,7 +1,7 @@
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertGreater } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { Matrix } from "./matrix.ts";
+import { Direction, Matrix, XY } from "./matrix.ts";
 // https://adventofcode.com/2024/day/12
 
 export interface Region {
@@ -11,13 +11,15 @@ export interface Region {
   cost: number; // perim * area
 }
 
+type RegionId = number;
+
 export interface RegionIdd extends Region {
-  id: number;
+  id: RegionId;
 }
 
 export interface Loc {
   crop: string; // letter
-  region: number; // -1 means not assigned yet
+  region: RegionId; // -1 means not assigned yet
   perim: number; // sides touching edge or other crop
 }
 
@@ -30,9 +32,49 @@ function parseLoc(crop: string): Loc {
 export type FieldMap = Matrix<Loc>;
 
 export class PuzzleField {
-  public regions: Region[] = [];
+  readonly RegionNeighbors: Direction[] = [Direction.S, Direction.W];
+  public regions: RegionIdd[] = [];
 
-  constructor(public grid: FieldMap) {}
+  constructor(public grid: FieldMap) {
+    this.collectRegions();
+  }
+
+  collectRegions() {
+    // this algorithm depends on iterating +x,+y (row-major, ascending cartesisn)
+    for (const [loca, xya] of this.grid.iterCellsC()) {
+      // loca.perim = this.perimCount(loca, xya);
+      loca.region = this.findOrMakeRegion(loca, xya);
+    }
+  }
+
+  findOrMakeRegion(loca: Loc, xya: XY): RegionId {
+    for (const d of this.RegionNeighbors) {
+      const xyb = this.grid.look(xya, d);
+      if (!xyb) continue;
+      const locb = this.grid.getXY(xyb);
+      if (locb.crop === loca.crop) {
+        assertGreater(
+          locb.region,
+          NO_REGION,
+          "if the crops match, should already have a region",
+        );
+        // add to region , area, and perim maybe? zip up costs after we're done
+        return locb.region;
+      }
+    }
+    const region: RegionIdd = {
+      id: this.regions.length,
+      crop: loca.crop,
+      perim: 0,
+      area: 1,
+      cost: 0,
+    };
+    loca.region = region.id;
+    // oops, have to iterate cells snake style
+    console.debug("found new region", loca, xya);
+    this.regions.push(region);
+    return region.id;
+  }
 
   // Loading
 

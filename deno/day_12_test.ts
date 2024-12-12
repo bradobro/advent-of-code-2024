@@ -81,3 +81,10 @@ describe("test data", () => {
     expect(regions3.reduce((acc, reg) => acc + reg.cost, 0)).toEqual(cost3);
   });
 });
+
+describe("basic algorithms 1", () => {
+  it("finds the regions in example 1", () => {
+    const pf1 = PuzzleField.parse(src1);
+    expect(pf1.regions.length).toEqual(regions1.length);
+  });
+});

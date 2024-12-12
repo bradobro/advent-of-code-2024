@@ -108,7 +108,7 @@ export class Matrix<T> {
   }
 
   *iterRows(): Generator<T[]> {
-    for (const row of this.store) yield row.slice(0);
+    for (const row of this.store) yield row;
   }
 
   formatRow(formatter: CellFormatter<T>, row: T[]): string {
