@@ -146,11 +146,16 @@ function regionSet2(r: Region[]): Set<string> {
   );
 }
 
-describe.only("basic algorithms 2 (sides calc)", () => {
+describe("basic algorithms 2 (sides calc)", () => {
   it("finds the sides count of example 1", () => {
     const pf1 = PuzzleField.parse(src1);
     expect(regionSet2(pf1.regions)).toEqual(regionSet2(regions1));
     expect(pf1.totalDiscountedCost).toEqual(discounted1);
+  });
+  it("finds the sides count of example 3", () => {
+    const pf3 = PuzzleField.parse(src3);
+    expect(regionSet2(pf3.regions)).toEqual(regionSet2(regions3));
+    expect(pf3.totalDiscountedCost).toEqual(discounted3);
   });
 });
 

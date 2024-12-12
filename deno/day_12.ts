@@ -98,8 +98,8 @@ export class PuzzleField {
           // console.debug("but we have no corners");
         }
       }
-      if (count++ > 14) {
-        // console.debug(reg);
+      if (count++ > 1000) {
+        console.debug(reg);
         assert(false, `looped too many times on on ${xya}`);
       } else {
         // console.debug({ count, dir, xya, regId: reg.id, crop: reg.crop });
