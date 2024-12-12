@@ -14,6 +14,14 @@ export enum Direction {
   W,
 }
 
+export function right(d: Direction): Direction {
+  return (d + 1) % 4;
+}
+
+export function left(d: Direction): Direction {
+  return (d + 3) % 4;
+}
+
 export const Directions: Direction[] = [
   Direction.N,
   Direction.E,
@@ -185,6 +193,14 @@ export class Matrix<T> {
     const locB = xyAdd(locA, directionVectors[d]);
     if (this.validXY(locB)) return locB;
     return null;
+  }
+
+  lookL(locA: XY, d: Direction): XY | null {
+    return this.look(locA, left(d));
+  }
+
+  lookR(locA: XY, d: Direction): XY | null {
+    return this.look(locA, right(d));
   }
 
   static async read(path: string): Promise<Matrix<string>> {

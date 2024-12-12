@@ -1,6 +1,6 @@
 import { assertEquals, assertGreater } from "@std/assert";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { Direction, Directions, Matrix, XY } from "./matrix.ts";
+import { Direction, Directions, left, Matrix, right, XY } from "./matrix.ts";
 import { earlyZipReadableStreams } from "@std/streams/early-zip-readable-streams";
 // https://adventofcode.com/2024/day/12
 
@@ -65,22 +65,28 @@ export class PuzzleField {
   }
 
   externalSideCount(reg: RegionWithMeta): number {
-    let xya = reg.start; // start here and finish here
-    let result = 1; // found one corner
-    const dir = Direction.N; // walk the perimiter starting Norh
+    let xya = reg.start; // start here and finish here facing the same way
+    let corners = 0; // found one corner
+    let dir = Direction.N; // walk the perimiter starting North
     while (true) {
-      const xyb = this.grid.look(xya, dir);
-      if (!xyb) break; // too simple
-      const locB = this.grid.getXY(xyb);
-      if (locB.region - reg.id) xya = xyb;
-      else break;
-      // look left, look right?
-      // maybe turn left if you can; turn right if you have to.
-      // if you end up on an xy facing the way you have before, break
-      if (xya === reg.start) break; // back where we started so quit
-      result++;
+      const xyL = this.grid.lookL(xya, dir);
+      const xyAhead = this.grid.look(xya, dir);
+      // if I can turn left, do so and add a corner to the count
+      if (xyL && this.grid.getXY(xyL).region === reg.id) {
+        dir = left(dir);
+        corners++;
+      } // else, go forward if I can along this side
+      else if (xyAhead && this.grid.getXY(xyAhead).region === reg.id) {
+        xya = xyAhead;
+      } // else turn right
+      else {
+        dir = right(dir);
+        corners++;
+      }
+      // if you end up where you started facing N, you're done
+      if (xya === reg.start && dir === Direction.N) break; // back where we started so quit
     }
-    return result;
+    return corners;
   }
 
   calcPerims() {
