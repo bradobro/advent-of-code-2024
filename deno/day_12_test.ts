@@ -101,4 +101,18 @@ describe("basic algorithms 1", () => {
     expect(pf1.totalCost).toEqual(cost1);
     // console.debug(regionSet(regions1));
   });
+  it("finds the regions in example 2", () => {
+    const pf2 = PuzzleField.parse(src2);
+    expect(pf2.regions.length).toEqual(regions2.length);
+    expectRegionsMatch(pf2.regions, regions2);
+    expect(pf2.totalCost).toEqual(cost2);
+    // console.debug(regionSet(regions1));
+  });
+  it("finds the regions in example 3", () => {
+    const pf3 = PuzzleField.parse(src3);
+    console.debug("expected 3", regionSet(regions3));
+    console.debug("got 3", regionSet(pf3.regions));
+    expectRegionsMatch(pf3.regions, regions3);
+    expect(pf3.totalCost).toEqual(cost3);
+  });
 });
