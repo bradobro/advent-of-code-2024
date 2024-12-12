@@ -146,7 +146,7 @@ function regionSet2(r: Region[]): Set<string> {
   );
 }
 
-describe("basic algorithms 2 (sides calc)", () => {
+describe.only("basic algorithms 2 (sides calc)", () => {
   it("finds the sides count of example 1", () => {
     const pf1 = PuzzleField.parse(src1);
     expect(regionSet2(pf1.regions)).toEqual(regionSet2(regions1));
@@ -154,27 +154,27 @@ describe("basic algorithms 2 (sides calc)", () => {
   });
 });
 
-describe.skip("part 2 handles the extra examples", () => {
-  const pf4 = PuzzleField.parse(`
-EEEEE
-EXXXX
-EEEEE
-EXXXX
-EEEEE
-`);
-  const discounted4 = 236;
+// describe.skip("part 2 handles the extra examples", () => {
+//   const pf4 = PuzzleField.parse(`
+// EEEEE
+// EXXXX
+// EEEEE
+// EXXXX
+// EEEEE
+// `);
+//   const discounted4 = 236;
 
-  // tests the diagonal edge condition with A's in the center
-  const pf5 = PuzzleField.parse(`
-AAAAAA
-AAABBA
-AAABBA
-ABBAAA
-ABBAAA
-AAAAAA
-`);
-  const discounted5 = 368;
-});
+//   // tests the diagonal edge condition with A's in the center
+//   const pf5 = PuzzleField.parse(`
+// AAAAAA
+// AAABBA
+// AAABBA
+// ABBAAA
+// ABBAAA
+// AAAAAA
+// `);
+//   const discounted5 = 368;
+// });
 
 // describe("alternate part1 implementation for example 3", () => {
 //   it("iterates the first region", () => {

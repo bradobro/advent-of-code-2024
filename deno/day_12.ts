@@ -1,6 +1,14 @@
-import { assertEquals, assertGreater } from "@std/assert";
+import { assert, assertEquals, assertGreater } from "@std/assert";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { Direction, Directions, left, Matrix, right, XY } from "./matrix.ts";
+import {
+  Direction,
+  Directions,
+  left,
+  Matrix,
+  right,
+  XY,
+  xyEqual,
+} from "./matrix.ts";
 import { earlyZipReadableStreams } from "@std/streams/early-zip-readable-streams";
 // https://adventofcode.com/2024/day/12
 
@@ -65,28 +73,137 @@ export class PuzzleField {
   }
 
   externalSideCount(reg: RegionWithMeta): number {
+    const xy0 = reg.start;
+    const loc0 = this.grid.getXY(xy0);
+    // console.debug(`starting from ${xy0}`, reg, loc0);
+
+    let count = 0;
+    const seen = new Set<XY>(); // prevent counterclockwise loops
     let xya = reg.start; // start here and finish here facing the same way
     let corners = 0; // found one corner
     let dir = Direction.N; // walk the perimiter starting North
+
     while (true) {
-      const xyL = this.grid.lookL(xya, dir);
-      const xyAhead = this.grid.look(xya, dir);
-      // if I can turn left, do so and add a corner to the count
-      if (xyL && this.grid.getXY(xyL).region === reg.id) {
-        dir = left(dir);
-        corners++;
-      } // else, go forward if I can along this side
-      else if (xyAhead && this.grid.getXY(xyAhead).region === reg.id) {
-        xya = xyAhead;
-      } // else turn right
-      else {
-        dir = right(dir);
-        corners++;
+      if (xyEqual(xya, reg.start)) {
+        // console.debug("We're backc home!");
+        if (corners > 0) {
+          // console.debug("we've got corners");
+          if (dir === Direction.N) {
+            // console.debug("and we're facing N, so breaking");
+            break;
+          } else {
+            // console.debug("but we're not facing N");
+          }
+        } else {
+          // console.debug("but we have no corners");
+        }
       }
-      // if you end up where you started facing N, you're done
-      if (xya === reg.start && dir === Direction.N) break; // back where we started so quit
+      if (count++ > 14) {
+        // console.debug(reg);
+        assert(false, `looped too many times on on ${xya}`);
+      } else {
+        // console.debug({ count, dir, xya, regId: reg.id, crop: reg.crop });
+      }
+      seen.add(xya);
+
+      // if I can turn left, do so and add a corner to the count
+      const xyLeft = this.grid.lookL(xya, dir);
+      if (xyLeft) {
+        // console.debug(`looking left from ${xya} ${dir}`);
+        const locLeft = this.grid.getXY(xyLeft);
+        if (locLeft.region === loc0.region) {
+          // console.debug(`left is same region, so turning and moving`);
+          dir = left(dir);
+          xya = xyLeft;
+          corners++;
+          continue;
+        } else {
+          // console.debug(`...but it's not the same region`);
+        }
+      } else {
+        // console.debug(`couldn't look left from ${xya} facing ${dir}`);
+      }
+
+      // else, go forward if I can along this side
+      const xyAhead = this.grid.look(xya, dir);
+      if (xyAhead) { // there's a space forward
+        // console.debug(`looking forward from ${xya}, ${dir}`);
+        const ahead = this.grid.getXY(xyAhead);
+        if (ahead.region === loc0.region) {
+          // console.debug(`same region, so moving to ${xyAhead}`);
+          xya = xyAhead;
+          continue;
+        } else {
+          // console.debug(`not same region, skipping move`);
+        }
+      } else {
+        // console.debug(`I couldn't see forward from ${xya}, ${dir}`);
+      }
+
+      dir = right(dir);
+      // console.debug(`turning right to ${dir}`);
+      corners++;
     }
+    // console.debug("corners = ", corners);
     return corners;
+  }
+
+  externalSideCountProbs1(reg: RegionWithMeta): number {
+    const xy0 = reg.start;
+    const loc0 = this.grid.getXY(xy0);
+    console.debug(`starting from ${xy0}`, reg, loc0);
+    return 1;
+    // let count = 0;
+    // const seen = new Set<XY>(); // prevent counterclockwise loops
+    // let xya = reg.start; // start here and finish here facing the same way
+    // let corners = 0; // found one corner
+    // let dir = Direction.N; // walk the perimiter starting North
+    // // only stop if we have some corners, are facing North at the start
+    // while (true) {
+    //   // if (xya === reg.start && count > 0) break;
+    //   if (count++ > 5) {
+    //     console.debug(reg);
+    //     assert(false, `looped too many times on on ${xya}`);
+    //   } else {
+    //     console.debug({ dir, xya, regId: reg.id, crop: reg.crop });
+    //   }
+    //   seen.add(xya);
+
+    //   // if I can turn left, do so and add a corner to the count
+    //   // const xyL = this.grid.lookL(xya, dir);
+    //   // if (xyL && this.grid.getXY(xyL).region === reg.id) {
+    //   //   dir = left(dir);
+    //   //   corners++;
+    //   // }
+
+    //   // else, go forward if I can along this side
+    //   const xyAhead = this.grid.look(xya, dir);
+    //   if (xyAhead) { // there's a space forward
+    //     const ahead = this.grid.getXY(xyAhead);
+    //     if (ahead.region === reg.id) {
+    //       console.debug(
+    //         `looks like ahead is the same region: ${xyAhead}, ${reg.start}`,
+    //         reg,
+    //         ahead,
+    //       );
+    //     }
+    //   }
+    //   // const locAhead = this.gridLook(xya, dir);
+    //   // if (xyAhead && this.grid.getXY(xyAhead).region === reg.id) {
+    //   //   if (seen.has(xyAhead)) {
+    //   //     console.debug(reg);
+    //   //     console.debug(
+    //   //       `looks like region is looping from ${xya} to ${xyAhead}`,
+    //   //     );
+    //   //   }
+    //   //   xya = xyAhead;
+    //   // }
+    //   // dir = right(dir);
+    //   // corners++;
+    //   // console.debug("Fallthrough break");
+    //   // break;
+    // }
+    // return corners;
   }
 
   calcPerims() {
