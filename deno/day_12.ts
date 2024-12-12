@@ -1,6 +1,7 @@
 import { assertEquals, assertGreater } from "@std/assert";
 import { Puzzle, Results } from "./Puzzle.ts";
 import { Direction, Directions, Matrix, XY } from "./matrix.ts";
+import { earlyZipReadableStreams } from "@std/streams/early-zip-readable-streams";
 // https://adventofcode.com/2024/day/12
 
 export interface Region {
@@ -14,9 +15,11 @@ export interface Region {
 
 type RegionId = number;
 
-export interface RegionIdd extends Region {
-  start: XY;
+export interface RegionWithMeta extends Region {
   id: RegionId;
+  start: XY;
+  island: boolean; // true if surrounded by one region: presumed true until proven false
+  islandIn: RegionId;
 }
 
 export interface Loc {
@@ -35,13 +38,15 @@ export type FieldMap = Matrix<Loc>;
 
 export class PuzzleField {
   readonly RegionNeighbors: Direction[] = [Direction.S, Direction.W];
-  public regions: RegionIdd[] = [];
+  public regions: RegionWithMeta[] = [];
   readonly totalCost: number;
   readonly totalDiscountedCost: number;
 
   constructor(public grid: FieldMap) {
     this.calcPerims();
     this.collectRegions();
+    for (const r of this.regions) r.sides = this.externalSideCount(r);
+    // then add in island sides
     [this.totalCost, this.totalDiscountedCost] = this.calcCosts();
   }
 
@@ -57,6 +62,25 @@ export class PuzzleField {
       discounted += region.discounted;
     }
     return [cost, discounted];
+  }
+
+  externalSideCount(reg: RegionWithMeta): number {
+    let xya = reg.start; // start here and finish here
+    let result = 1; // found one corner
+    const dir = Direction.N; // walk the perimiter starting Norh
+    while (true) {
+      const xyb = this.grid.look(xya, dir);
+      if (!xyb) break; // too simple
+      const locB = this.grid.getXY(xyb);
+      if (locB.region - reg.id) xya = xyb;
+      else break;
+      // look left, look right?
+      // maybe turn left if you can; turn right if you have to.
+      // if you end up on an xy facing the way you have before, break
+      if (xya === reg.start) break; // back where we started so quit
+      result++;
+    }
+    return result;
   }
 
   calcPerims() {
@@ -79,11 +103,13 @@ export class PuzzleField {
     return null;
   }
 
-  newRegion(loc: Loc, xy: XY): RegionIdd {
+  newRegion(loc: Loc, xy: XY): RegionWithMeta {
     // create region and do initial bookeeping
-    const r: RegionIdd = {
-      start: xy,
+    const r: RegionWithMeta = {
       id: this.regions.length,
+      start: xy,
+      island: true,
+      islandIn: NO_REGION,
       crop: loc.crop,
       perim: 0,
       sides: 0,
@@ -122,7 +148,7 @@ export class PuzzleField {
     }
   }
 
-  *iterRegions(): Generator<RegionIdd> {
+  *iterRegions(): Generator<RegionWithMeta> {
     while (true) {
       const nxt = this.nextLocWithoutRegion();
       if (nxt === null) break; // no more non-regioned cells

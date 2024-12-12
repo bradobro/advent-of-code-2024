@@ -1,6 +1,6 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { PuzzleField, Region, RegionIdd } from "./day_12.ts";
+import { PuzzleField, Region, RegionWithMeta } from "./day_12.ts";
 
 const src1 = `
 AAAA
@@ -108,7 +108,7 @@ function regionSet1(r: Region[]): Set<string> {
   return new Set(r.map((r) => `${r.crop}-a${r.area}-p${r.perim}-c${r.cost}`));
 }
 
-function expectRegionsMatch(actual: RegionIdd[], expected: Region[]) {
+function expectRegionsMatch(actual: RegionWithMeta[], expected: Region[]) {
   // const actualSet = new Set<Region>(actual.map((
   //   { crop, perim, area, cost },
   // ) => ({ crop, perim, area, cost })));
