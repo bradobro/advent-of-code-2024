@@ -1,10 +1,12 @@
 import { assert, assertEquals, assertGreater } from "@std/assert";
 import { Puzzle, Results } from "./Puzzle.ts";
 import {
+  CellColoredFormatter,
   Direction,
   Directions,
   left,
   Matrix,
+  nColors,
   right,
   XY,
   xyEqual,
@@ -57,14 +59,6 @@ export class PuzzleField {
     [this.totalCost, this.totalDiscountedCost] = this.calcCosts();
   }
 
-  private countSidesByTrapsing() {
-    for (const r of this.regions) r.sides = this.externalSideCount(r);
-    for (const r of this.regions) {
-      // islands "carve their sides out of another"
-      if (r.island) this.regions[r.islandIn].sides += r.sides;
-    }
-  }
-
   calcCosts(): [number, number] {
     let cost = 0;
     let discounted = 0;
@@ -79,8 +73,15 @@ export class PuzzleField {
     return [cost, discounted];
   }
 
+  private countSidesByTrapsing() {
+    for (const r of this.regions) r.sides = this.externalSideCount(r);
+    for (const r of this.regions) {
+      // islands "carve their sides out of another"
+      if (r.island) this.regions[r.islandIn].sides += r.sides;
+    }
+  }
+
   externalSideCount(reg: RegionWithMeta): number {
-    // const neighbors = new Set<RegionId>();  // test for islands a byproducs
     const xy0 = reg.start;
     const loc0 = this.grid.getXY(xy0);
     // console.debug(`starting from ${xy0}`, reg, loc0);
@@ -107,6 +108,8 @@ export class PuzzleField {
           // console.debug("but we have no corners");
         }
       }
+
+      seen.add(xya);
 
       // we still think this region could be an island. Let's check
       // if that's still true
@@ -144,7 +147,9 @@ export class PuzzleField {
       if (xyLeft) {
         // console.debug(`looking left from ${xya} ${dir}`);
         const locLeft = this.grid.getXY(xyLeft);
-        if (locLeft.region === loc0.region) {
+        if (seen.has(xyLeft)) {
+          console.debug(`strange, we might have a left-hand-trap`);
+        } else if (locLeft.region === loc0.region) {
           // console.debug(`left is same region, so turning and moving`);
           dir = left(dir);
           xya = xyLeft;
@@ -302,20 +307,70 @@ export class Day12 extends Puzzle<Results> {
       878118: "too low",
       918740: "too high",
     };
-    const { totalDiscountedCost: discounted2 } = await this.load();
+    const data = await this.load();
+    const { totalDiscountedCost: discounted2 } = data;
     if (discounted2 in mistakes) {
       console.error(
         "already gave that answer",
         discounted2,
         mistakes[discounted2],
       );
-      Deno.exit(1);
+      // Deno.exit(1);
+    }
+    /* Still got problems. Here are ideas
+  - [x] check for repeats on left turns NOPE!
+  - [ ] look hard at islands
+    - 74 regions are islands
+    - 70 of those have 4 sides (of which 59 are singletons)
+    - J-72,100 has 6 sides
+    - G-12, 108 has 6 sides
+  { islands: 60 } {
+  id: 495,
+  start: [ 123, 119 ],
+  island: true,
+  islandIn: 471,
+  crop: "J",
+  perim: 22,
+  sides: 16,
+  area: 16,
+  cost: 352,
+  discounted: 256
+}
+  - [ ] try calc with spans
+  - [ ] check out solutions
+ */
+
+    // color formatters
+
+    const _cRegions: CellColoredFormatter<Loc> = (c: Loc) => [c.region, c.crop];
+    const _cRegionIds: CellColoredFormatter<Loc> = (
+      c: Loc,
+    ) => [c.region, data.regions[c.region].id.toString().padEnd(4)];
+
+    const _cRegionSides: CellColoredFormatter<Loc> = (
+      c: Loc,
+    ) => [c.region, data.regions[c.region].sides.toString().padEnd(4)];
+    const _cIslands: CellColoredFormatter<Loc> = (
+      c: Loc,
+    ) => {
+      const region = data.regions[c.region];
+      if (region.island) {
+        return [c.region, c.crop];
+      } else {
+        return [nColors - 1, " "];
+      }
+    };
+
+    // data.grid.printc(_cRegions);
+    // data.grid.printc(_cIslands);
+    for (const r of data.regions) {
+      if (r.sides % 2 === 1) console.debug(r); // regions should have even number of sides
     }
     return { discounted2 };
   }
 
   override async solve(): Promise<Results> {
-    const which = 3;
+    const which = 2;
     const results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
     const results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
     const results = { ...results1, ...results2 };

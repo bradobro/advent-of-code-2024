@@ -6,6 +6,24 @@ import {
   assertLess,
 } from "@std/assert";
 import { fileLines } from "./lib.ts";
+import { Row } from "./day_07.ts";
+
+export const ConsoleForegroundBackgrounds: [string, string][] = [
+  ["white", "black"], // foreground, background
+  ["white", "red"],
+  ["black", "green"],
+  ["black", "yellow"],
+  ["white", "blue"],
+  ["black", "magenta"],
+  ["black", "cyan"],
+  ["black", "white"],
+];
+
+export const nColors = ConsoleForegroundBackgrounds.length;
+
+export function getFgBg(n: number): [string, string] {
+  return ConsoleForegroundBackgrounds[n % nColors];
+}
 
 export enum Direction {
   N = 0,
@@ -50,7 +68,10 @@ export const directionVectors: Record<Direction, XY> = {
   3: [-1, 0],
 };
 
-type CellFormatter<T> = (cell: T) => string;
+export type CellFormatter<T> = (cell: T) => string;
+
+// returns color number and string
+export type CellColoredFormatter<T> = (cell: T) => [number, string];
 
 export class Matrix<T> {
   private nrows = 0;
@@ -126,6 +147,52 @@ export class Matrix<T> {
   print(formatter: CellFormatter<T>) {
     for (const row of this.store) {
       console.log(this.formatRow(formatter, row));
+    }
+  }
+
+  // works, but not with Less R
+  consoleColorize(fmt: CellColoredFormatter<T>, row: T[]): [string, string[]] {
+    assertGreater(row.length, 0, "row must have items to format");
+    let currentColor = -1;
+    const message: string[] = [];
+    const colors: string[] = [];
+    for (const cell of row) {
+      const [color, txt] = fmt(cell);
+      if (color !== currentColor) {
+        message.push("%c");
+        currentColor = color;
+        const [fg, bg] = getFgBg(color);
+        colors.push(`color: ${fg}; background-color: ${bg};`);
+      }
+      message.push(txt);
+    }
+    message.push("%c");
+    colors.push(`color: black; background-color: white;`);
+    // return [message.join(""), colors];
+    // return ["message", ["test: red;"]];
+    return [message.join(""), colors];
+  }
+
+  printc(fmt: CellColoredFormatter<T>) {
+    for (const row of this.store) {
+      const [msg, colors] = this.consoleColorize(fmt, row);
+      console.log(msg, ...colors);
+      // console.debug({ msg, colors });
+      // console.log(msg, colors);
+      // console.log(this.formatRow(formatter, row));
+    }
+  }
+
+  async fprint(path: string, formatter: CellFormatter<T>) {
+    const te = new TextEncoder();
+    const f = await Deno.open(path, {
+      write: true,
+      truncate: true,
+      create: true,
+    });
+    const w = f.writable.getWriter();
+    for (const row of this.store) {
+      w.write(te.encode(this.formatRow(formatter, row)));
     }
   }
 
