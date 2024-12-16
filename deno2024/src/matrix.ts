@@ -6,12 +6,38 @@ import {
   assertLess,
 } from "@std/assert";
 import { fileLines } from "./lib.ts";
+import { Row } from "./day_07.ts";
+
+export const ConsoleForegroundBackgrounds: [string, string][] = [
+  ["white", "black"], // foreground, background
+  ["white", "red"],
+  ["black", "green"],
+  ["black", "yellow"],
+  ["white", "blue"],
+  ["black", "magenta"],
+  ["black", "cyan"],
+  ["black", "white"],
+];
+
+export const nColors = ConsoleForegroundBackgrounds.length;
+
+export function getFgBg(n: number): [string, string] {
+  return ConsoleForegroundBackgrounds[n % nColors];
+}
 
 export enum Direction {
   N = 0,
   E,
   S,
   W,
+}
+
+export function right(d: Direction): Direction {
+  return (d + 1) % 4;
+}
+
+export function left(d: Direction): Direction {
+  return (d + 3) % 4;
 }
 
 export const Directions: Direction[] = [
@@ -42,7 +68,10 @@ export const directionVectors: Record<Direction, XY> = {
   3: [-1, 0],
 };
 
-// directionVectors[Direction.N] = [0, 1];
+export type CellFormatter<T> = (cell: T) => string;
+
+// returns color number and string
+export type CellColoredFormatter<T> = (cell: T) => [number, string];
 
 export class Matrix<T> {
   private nrows = 0;
@@ -108,17 +137,68 @@ export class Matrix<T> {
   }
 
   *iterRows(): Generator<T[]> {
-    for (const row of this.store) yield row.slice(0);
+    for (const row of this.store) yield row;
   }
 
-  formatRow(formatter: (cell: T) => string, row: T[]): string {
+  formatRow(formatter: CellFormatter<T>, row: T[]): string {
     return row.map(formatter).join("");
   }
 
-  print(formatter: (cell: T) => string) {
+  print(formatter: CellFormatter<T>) {
     for (const row of this.store) {
       console.log(this.formatRow(formatter, row));
     }
+  }
+
+  // works, but not with Less R
+  consoleColorize(fmt: CellColoredFormatter<T>, row: T[]): [string, string[]] {
+    assertGreater(row.length, 0, "row must have items to format");
+    let currentColor = -1;
+    const message: string[] = [];
+    const colors: string[] = [];
+    for (const cell of row) {
+      const [color, txt] = fmt(cell);
+      if (color !== currentColor) {
+        message.push("%c");
+        currentColor = color;
+        const [fg, bg] = getFgBg(color);
+        colors.push(`color: ${fg}; background-color: ${bg};`);
+      }
+      message.push(txt);
+    }
+    message.push("%c");
+    colors.push(`color: black; background-color: white;`);
+    // return [message.join(""), colors];
+    // return ["message", ["test: red;"]];
+    return [message.join(""), colors];
+  }
+
+  printc(fmt: CellColoredFormatter<T>) {
+    for (const row of this.store) {
+      const [msg, colors] = this.consoleColorize(fmt, row);
+      console.log(msg, ...colors);
+      // console.debug({ msg, colors });
+      // console.log(msg, colors);
+      // console.log(this.formatRow(formatter, row));
+    }
+  }
+
+  async fprint(path: string, formatter: CellFormatter<T>) {
+    const te = new TextEncoder();
+    const f = await Deno.open(path, {
+      write: true,
+      truncate: true,
+      create: true,
+    });
+    const w = f.writable.getWriter();
+    for (const row of this.store) {
+      w.write(te.encode(this.formatRow(formatter, row)));
+    }
+  }
+
+  format(formatter: CellFormatter<T>): string {
+    const rows = this.store.map((row) => this.formatRow(formatter, row));
+    return rows.join("\n");
   }
 
   rows() {
@@ -154,10 +234,40 @@ export class Matrix<T> {
     }
   }
 
+  /**
+   * Iterate  ascending y, +x|-x alternating
+   *
+   * @generator: [cell, cellXY, predecessor XY|null]
+   */
+  *iterSnake(): Generator<[T, XY, XY | null]> {
+    const [nx, ny] = this.sizeXY();
+    let xDirection = 1;
+    for (let y = 0; y < ny; y++) {
+      const row = this.store[ny - 1 - y];
+      let pred: XY | null = null;
+      for (let x = 0; x < nx; x++) {
+        const actualX = xDirection > 0 ? x : nx - 1 - x;
+        const cell = row[actualX];
+        const xy: XY = [actualX, y];
+        yield [cell, xy, pred];
+        pred = xy;
+      }
+      xDirection *= -1;
+    }
+  }
+
   look(locA: XY, d: Direction): XY | null {
     const locB = xyAdd(locA, directionVectors[d]);
     if (this.validXY(locB)) return locB;
     return null;
+  }
+
+  lookL(locA: XY, d: Direction): XY | null {
+    return this.look(locA, left(d));
+  }
+
+  lookR(locA: XY, d: Direction): XY | null {
+    return this.look(locA, right(d));
   }
 
   static async read(path: string): Promise<Matrix<string>> {
