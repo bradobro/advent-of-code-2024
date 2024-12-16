@@ -81,7 +81,7 @@ export class Matrix<T> {
   // or screen coordinates, the same order we read or print lines:
   // _store[r][c], so _store[0,9] is the rightmost (last) item of 10 in
   // the first row read.
-  constructor(private store: T[][]) {
+  constructor(public store: T[][]) {
     this.calcDimensions();
   }
 
