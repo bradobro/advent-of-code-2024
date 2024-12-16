@@ -10,4 +10,4 @@ export { Day08 } from "./src/day_08.ts";
 export { Day09 } from "./src/day_09.ts";
 export { Day10 } from "./src/day_10.ts";
 export { Day11 } from "./src/day_11.ts";
-export { Day12 } from "./src/day_12.ts";
+export { Day12, PuzzleModel12 } from "./src/day_12.ts";
