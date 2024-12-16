@@ -1,4 +1,4 @@
-import { Day12, PuzzleModel12 } from "@scope/deno2024";
+import { Day12, PuzzleModel12 } from "deno2024";
 
 import { Handlers } from "$fresh/server.ts";
 

@@ -1,7 +1,7 @@
 {
-  "name": "@scope/deno2024",
-  "version": "2.7.0",
-  "exports": "./mod.ts",
+  // "name": "@scope/deno2024",
+  // "version": "2.7.0",
+  // "exports": "./mod.ts",
   "tasks": {
     "run": "deno run --allow-read --allow-write --allow-net aoc.ts 1",
     "runw": "deno run --allow-read --allow-write --allow-net --watch aoc.ts 1",
