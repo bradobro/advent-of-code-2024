@@ -11,10 +11,9 @@ import {
   XY,
   xyEqual,
 } from "./matrix.ts";
-import { earlyZipReadableStreams } from "@std/streams/early-zip-readable-streams";
 // https://adventofcode.com/2024/day/12
 
-export interface Region {
+export interface Region12 {
   crop: string;
   perim: number; // perimeter
   sides: number;
@@ -23,36 +22,36 @@ export interface Region {
   discounted: number; // answer for part 2
 }
 
-type RegionId = number;
+export type Region12Id = number;
 
-export interface RegionWithMeta extends Region {
-  id: RegionId;
+export interface Region12WithMeta extends Region12 {
+  id: Region12Id;
   start: XY;
   island: boolean; // true if surrounded by one region: presumed true until proven false
-  islandIn: RegionId;
+  islandIn: Region12Id;
 }
 
-export interface Loc {
+export interface Loc12 {
   crop: string; // letter
-  region: RegionId; // -1 means not assigned yet
+  region: Region12Id; // -1 means not assigned yet
   perim: number; // sides touching edge or other crop
 }
 
 export const NO_REGION = -1;
 
-function parseLoc(crop: string): Loc {
+function parseLoc(crop: string): Loc12 {
   return { crop, region: NO_REGION, perim: 0 };
 }
 
-export type FieldMap = Matrix<Loc>;
+export type FieldMap12 = Matrix<Loc12>;
 
-export class PuzzleField {
+export class PuzzleModel12 {
   readonly RegionNeighbors: Direction[] = [Direction.S, Direction.W];
-  public regions: RegionWithMeta[] = [];
+  public regions: Region12WithMeta[] = [];
   readonly totalCost: number;
   readonly totalDiscountedCost: number;
 
-  constructor(public grid: FieldMap) {
+  constructor(public grid: FieldMap12) {
     this.calcPerims();
     this.collectRegions();
     this.countSidesByTrapsing();
@@ -81,7 +80,7 @@ export class PuzzleField {
     }
   }
 
-  externalSideCount(reg: RegionWithMeta): number {
+  externalSideCount(reg: Region12WithMeta): number {
     const xy0 = reg.start;
     const loc0 = this.grid.getXY(xy0);
     // console.debug(`starting from ${xy0}`, reg, loc0);
@@ -192,23 +191,23 @@ export class PuzzleField {
     }
   }
 
-  perimCount(loca: Loc, xya: XY): number {
+  perimCount(loca: Loc12, xya: XY): number {
     return Directions.reduce((acc, d) => {
       const xyb = this.grid.look(xya, d);
       return acc + ((xyb && this.grid.getXY(xyb).crop === loca.crop) ? 0 : 1);
     }, 0);
   }
 
-  nextLocWithoutRegion(): [Loc, XY] | null {
+  nextLocWithoutRegion(): [Loc12, XY] | null {
     for (const [loc, xy] of this.grid.iterCellsC()) {
       if (loc.region === NO_REGION) return [loc, xy];
     }
     return null;
   }
 
-  newRegion(loc: Loc, xy: XY): RegionWithMeta {
+  newRegion(loc: Loc12, xy: XY): Region12WithMeta {
     // create region and do initial bookeeping
-    const r: RegionWithMeta = {
+    const r: Region12WithMeta = {
       id: this.regions.length,
       start: xy,
       island: true,
@@ -224,7 +223,7 @@ export class PuzzleField {
     return r;
   }
 
-  *iterRegionCells(id: RegionId, xy0: XY): Generator<[Loc, XY]> {
+  *iterRegionCells(id: Region12Id, xy0: XY): Generator<[Loc12, XY]> {
     const searchThese: XY[] = [xy0];
     while (true) {
       // get the next loc  if there is one
@@ -251,7 +250,7 @@ export class PuzzleField {
     }
   }
 
-  *iterRegions(): Generator<RegionWithMeta> {
+  *iterRegions(): Generator<Region12WithMeta> {
     while (true) {
       const nxt = this.nextLocWithoutRegion();
       if (nxt === null) break; // no more non-regioned cells
@@ -276,14 +275,14 @@ export class PuzzleField {
 
   // Loading
 
-  static parse(src: string): PuzzleField {
+  static parse(src: string): PuzzleModel12 {
     const grid = Matrix.parse(src.trim()).mapCells(parseLoc);
-    return new PuzzleField(grid);
+    return new PuzzleModel12(grid);
   }
 
-  static async read(path: string): Promise<PuzzleField> {
+  static async read(path: string): Promise<PuzzleModel12> {
     const src = await Deno.readTextFile(path);
-    return PuzzleField.parse(src);
+    return PuzzleModel12.parse(src);
   }
 }
 
@@ -293,7 +292,7 @@ export class Day12 extends Puzzle<Results> {
   }
 
   async load() {
-    return await PuzzleField.read(this.dataFilePath);
+    return await PuzzleModel12.read(this.dataFilePath);
   }
 
   async solve1() {
@@ -342,16 +341,18 @@ export class Day12 extends Puzzle<Results> {
 
     // color formatters
 
-    const _cRegions: CellColoredFormatter<Loc> = (c: Loc) => [c.region, c.crop];
-    const _cRegionIds: CellColoredFormatter<Loc> = (
-      c: Loc,
+    const _cRegions: CellColoredFormatter<Loc12> = (
+      c: Loc12,
+    ) => [c.region, c.crop];
+    const _cRegionIds: CellColoredFormatter<Loc12> = (
+      c: Loc12,
     ) => [c.region, data.regions[c.region].id.toString().padEnd(4)];
 
-    const _cRegionSides: CellColoredFormatter<Loc> = (
-      c: Loc,
+    const _cRegionSides: CellColoredFormatter<Loc12> = (
+      c: Loc12,
     ) => [c.region, data.regions[c.region].sides.toString().padEnd(4)];
-    const _cIslands: CellColoredFormatter<Loc> = (
-      c: Loc,
+    const _cIslands: CellColoredFormatter<Loc12> = (
+      c: Loc12,
     ) => {
       const region = data.regions[c.region];
       if (region.island) {
