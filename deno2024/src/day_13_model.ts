@@ -267,11 +267,7 @@ export function findStrideAndStart(g: Game, n = 50): [number, number] {
         lowB = iL;
         break;
       }
-      // console.debug("found lowA");
-      lowA = iL;
-      [iL, vL, iM, vM] = [-1, -1, -1, -1];
-      // assert(false, "found a solution at first low");
-      continue;
+      return [iL, 0];
     }
     if (vL < 0) { // initialize item L
       // console.debug("filled vL");
