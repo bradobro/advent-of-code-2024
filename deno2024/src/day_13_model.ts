@@ -1,10 +1,14 @@
 // trying to avoid classes in the main model today,
 // though maybe using smaller ones to namespace algorithms.
 
+import { assertEquals } from "@std/assert/equals";
 import { multinodes } from "./day_08.ts";
 import { parse } from "./day_11.ts";
 import { day13data } from "./day_13_data.ts";
+import { min } from "./lib.ts";
 import { XY } from "./matrix.ts";
+
+const nOfficialGames = day13data.length;
 
 export interface Game {
   buttona: XY;
@@ -27,14 +31,27 @@ export interface ClawMachine {
   solutions: Solution[];
 }
 
-export function getClawMachine(costa: number, costb: number) {
-  const games = day13data;
+export function getClawMachine(
+  costa: number,
+  costb: number,
+  gamea = 0,
+  gamez = nOfficialGames + 1,
+) {
+  const games = day13data.slice(gamea, gamez);
   const solutions = games.map((_) => ({ buttona: 0, buttonb: 0, cost: 0 }));
   return { costa, costb, games, solutions };
 }
 
 export function puzzle1Machine() {
   return getClawMachine(3, 1);
+}
+
+const supersizeFactor = 10000000000000;
+
+export function supersizeGame(g: Game) {
+  const [px, py] = g.prize;
+  const newPos: XY = [px + supersizeFactor, py + supersizeFactor];
+  g.prize = newPos;
 }
 
 export class Optimizer1 {
@@ -102,14 +119,6 @@ export class Optimizer1 {
   }
 }
 
-export function min(...numbs: number[]) {
-  return numbs.reduce((acc, n) => n < acc ? n : acc);
-}
-
-// export function min(...numbs: number[]){
-//   return numbs.reduce((acc, n) => n < acc ? n : acc)
-// }
-
 export function maxA(g: Game) {
   const [ax, ay] = g.buttona;
   const [px, py] = g.prize;
@@ -124,7 +133,7 @@ export function solves(g: Game, buttona: number, buttonb: number): boolean {
     (buttona * ay + buttonb * by === py);
 }
 
-export function findb(g: game, buttona: number): number {
+export function findb(g: Game, buttona: number): number {
   const [ax, ay] = g.buttona;
   const [bx, by] = g.buttonb;
   const [px, py] = g.prize;
@@ -150,12 +159,63 @@ export function optimize2(g: Game, costa: number, costb: number): Solution {
   return { buttona: abest, buttonb: bbest, cost: costbest };
 }
 
-export function solveMachine(m: ClawMachine, opt: Optimizer = optimize2) {
+// if verify=true, audits solution silently
+function formatProof(g: Game, s: Solution, verify = false): string {
+  const result: string[] = ["proof: "];
+  const [ax, ay] = g.buttona;
+  const [bx, by] = g.buttonb;
+  const [px, py] = g.prize;
+  const { buttona: na, buttonb: nb, cost } = s;
+  const xcalc = na * ax + nb * bx;
+  const ycalc = na * ay + nb * by;
+  if (verify) {
+    assertEquals(xcalc, px, "our x result is off");
+    assertEquals(ycalc, py, "our y result is off");
+  } else {
+    result.push(
+      `a*ax+b*bx=${xcalc}===px=${px} ${JSON.stringify([na, ax, nb, bx, px])}; `,
+    );
+    result.push(
+      `a*ay+b*by=${ycalc}===py=${py}  ${
+        JSON.stringify([na, ay, nb, by, py])
+      }; `,
+    );
+    result.push(`cost=${cost}.`);
+  }
+  return result.join("");
+}
+
+export function solveMachine(
+  m: ClawMachine,
+  opt: Optimizer = optimize2,
+  verify = true,
+) {
+  let nWinnable = 0;
   m.solutions = m.games.map((g, i) => {
     // console.debug("starting game", i);
     const solution = opt(g, m.costa, m.costb);
-    // if (solution.cost > 0) console.debug("A winner", solution);
+    if (solution.cost > 0) {
+      nWinnable++;
+      if (verify) formatProof(g, solution, verify);
+      else console.debug("A winner", i, formatProof(g, solution));
+    }
     return solution;
   });
-  return m.solutions.reduce((acc, s) => acc + s.cost, 0);
+  const tCost = m.solutions.reduce((acc, s) => acc + s.cost, 0);
+  return { nWinnable, tCost };
+}
+
+// tries to look at the progression of errors
+export function optimize3(g: Game, costa: number, costb: number): Solution {
+  let [abest, bbest, costbest] = [0, 0, 0];
+  console.debug("game", g);
+  for (let a = maxA(g); a >= 0; a--) {
+    const b = findb(g, a);
+    if (b < 0) continue;
+    const cost = a * costa + b * costb;
+    if (costbest < 1 || cost < costbest) {
+      [abest, bbest, costbest] = [a, b, cost];
+    }
+  }
+  return { buttona: abest, buttonb: bbest, cost: costbest };
 }

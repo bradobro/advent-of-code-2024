@@ -17,15 +17,19 @@ export class Day13 extends Puzzle<Results> {
     const clawgame = await this.load();
     // const stats = Optimizer1.machineStats(data);
     // return stats;
-    const totalCost1 = solveMachine(clawgame);
-    const winnable1 = clawgame.solutions.reduce(
-      (acc, s) => acc + s.cost > 0 ? 1 : 0,
-      0,
-    );
+    const { tCost, nWinnable } = solveMachine(clawgame);
+    // const winnable1 = clawgame.solutions.reduce(
+    //   (acc, s) => acc + (s.cost > 0 ? 1 : 0),
+    //   0,
+    // );
     assertEquals(clawgame.solutions.length, clawgame.games.length);
     // could audit solutions 35574
-    assertEquals(totalCost1, 35574);
-    return { totalCost1, total1: clawgame.solutions.length, winnable1 };
+    assertEquals(tCost, 35574);
+    return {
+      nGames: clawgame.solutions.length,
+      winnable1: nWinnable,
+      totalCost1: tCost,
+    };
   }
 
   async solve2() {
