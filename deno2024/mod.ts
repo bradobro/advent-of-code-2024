@@ -16,3 +16,4 @@ export {
   type Loc12,
   PuzzleModel12,
 } from "./src/day_12.ts";
+export { Day13 } from "./src/day_13.ts";
