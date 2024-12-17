@@ -132,7 +132,7 @@ describe("basic algorithms 1", () => {
   });
   it("finds the regions in example 3", () => {
     const pf3 = PuzzleModel12.parse(src3);
-    for (const r of pf3.iterRegions()) {
+    for (const r of pf3.constructRegions()) {
       console.log(r);
     }
     expectRegionsMatch(pf3.regions, regions3);

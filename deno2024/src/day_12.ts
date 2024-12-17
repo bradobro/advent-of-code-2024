@@ -38,12 +38,19 @@ export interface Loc12 {
   region: Region12Id; // -1 means not assigned yet
   perim: number; // sides touching edge or other crop
   xy: XY;
+  borders: Set<Direction>; // directions with a different crop
 }
 
 export const NO_REGION = -1;
 
 function parseLoc(crop: string, x: number, y: number): Loc12 {
-  return { crop, region: NO_REGION, perim: 0, xy: [x, y] };
+  return {
+    crop,
+    region: NO_REGION,
+    perim: 0,
+    xy: [x, y],
+    borders: new Set<Direction>(),
+  };
 }
 
 export type FieldMap12 = Matrix<Loc12>;
@@ -55,9 +62,9 @@ export class PuzzleModel12 {
   readonly totalDiscountedCost: number;
 
   constructor(public grid: FieldMap12) {
-    this.calcPerims();
+    // this.calcPerims();
     this.collectRegions();
-    this.trapseCountingSides();
+    this.extendSides();
     [this.totalCost, this.totalDiscountedCost] = this.calcCosts();
   }
 
@@ -85,9 +92,27 @@ export class PuzzleModel12 {
     return [tPerims, tSides];
   }
 
-  countSidesExtendingPerims() {}
+  extendSides() {
+    for (const r of this.regions) {
+      // gather adjoining regions
+      for (const c of r.cells) {
+        for (const d of Directions) {
+          const xyb = this.grid.look(c.xy, d);
+          if (!xyb) continue;
+          const locb = this.grid.getXY(xyb);
+          if (locb.region !== r.id) r.adjoining.add(locb.region);
+          if (locb.crop != c.crop) c.borders.add(d);
+        }
+      }
+      // console.debug(r.id, "adjoins", r.adjoining);
+      r.sides = this._regionSides(r);
+    }
+  }
 
-  regionSides() {
+  _regionSides(r: Region12WithMeta) {
+    // console.debug(Array.from(r.cells).flatMap((c) => Array.from(c.borders)));
+    console.debug(Array.from(r.cells).map((c) => c.borders));
+    return 2;
   }
 
   trapseCountingSides() {
@@ -203,19 +228,6 @@ export class PuzzleModel12 {
     return corners;
   }
 
-  calcPerims() {
-    for (const [loc, xy] of this.grid.iterCellsC()) {
-      loc.perim = this.perimCount(loc, xy);
-    }
-  }
-
-  perimCount(loca: Loc12, xya: XY): number {
-    return Directions.reduce((acc, d) => {
-      const xyb = this.grid.look(xya, d);
-      return acc + ((xyb && this.grid.getXY(xyb).crop === loca.crop) ? 0 : 1);
-    }, 0);
-  }
-
   nextLocWithoutRegion(): [Loc12, XY] | null {
     for (const [loc, xy] of this.grid.iterCellsC()) {
       if (loc.region === NO_REGION) return [loc, xy];
@@ -243,7 +255,7 @@ export class PuzzleModel12 {
     return r;
   }
 
-  *iterRegionCells(id: Region12Id, xy0: XY): Generator<[Loc12, XY]> {
+  *constructRegion(id: Region12Id, xy0: XY): Generator<[Loc12, XY]> {
     const searchThese: XY[] = [xy0];
     while (true) {
       // get the next loc  if there is one
@@ -270,7 +282,18 @@ export class PuzzleModel12 {
     }
   }
 
-  *iterRegions(): Generator<Region12WithMeta> {
+  *constructRegions(): Generator<Region12WithMeta> {
+    // calculate number of sides on each cell bordered by a different crop
+    for (const [loc, xy] of this.grid.iterCellsC()) {
+      // loc.perim = this.perimCount(loc, xy);
+      loc.perim = Directions.reduce((acc, d) => {
+        const xyb = this.grid.look(xy, d);
+        return acc + ((xyb && this.grid.getXY(xyb).crop === loc.crop) ? 0 : 1);
+      }, 0);
+    }
+
+    // loop through cells that aren't already part of a region and extend
+    // through their neighbors
     while (true) {
       const nxt = this.nextLocWithoutRegion();
       if (nxt === null) break; // no more non-regioned cells
@@ -280,7 +303,7 @@ export class PuzzleModel12 {
       const r = this.newRegion(loc0, xy0);
 
       // add cells to it (iterator includes origin cell)
-      for (const [loca, _] of this.iterRegionCells(r.id, xy0)) {
+      for (const [loca, _] of this.constructRegion(r.id, xy0)) {
         // loca.region = r.id; // set in iterator
         r.perim += loca.perim;
         r.area += 1;
@@ -292,7 +315,7 @@ export class PuzzleModel12 {
 
   collectRegions() {
     // search out the regions
-    this.iterRegions().forEach((r, i) => {
+    this.constructRegions().forEach((r, i) => {
       assertEquals(r.id, i);
       assertEquals(r.area, r.cells.size);
     });
@@ -322,7 +345,8 @@ export class Day12 extends Puzzle<Results> {
 
   async solve1() {
     const data = await this.load();
-    // return data.grid.format((c: Loc) => c.crop);
+    // return data.grid.format((c: Loc) => c.crop);1473
+    // 620
     return { cost1: data.totalCost };
   }
 
@@ -378,7 +402,7 @@ export class Day12 extends Puzzle<Results> {
   }
 
   override async solve(): Promise<Results> {
-    const which = 2;
+    const which = 3;
     const results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
     const results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
     const results = { ...results1, ...results2 };
