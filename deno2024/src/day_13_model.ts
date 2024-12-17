@@ -1,6 +1,7 @@
 // trying to avoid classes in the main model today,
 // though maybe using smaller ones to namespace algorithms.
 
+import { multinodes } from "./day_08.ts";
 import { parse } from "./day_11.ts";
 import { day13data } from "./day_13_data.ts";
 import { XY } from "./matrix.ts";
@@ -99,4 +100,55 @@ export class Optimizer1 {
     }
     return { abargainx, abargainy, axfit, ayfit, afit, bxfit, byfit, bfit };
   }
+}
+
+export function min(...numbs: number[]) {
+  return numbs.reduce((acc, n) => n < acc ? n : acc);
+}
+
+// export function min(...numbs: number[]){
+//   return numbs.reduce((acc, n) => n < acc ? n : acc)
+// }
+
+export function maxA(g: Game) {
+  const [ax, ay] = g.buttona;
+  const [px, py] = g.prize;
+  return min(Math.trunc(px / ax), Math.trunc(py / ay));
+}
+
+export function solves(g: Game, buttona: number, buttonb: number): boolean {
+  const [ax, ay] = g.buttona;
+  const [bx, by] = g.buttonb;
+  const [px, py] = g.prize;
+  return (buttona * ax + buttonb * bx === px) &&
+    (buttona * ay + buttonb * by === py);
+}
+
+export function findb(g: game, buttona: number): number {
+  const [ax, ay] = g.buttona;
+  const [bx, by] = g.buttonb;
+  const [px, py] = g.prize;
+  const restx = px - (ax * buttona);
+  if (restx < 1 || restx % bx !== 0) return -1; // can't solve
+  const b = restx / bx;
+  if (py === buttona * ay + b * by) return b;
+  return -1;
+}
+
+export function optimize2(g: Game, costa: number, costb: number): Solution {
+  let [abest, bbest, costbest] = [0, 0, 0];
+  for (let a = maxA(g); a >= 0; a--) {
+    const b = findb(g, a);
+    if (b < 0) continue;
+    const cost = a * costa + b * costb;
+    if (costbest < 1 || cost < costbest) {
+      [abest, bbest, costbest] = [a, b, cost];
+    }
+  }
+  return { buttona: abest, buttonb: bbest, cost: costbest };
+}
+
+export function solveMachine(m: ClawMachine) {
+  m.solutions = m.games.map((g) => optimize2(g, m.costa, m.costb));
+  return m.solutions.reduce((acc, s) => acc + s.cost, 0);
 }
