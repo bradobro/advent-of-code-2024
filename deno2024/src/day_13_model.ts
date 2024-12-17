@@ -135,6 +135,8 @@ export function findb(g: game, buttona: number): number {
   return -1;
 }
 
+type Optimizer = (g: Game, costa: number, costb: number) => Solution;
+
 export function optimize2(g: Game, costa: number, costb: number): Solution {
   let [abest, bbest, costbest] = [0, 0, 0];
   for (let a = maxA(g); a >= 0; a--) {
@@ -149,6 +151,11 @@ export function optimize2(g: Game, costa: number, costb: number): Solution {
 }
 
 export function solveMachine(m: ClawMachine) {
-  m.solutions = m.games.map((g) => optimize2(g, m.costa, m.costb));
+  m.solutions = m.games.map((g, i) => {
+    console.debug("starting game", i);
+    const solution = optimize2(g, m.costa, m.costb);
+    if (solution.cost > 0) console.debug("A winner", solution);
+    return solution;
+  });
   return m.solutions.reduce((acc, s) => acc + s.cost, 0);
 }
