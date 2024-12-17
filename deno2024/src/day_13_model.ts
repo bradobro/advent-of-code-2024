@@ -9,6 +9,7 @@ import { min } from "./lib.ts";
 import { XY } from "./matrix.ts";
 import { assertGreater } from "@std/assert/greater";
 import { assertGreaterOrEqual } from "@std/assert/greater-or-equal";
+import { assert } from "@std/assert/assert";
 
 const nOfficialGames = day13data.length;
 
@@ -257,31 +258,48 @@ export function findStrideAndStart(g: Game, n = 50): [number, number] {
   let [lowA, lowB] = [-1, -1];
   let [vL, vM, vN] = [-1, -1, -1]; // val i-2, val i-1, val i
   let [iL, iM, iN] = [-1, -1, -1]; // i-2, i-1, i
-  for (let a = 0; a < limit; a++) {
-    const [b, errx, _] = findBOrErrors(g, a);
+  for (let iN = 0; iN < limit; iN++) { // iN ia also the proposed a value
+    const [_b, vN, _erry] = findBOrErrors(g, iN);
     // if (b >= 0) console.debug("found an answer while searching for strides");
-    if (vL < 0) {
-      [vL, iL] = [errx, a];
-      continue;
-    } // initialize item L
-    if (vM < 0) {
-      [vM, iM] = [errx, a];
-      continue;
-    } // initialize item M
-    if (vL < vM && vL < vN) { // see if we found a low
-      if (lowA >= 0) { // found second low, so stop
-        console.debug("found lowB");
+    if (vN === 0) { //found an answer
+      if (lowA >= 0) { // found second low, so fill in and exitstop
+        // console.debug("found lowB");
         lowB = iL;
         break;
       }
-      console.debug("found lowA");
+      // console.debug("found lowA");
+      lowA = iL;
+      [iL, vL, iM, vM] = [-1, -1, -1, -1];
+      // assert(false, "found a solution at first low");
+      continue;
+    }
+    if (vL < 0) { // initialize item L
+      // console.debug("filled vL");
+      [vL, iL] = [vN, iN];
+      continue;
+    }
+    if (vM < 0) { // initialize item M
+      // console.debug("filled vM");
+      [vM, iM] = [vN, iN];
+      continue;
+    }
+    if (vL < vM && vL < vN) { // see if we found a low
+      if (lowA >= 0) { // found second low, so fill in and exitstop
+        // console.debug("found lowB");
+        lowB = iL;
+        break;
+      }
+      // console.debug("found lowA");
       lowA = iL;
       // BUG? shouldn't need to reset vL and vM if this is a true low I thinnk
+      [iL, vL, iM, vM] = [-1, -1, -1, -1];
     }
     [vL, vM] = [vM, vN]; // update the prevs
     [iL, iM] = [iM, iN];
   }
+  assertGreater(lowB, 0, "didn't find a low b for game");
   const stride = lowB - lowA;
+  assertGreater(lowB, lowA, `lowA = ${lowA} should be < lowB = ${lowB}`);
   if (stride === lowA) return [stride, 0]; // start ot origin
   return [stride, lowA];
 }
@@ -294,7 +312,7 @@ export function optimize3(g: Game, costa: number, costb: number): Solution {
   const limit = maxA(g) + 1;
   // for (let a = maxA(g); a >= 0; a--) {
   for (let a = 0; a < limit; a++) {
-    const [stride, start] = findStrideAndStart(g, 1000);
+    const [stride, start] = findStrideAndStart(g, 100000000000);
     const [b, _errx, _erry] = findBOrErrors(g, a);
     // IDEA: estimate the stride of x, within the stride, errx, erry seem parallel lines
     const b1 = findb(g, a);
