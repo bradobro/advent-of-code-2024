@@ -24,6 +24,7 @@ export class Day13 extends Puzzle<Results> {
     );
     assertEquals(clawgame.solutions.length, clawgame.games.length);
     // could audit solutions 35574
+    assertEquals(totalCost1, 35574);
     return { totalCost1, total1: clawgame.solutions.length, winnable1 };
   }
 
@@ -47,7 +48,7 @@ export class Day13 extends Puzzle<Results> {
   }
 
   override async solve(): Promise<Results> {
-    const which = 2;
+    const which = 1;
     const results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
     const results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
     console.debug({ results1, results2 });

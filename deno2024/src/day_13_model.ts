@@ -150,11 +150,11 @@ export function optimize2(g: Game, costa: number, costb: number): Solution {
   return { buttona: abest, buttonb: bbest, cost: costbest };
 }
 
-export function solveMachine(m: ClawMachine) {
+export function solveMachine(m: ClawMachine, opt: Optimizer = optimize2) {
   m.solutions = m.games.map((g, i) => {
-    console.debug("starting game", i);
-    const solution = optimize2(g, m.costa, m.costb);
-    if (solution.cost > 0) console.debug("A winner", solution);
+    // console.debug("starting game", i);
+    const solution = opt(g, m.costa, m.costb);
+    // if (solution.cost > 0) console.debug("A winner", solution);
     return solution;
   });
   return m.solutions.reduce((acc, s) => acc + s.cost, 0);
