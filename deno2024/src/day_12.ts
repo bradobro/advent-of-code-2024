@@ -9,8 +9,10 @@ import {
   nColors,
   right,
   XY,
+  xyAdd,
   xyEqual,
 } from "./matrix.ts";
+import { ConsoleForegroundBackgrounds } from "./matrix.ts";
 // https://adventofcode.com/2024/day/12
 
 export interface Region12 {
@@ -98,21 +100,77 @@ export class PuzzleModel12 {
       for (const c of r.cells) {
         for (const d of Directions) {
           const xyb = this.grid.look(c.xy, d);
-          if (!xyb) continue;
+          if (!xyb) { // off map, so it's  border
+            c.borders.add(d);
+            continue;
+          }
           const locb = this.grid.getXY(xyb);
           if (locb.region !== r.id) r.adjoining.add(locb.region);
           if (locb.crop != c.crop) c.borders.add(d);
         }
+        assertEquals(c.perim, c.borders.size);
       }
+
       // console.debug(r.id, "adjoins", r.adjoining);
       r.sides = this._regionSides(r);
     }
   }
 
   _regionSides(r: Region12WithMeta) {
-    // console.debug(Array.from(r.cells).flatMap((c) => Array.from(c.borders)));
-    console.debug(Array.from(r.cells).map((c) => c.borders));
-    return 2;
+    const grid = this.grid;
+    // set of {xy: XY, d: Direction} of all sides of all the cells
+    // in the region that border a different crop
+    let borders = Array.from(r.cells).flatMap((c) =>
+      Array.from(c.borders).flatMap((d) => {
+        const [x, y] = c.xy;
+        return { x, y, d };
+      })
+    );
+
+    function extendEdge(x1: number, y1: number, d: Direction, [dx, dy]: XY) {
+      // console.debug("extending edge of ", { x1, y1, dx, dy, d });
+      let [x, y] = [x1 + dx, y1 + dy];
+      let len = 0;
+      while (grid.validXY([x, y])) {
+        const pos = borders.findIndex((el) =>
+          el.x === x && el.y === y && el.d === d
+        );
+        if (pos >= 0) {
+          len++;
+          borders = borders.slice(0, pos).concat(borders.slice(pos + 1));
+          x += dx;
+          y += dy;
+        } else {
+          break;
+        }
+      }
+      return len;
+    }
+
+    let nSides = 0;
+    while (true) {
+      let len = 1;
+      const border = borders.shift();
+      if (!border) break;
+      const { x, y, d } = border;
+      // console.debug({ x, y, d, len });
+      if (d % 2 === 0) { // n or s
+        len += extendEdge(x, y, d, [-1, 0]) + extendEdge(x, y, d, [1, 0]);
+        nSides++;
+        // console.debug("Horizontal edge on the N or S side", { x, y, d, len });
+      } else {
+        nSides++;
+        len += extendEdge(x, y, d, [0, -1]) + extendEdge(x, y, d, [0, 1]);
+        // console.debug("Vertical edge on the E or W side", { x, y, d, len });
+      }
+
+      // if ([Direction.E, Direction.W].includes(d)) {
+      //   len += extendEdge(xy, d, [-1, 0]) + extendEdge(xy, d, [1, 0]);
+      // } else {
+      //   len += extendEdge(xy, d, [0, -1]) + extendEdge(xy, d, [0, 1]);
+      // }
+    }
+    return nSides;
   }
 
   trapseCountingSides() {
@@ -354,7 +412,7 @@ export class Day12 extends Puzzle<Results> {
     // deno-lint-ignore no-explicit-any
     const mistakes: Record<number, any> = {
       878118: { msg: "too low" },
-      918740: { msg: "too high", tPerim: 16568, tSides: 10688 },
+      918740: { msg: "too high", tPerim: 16568, tSides: 10688 }, // now 10556
     };
     const data = await this.load();
     const { totalDiscountedCost: discounted2 } = data;
