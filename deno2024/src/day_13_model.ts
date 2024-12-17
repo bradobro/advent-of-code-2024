@@ -7,6 +7,8 @@ import { parse } from "./day_11.ts";
 import { day13data } from "./day_13_data.ts";
 import { min } from "./lib.ts";
 import { XY } from "./matrix.ts";
+import { assertGreater } from "@std/assert/greater";
+import { assertGreaterOrEqual } from "@std/assert/greater-or-equal";
 
 const nOfficialGames = day13data.length;
 
@@ -160,7 +162,7 @@ export function optimize2(g: Game, costa: number, costb: number): Solution {
 }
 
 // if verify=true, audits solution silently
-function formatProof(g: Game, s: Solution, verify = false): string {
+export function formatProof(g: Game, s: Solution, verify = false): string {
   const result: string[] = ["proof: "];
   const [ax, ay] = g.buttona;
   const [bx, by] = g.buttonb;
@@ -192,12 +194,14 @@ export function solveMachine(
 ) {
   let nWinnable = 0;
   m.solutions = m.games.map((g, i) => {
-    // console.debug("starting game", i);
+    console.debug("starting game", i);
     const solution = opt(g, m.costa, m.costb);
     if (solution.cost > 0) {
       nWinnable++;
       if (verify) formatProof(g, solution, verify);
       else console.debug("A winner", i, formatProof(g, solution));
+    } else if (!verify) {
+      verify || console.debug("unwinnable:", i);
     }
     return solution;
   });
@@ -205,15 +209,101 @@ export function solveMachine(
   return { nWinnable, tCost };
 }
 
+/**
+ * @param g
+ * @param buttona
+ * @ returns [
+ *   b, // valid buttonb value or -1 for none found
+ *   errx, // remainder of b for x
+ *   erry, // if errx===0, remainder of b for y
+ * ]
+ */
+export function findBOrErrors(
+  g: Game,
+  buttona: number,
+): [number, number, number] {
+  const [ax, ay] = g.buttona;
+  const [bx, by] = g.buttonb;
+  const [px, py] = g.prize;
+  const restx = px - (ax * buttona);
+  assertGreaterOrEqual(restx, 0);
+  if (restx > 0) { // if we need some button b, let's see if it works out
+    const errx = restx % bx;
+    if (errx > 0) return [-1, errx, 0];
+  }
+
+  // okay, we know a and b can satisfy prizex, but b might be 0
+  const b = restx < 1 ? 0 : restx / bx;
+  const calcy = buttona * ay + b * by;
+  const erry = calcy - py;
+  if (erry === 0) return [b, 0, 0];
+  return [-1, 0, erry];
+}
+
+/**
+ * @param g game
+ * @param n number of a's to sample
+ * @returns [stride, lowpoint]
+ *
+ * BUG: it might be a bit more complicated than this.
+ * FACT: in game 0, tracking ErrX is all that matters
+ * FACT: ErrX has to be 0 before we can win
+ * BUT: ErrX might not equal 0 at the lowpoint if it passes below 0
+ * BUT: it's a modulo, so it can never be negative
+ * HYPOTHESIS: a lowpoint is the lowest ErrX after which the next two are higher
+ */
+export function findStrideAndStart(g: Game, n = 50): [number, number] {
+  const limit = min(n, maxA(g) + 1);
+  let [lowA, lowB] = [-1, -1];
+  let [vL, vM, vN] = [-1, -1, -1]; // val i-2, val i-1, val i
+  let [iL, iM, iN] = [-1, -1, -1]; // i-2, i-1, i
+  for (let a = 0; a < limit; a++) {
+    const [b, errx, _] = findBOrErrors(g, a);
+    // if (b >= 0) console.debug("found an answer while searching for strides");
+    if (vL < 0) {
+      [vL, iL] = [errx, a];
+      continue;
+    } // initialize item L
+    if (vM < 0) {
+      [vM, iM] = [errx, a];
+      continue;
+    } // initialize item M
+    if (vL < vM && vL < vN) { // see if we found a low
+      if (lowA >= 0) { // found second low, so stop
+        console.debug("found lowB");
+        lowB = iL;
+        break;
+      }
+      console.debug("found lowA");
+      lowA = iL;
+      // BUG? shouldn't need to reset vL and vM if this is a true low I thinnk
+    }
+    [vL, vM] = [vM, vN]; // update the prevs
+    [iL, iM] = [iM, iN];
+  }
+  const stride = lowB - lowA;
+  if (stride === lowA) return [stride, 0]; // start ot origin
+  return [stride, lowA];
+}
+
 // tries to look at the progression of errors
 export function optimize3(g: Game, costa: number, costb: number): Solution {
   let [abest, bbest, costbest] = [0, 0, 0];
-  console.debug("game", g);
-  for (let a = maxA(g); a >= 0; a--) {
-    const b = findb(g, a);
-    if (b < 0) continue;
+  // console.debug("game", g);
+  // console.debug("b,errx,erry");
+  const limit = maxA(g) + 1;
+  // for (let a = maxA(g); a >= 0; a--) {
+  for (let a = 0; a < limit; a++) {
+    const [stride, start] = findStrideAndStart(g, 1000);
+    const [b, _errx, _erry] = findBOrErrors(g, a);
+    // IDEA: estimate the stride of x, within the stride, errx, erry seem parallel lines
+    const b1 = findb(g, a);
+    assertEquals(b1, b, "expecting b's to match");
+    // console.debug([a, b, errx, erry].map((n) => n.toString()).join(","));
+    if (b < 0) continue; // not an answer yet
     const cost = a * costa + b * costb;
     if (costbest < 1 || cost < costbest) {
+      console.debug("  improving solution", { stride, start, a, b, cost });
       [abest, bbest, costbest] = [a, b, cost];
     }
   }
