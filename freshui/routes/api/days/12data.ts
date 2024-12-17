@@ -22,7 +22,9 @@ async function ensureState(): Promise<Day12State> {
 export const handler: Handlers = {
   async GET(_req, _ctx) {
     const { model } = await ensureState();
-    return new Response(JSON.stringify(model), { status: 200 });
+    const headers = new Headers();
+    headers.set("content-type", "application/json");
+    return new Response(JSON.stringify(model), { status: 200, headers });
   },
   async POST(req, _ctx) {
     const form = await req.formData();

@@ -9,8 +9,10 @@ import {
   nColors,
   right,
   XY,
+  xyAdd,
   xyEqual,
 } from "./matrix.ts";
+import { ConsoleForegroundBackgrounds } from "./matrix.ts";
 // https://adventofcode.com/2024/day/12
 
 export interface Region12 {
@@ -29,18 +31,28 @@ export interface Region12WithMeta extends Region12 {
   start: XY;
   island: boolean; // true if surrounded by one region: presumed true until proven false
   islandIn: Region12Id;
+  cells: Set<Loc12>;
+  adjoining: Set<Region12Id>;
 }
 
 export interface Loc12 {
   crop: string; // letter
   region: Region12Id; // -1 means not assigned yet
   perim: number; // sides touching edge or other crop
+  xy: XY;
+  borders: Set<Direction>; // directions with a different crop
 }
 
 export const NO_REGION = -1;
 
-function parseLoc(crop: string): Loc12 {
-  return { crop, region: NO_REGION, perim: 0 };
+function parseLoc(crop: string, x: number, y: number): Loc12 {
+  return {
+    crop,
+    region: NO_REGION,
+    perim: 0,
+    xy: [x, y],
+    borders: new Set<Direction>(),
+  };
 }
 
 export type FieldMap12 = Matrix<Loc12>;
@@ -52,9 +64,9 @@ export class PuzzleModel12 {
   readonly totalDiscountedCost: number;
 
   constructor(public grid: FieldMap12) {
-    this.calcPerims();
+    // this.calcPerims();
     this.collectRegions();
-    this.countSidesByTrapsing();
+    this.extendSides();
     [this.totalCost, this.totalDiscountedCost] = this.calcCosts();
   }
 
@@ -72,15 +84,104 @@ export class PuzzleModel12 {
     return [cost, discounted];
   }
 
-  private countSidesByTrapsing() {
-    for (const r of this.regions) r.sides = this.externalSideCount(r);
+  totalPerimsAndSides(): [number, number] {
+    let tPerims = 0;
+    let tSides = 0;
+    for (const r of this.regions) {
+      tPerims += r.perim;
+      tSides += r.sides;
+    }
+    return [tPerims, tSides];
+  }
+
+  extendSides() {
+    for (const r of this.regions) {
+      // gather adjoining regions
+      for (const c of r.cells) {
+        for (const d of Directions) {
+          const xyb = this.grid.look(c.xy, d);
+          if (!xyb) { // off map, so it's  border
+            c.borders.add(d);
+            continue;
+          }
+          const locb = this.grid.getXY(xyb);
+          if (locb.region !== r.id) r.adjoining.add(locb.region);
+          if (locb.crop != c.crop) c.borders.add(d);
+        }
+        assertEquals(c.perim, c.borders.size);
+      }
+
+      // console.debug(r.id, "adjoins", r.adjoining);
+      r.sides = this._regionSides(r);
+    }
+  }
+
+  _regionSides(r: Region12WithMeta) {
+    const grid = this.grid;
+    // set of {xy: XY, d: Direction} of all sides of all the cells
+    // in the region that border a different crop
+    let borders = Array.from(r.cells).flatMap((c) =>
+      Array.from(c.borders).flatMap((d) => {
+        const [x, y] = c.xy;
+        return { x, y, d };
+      })
+    );
+
+    function extendEdge(x1: number, y1: number, d: Direction, [dx, dy]: XY) {
+      // console.debug("extending edge of ", { x1, y1, dx, dy, d });
+      let [x, y] = [x1 + dx, y1 + dy];
+      let len = 0;
+      while (grid.validXY([x, y])) {
+        const pos = borders.findIndex((el) =>
+          el.x === x && el.y === y && el.d === d
+        );
+        if (pos >= 0) {
+          len++;
+          borders = borders.slice(0, pos).concat(borders.slice(pos + 1));
+          x += dx;
+          y += dy;
+        } else {
+          break;
+        }
+      }
+      return len;
+    }
+
+    let nSides = 0;
+    while (true) {
+      let len = 1;
+      const border = borders.shift();
+      if (!border) break;
+      const { x, y, d } = border;
+      // console.debug({ x, y, d, len });
+      if (d % 2 === 0) { // n or s
+        len += extendEdge(x, y, d, [-1, 0]) + extendEdge(x, y, d, [1, 0]);
+        nSides++;
+        // console.debug("Horizontal edge on the N or S side", { x, y, d, len });
+      } else {
+        nSides++;
+        len += extendEdge(x, y, d, [0, -1]) + extendEdge(x, y, d, [0, 1]);
+        // console.debug("Vertical edge on the E or W side", { x, y, d, len });
+      }
+
+      // if ([Direction.E, Direction.W].includes(d)) {
+      //   len += extendEdge(xy, d, [-1, 0]) + extendEdge(xy, d, [1, 0]);
+      // } else {
+      //   len += extendEdge(xy, d, [0, -1]) + extendEdge(xy, d, [0, 1]);
+      // }
+    }
+    return nSides;
+  }
+
+  trapseCountingSides() {
+    for (const r of this.regions) r.sides = this._trapseRegion(r);
     for (const r of this.regions) {
       // islands "carve their sides out of another"
       if (r.island) this.regions[r.islandIn].sides += r.sides;
     }
   }
 
-  externalSideCount(reg: Region12WithMeta): number {
+  private _trapseRegion(reg: Region12WithMeta): number {
     const xy0 = reg.start;
     const loc0 = this.grid.getXY(xy0);
     // console.debug(`starting from ${xy0}`, reg, loc0);
@@ -185,19 +286,6 @@ export class PuzzleModel12 {
     return corners;
   }
 
-  calcPerims() {
-    for (const [loc, xy] of this.grid.iterCellsC()) {
-      loc.perim = this.perimCount(loc, xy);
-    }
-  }
-
-  perimCount(loca: Loc12, xya: XY): number {
-    return Directions.reduce((acc, d) => {
-      const xyb = this.grid.look(xya, d);
-      return acc + ((xyb && this.grid.getXY(xyb).crop === loca.crop) ? 0 : 1);
-    }, 0);
-  }
-
   nextLocWithoutRegion(): [Loc12, XY] | null {
     for (const [loc, xy] of this.grid.iterCellsC()) {
       if (loc.region === NO_REGION) return [loc, xy];
@@ -218,12 +306,14 @@ export class PuzzleModel12 {
       area: 0,
       cost: 0,
       discounted: 0,
+      cells: new Set<Loc12>(),
+      adjoining: new Set<Region12Id>(),
     };
     this.regions.push(r);
     return r;
   }
 
-  *iterRegionCells(id: Region12Id, xy0: XY): Generator<[Loc12, XY]> {
+  *constructRegion(id: Region12Id, xy0: XY): Generator<[Loc12, XY]> {
     const searchThese: XY[] = [xy0];
     while (true) {
       // get the next loc  if there is one
@@ -250,7 +340,18 @@ export class PuzzleModel12 {
     }
   }
 
-  *iterRegions(): Generator<Region12WithMeta> {
+  *constructRegions(): Generator<Region12WithMeta> {
+    // calculate number of sides on each cell bordered by a different crop
+    for (const [loc, xy] of this.grid.iterCellsC()) {
+      // loc.perim = this.perimCount(loc, xy);
+      loc.perim = Directions.reduce((acc, d) => {
+        const xyb = this.grid.look(xy, d);
+        return acc + ((xyb && this.grid.getXY(xyb).crop === loc.crop) ? 0 : 1);
+      }, 0);
+    }
+
+    // loop through cells that aren't already part of a region and extend
+    // through their neighbors
     while (true) {
       const nxt = this.nextLocWithoutRegion();
       if (nxt === null) break; // no more non-regioned cells
@@ -260,17 +361,22 @@ export class PuzzleModel12 {
       const r = this.newRegion(loc0, xy0);
 
       // add cells to it (iterator includes origin cell)
-      for (const [loca, _] of this.iterRegionCells(r.id, xy0)) {
+      for (const [loca, _] of this.constructRegion(r.id, xy0)) {
         // loca.region = r.id; // set in iterator
         r.perim += loca.perim;
         r.area += 1;
+        r.cells.add(loca);
       }
       yield r;
     }
   }
 
   collectRegions() {
-    this.iterRegions().forEach((r, i) => assertEquals(r.id, i));
+    // search out the regions
+    this.constructRegions().forEach((r, i) => {
+      assertEquals(r.id, i);
+      assertEquals(r.area, r.cells.size);
+    });
   }
 
   // Loading
@@ -297,50 +403,33 @@ export class Day12 extends Puzzle<Results> {
 
   async solve1() {
     const data = await this.load();
-    // return data.grid.format((c: Loc) => c.crop);
+    // return data.grid.format((c: Loc) => c.crop);1473
+    // 620
     return { cost1: data.totalCost };
   }
 
   async solve2() {
-    const mistakes: Record<number, string> = {
-      878118: "too low",
-      918740: "too high",
+    // deno-lint-ignore no-explicit-any
+    const mistakes: Record<number, any> = {
+      878118: { msg: "too low" },
+      918740: { msg: "too high", tPerim: 16568, tSides: 10688 }, // now 10556
     };
     const data = await this.load();
     const { totalDiscountedCost: discounted2 } = data;
+    const [tPerim, tSides] = data.totalPerimsAndSides();
+
     if (discounted2 in mistakes) {
       console.error(
         "already gave that answer",
         discounted2,
         mistakes[discounted2],
       );
-      // Deno.exit(1);
     }
-    /* Still got problems. Here are ideas
-  - [x] check for repeats on left turns NOPE!
-  - [ ] look hard at islands
-    - 74 regions are islands
-    - 70 of those have 4 sides (of which 59 are singletons)
-    - J-72,100 has 6 sides
-    - G-12, 108 has 6 sides
-  { islands: 60 } {
-  id: 495,
-  start: [ 123, 119 ],
-  island: true,
-  islandIn: 471,
-  crop: "J",
-  perim: 22,
-  sides: 16,
-  area: 16,
-  cost: 352,
-  discounted: 256
-}
-  - [ ] try calc with spans
-  - [ ] check out solutions
- */
+    if (discounted2 < 918740 && discounted2 > 978118) {
+      console.debug("you have a new answer in a possibly correct range");
+    }
 
     // color formatters
-
     const _cRegions: CellColoredFormatter<Loc12> = (
       c: Loc12,
     ) => [c.region, c.crop];
@@ -367,11 +456,11 @@ export class Day12 extends Puzzle<Results> {
     for (const r of data.regions) {
       if (r.sides % 2 === 1) console.debug(r); // regions should have even number of sides
     }
-    return { discounted2 };
+    return { discounted2, tPerim, tSides };
   }
 
   override async solve(): Promise<Results> {
-    const which = 2;
+    const which = 3;
     const results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
     const results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
     const results = { ...results1, ...results2 };

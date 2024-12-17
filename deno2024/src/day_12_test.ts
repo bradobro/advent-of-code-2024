@@ -132,7 +132,7 @@ describe("basic algorithms 1", () => {
   });
   it("finds the regions in example 3", () => {
     const pf3 = PuzzleModel12.parse(src3);
-    for (const r of pf3.iterRegions()) {
+    for (const r of pf3.constructRegions()) {
       console.log(r);
     }
     expectRegionsMatch(pf3.regions, regions3);
@@ -152,7 +152,6 @@ describe("basic algorithms 2 (sides calc)", () => {
     expect(regionSet2(pf1.regions)).toEqual(regionSet2(regions1));
     expect(pf1.totalDiscountedCost).toEqual(discounted1);
     // example 1 has no islands
-    for (const r of pf1.regions) expect(r.island).toBeFalsy();
   });
   it("finds the sides count of example 2", () => {
     const pf2 = PuzzleModel12.parse(src2);
@@ -166,7 +165,6 @@ describe("basic algorithms 2 (sides calc)", () => {
     const pf3 = PuzzleModel12.parse(src3);
     expect(regionSet2(pf3.regions)).toEqual(regionSet2(regions3));
     expect(pf3.totalDiscountedCost).toEqual(discounted3);
-    for (const r of pf3.regions) expect(r.island).toBeFalsy();
   });
 });
 
