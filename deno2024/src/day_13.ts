@@ -4,9 +4,11 @@ import { Puzzle, Results } from "./Puzzle.ts";
 import {
   optimize2,
   optimize3,
+  optimize4,
   Optimizer1,
   puzzle1Machine,
   solveMachine,
+  supersizeMachine,
 } from "./day_13_model.ts";
 import { XY } from "./matrix.ts";
 
@@ -21,16 +23,10 @@ export class Day13 extends Puzzle<Results> {
 
   async solve1() {
     const clawgame = await this.load();
-    // const stats = Optimizer1.machineStats(data);
-    // return stats;
-    const { tCost, nWinnable } = solveMachine(clawgame, optimize2, false);
-    // const winnable1 = clawgame.solutions.reduce(
-    //   (acc, s) => acc + (s.cost > 0 ? 1 : 0),
-    //   0,
-    // );
+    const { tCost, nWinnable } = solveMachine(clawgame, optimize4, false);
+
     assertEquals(clawgame.solutions.length, clawgame.games.length);
-    // could audit solutions 35574
-    assertEquals(tCost, 35574);
+    // assertEquals(tCost, 35574);
     return {
       nGames: clawgame.solutions.length,
       winnable1: nWinnable,
@@ -39,29 +35,24 @@ export class Day13 extends Puzzle<Results> {
   }
 
   async solve2() {
-    const clawgame = await this.load();
-    // for (const game of clawgame.games) {
-    // use supersizeGame()
-    //   const [px, py] = game.prize;
-    //   const newPos: XY = [px + adjustment, py + adjustment];
-    //   game.prize = newPos;
-    // }
+    const originalMachine = await this.load();
+    const clawMachine = supersizeMachine(originalMachine);
 
     const { nWinnable: winnable2, tCost: totalCost2 } = solveMachine(
-      clawgame,
-      optimize2,
+      clawMachine,
+      optimize4,
       true,
     );
 
-    return { totalCost2, total2: clawgame.solutions.length, winnable2 };
+    return { totalCost2, total2: clawMachine.solutions.length, winnable2 };
   }
 
   override async solve(): Promise<Results> {
-    const which = 2;
+    const which = 3;
     const results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
     const results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
-    console.debug({ results1, results2 });
-    const results = {};
+    // console.debug({ results1, results2 });
+    const results = { ...results1, ...results2 };
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
 }

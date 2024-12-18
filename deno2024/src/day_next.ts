@@ -30,9 +30,9 @@ export class DayNext extends Puzzle<Results> {
 
   override async solve(): Promise<Results> {
     const which = 1;
-    const results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
-    const results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
-    console.debug({ results1, results2 });
+    const _results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
+    const _results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
+    // console.debug({ _results1, _results2 });
     const results = {};
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }

@@ -52,10 +52,14 @@ export function puzzle1Machine() {
 
 const supersizeFactor = 10000000000000;
 
-export function supersizeGame(g: Game) {
+export function supersizeGame(g: Game): Game {
   const [px, py] = g.prize;
-  const newPos: XY = [px + supersizeFactor, py + supersizeFactor];
-  g.prize = newPos;
+  const prize: XY = [px + supersizeFactor, py + supersizeFactor];
+  return { ...g, prize };
+}
+
+export function supersizeMachine(m: ClawMachine): ClawMachine {
+  return { ...m, games: m.games.map(supersizeGame) };
 }
 
 export class Optimizer1 {
@@ -202,15 +206,16 @@ export function solveMachine(
 ) {
   let nWinnable = 0;
   m.solutions = m.games.map((g, i) => {
-    console.debug("starting game", i);
+    // console.debug("starting game", i);
     const solution = opt(g, m.costa, m.costb);
     if (solution.cost > 0) {
       nWinnable++;
       if (verify) formatProof(g, solution, verify);
-      else console.debug("A winner", i, formatProof(g, solution));
-    } else if (!verify) {
-      verify || console.debug("unwinnable:", i);
+      // else console.debug("A winner", i, formatProof(g, solution));
     }
+    //  else if (!verify) {
+    //   console.debug("unwinnable:", i);
+    // }
     return solution;
   });
   const tCost = m.solutions.reduce((acc, s) => acc + s.cost, 0);
@@ -381,26 +386,64 @@ export function optimize4(g: Game, costa: number, costb: number): Solution {
   return opt.solve();
 }
 
-class Optimizer4 {
+export class Optimizer4 {
+  // Button coefficients
+  readonly aDx: number; //how far button a moves on the x axis
+  readonly aDy: number; //how far button a moves on the y axis
+  readonly bDx: number; //how far button b moves on the x axis
+  readonly bDy: number; //how far button b moves on the y axis
+  readonly px: number; // x coordinate of the prize
+  readonly py: number; // y coordinate of the prize
   // Equation X: `aDx*aN + bDx*bN = pX` -> `bN = -(aDx*aN)/bDx + pX/bDx
   // Equation Y: `aDy*aN + bDy*bN = py` -> `bN = -(aDy*aN)/bDy + py/bDy
   readonly mX: number;
   readonly bX: number;
   readonly mY: number;
   readonly bY: number;
+  readonly tolerance: number;
   constructor(
     readonly g: Game,
     readonly costa: number,
     readonly costb: number,
   ) {
-    const [aDx, aDy] = g.buttona;
-    const [bDx, bDy] = g.buttonb;
-    const [px, py] = g.prize;
+    [this.aDx, this.aDy] = g.buttona;
+    [this.bDx, this.bDy] = g.buttonb;
+    [this.px, this.py] = g.prize;
 
-    this.mX = -aDx / bDx; // slope of equation that finds px
-    this.bX = px / bDx; // y-intercept of equation that finds px
-    this.mY = -aDy / bDy;
-    this.bY = py / bDy;
+    // we have to scale tolerance if px,py is huge
+    this.tolerance = 0.01 * this.px / supersizeFactor;
+
+    this.mX = -this.aDx / this.bDx; // slope of equation that finds px
+    this.bX = this.px / this.bDx; // y-intercept of equation that finds px
+    this.mY = -this.aDy / this.bDy;
+    this.bY = this.py / this.bDy;
+  }
+
+  format(i = -1): string {
+    const s: string[] = [`============\ngame ${i}`];
+    s.push(
+      `  prize: [${this.px},${this.py}]`,
+    );
+    const { buttona, buttonb, cost } = optimize2(
+      this.g,
+      this.costa,
+      this.costb,
+    );
+    s.push(`  win: buttona: ${buttona}, buttonb: ${buttonb}, cost: ${cost}`);
+    s.push(
+      `  buttonA: [${this.aDx},${this.aDy}]\tbuttonB: [${this.bDx},${this.bDy}]`,
+    );
+    s.push(
+      `  px: buttonB = ${this.mX}buttonA + ${this.bX}  (m=${-this
+        .aDx}/${this.bDx})`,
+    );
+    s.push(
+      `  py: buttonB = ${this.mY}buttonA + ${this.bY}  (m=${-this
+        .aDy}/${this.bDy})`,
+    );
+    const [qx, qy] = this.intersection(this.mX, this.bX, this.mY, this.bY);
+    s.push(`  intersection: [${qx},${qy}]`);
+    return s.join("\n");
   }
 
   intersection(m1: number, b1: number, m2: number, b2: number): XY {
@@ -409,29 +452,37 @@ class Optimizer4 {
     assertAlmostEquals(
       y,
       m2 * x + b2,
-      0.0000001,
-      "the intersection shouild solve both equations",
+      this.tolerance, // with the huge numbers, rounding errors can be huge
+      "the intersection should solve both equations",
     );
+    // even if the solution is integral, floats may introduce fractional answers
     return [x, y];
   }
 
+  valid(a: number, b: number): boolean {
+    return (
+      ((this.aDx * a + this.bDx * b) === this.px) &&
+      ((this.aDy * a + this.bDy * b) === this.py)
+    );
+  }
+
   solveIntersecting() {
-    const [buttona, buttonb] = this.intersection(
+    const [buttonaF, buttonbF] = this.intersection(
       this.mX,
       this.bX,
       this.mY,
       this.bY,
     );
-    if (Number.isInteger(buttona) && Number.isInteger(buttonb)) {
+
+    // even if the solution is integral, floats may introduce fractional answers
+    // therefor Number.isInteger is not our friend here, nor is trunc.
+    // So we round to integers and see if it still solves
+    const [buttona, buttonb] = [Math.round(buttonaF), Math.round(buttonbF)];
+    if (this.valid(buttona, buttonb)) {
       const cost = buttona * this.costa + buttonb * this.costb;
       return { buttona, buttonb, cost };
     }
-    return { buttona: 0, buttonb: 0, cost: 0 };
-  }
 
-  solveColinear() {
-    console.debug("COLINEAR GAME", this.g);
-    throw new Error("Found a colinear game");
     return { buttona: 0, buttonb: 0, cost: 0 };
   }
 
@@ -439,7 +490,7 @@ class Optimizer4 {
     if (this.mX !== this.mY) { // single solution
       return this.solveIntersecting();
     }
-    if (this.bX === this.bY) return this.solveColinear();
+    if (this.bX === this.bY) throw new Error("Found a colinear game");
     // else: parallel, no solution
     return { buttona: 0, buttonb: 0, cost: 0 };
   }

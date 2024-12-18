@@ -6,6 +6,7 @@ import {
   optimize2,
   optimize3,
   optimize4,
+  Optimizer4,
 } from "./day_13_model.ts";
 import { assertEquals } from "@std/assert/equals";
 
@@ -17,16 +18,20 @@ const COSTB = 1;
 describe.skip("look at progression of some puzzles, normal sized", () => {
   const g = day13data[_winnable[0]];
   const s = optimize2(g, COSTA, COSTB);
-  console.debug(s, formatProof(g, s));
+  // console.debug(s, formatProof(g, s));
   const s2 = optimize3(g, COSTA, COSTB);
-  console.debug(s2);
+  // console.debug(s2);
 });
 
 describe("try slope-intercept method of optimize4", () => {
   let i = 0;
-  for (const g of day13data.slice(0, 1)) {
+  for (const g of day13data) {
     const s2 = optimize2(g, COSTA, COSTB);
-    const s4 = optimize4(g, COSTA, COSTB);
+    // console.debug(formatProof(g, s2, false));
+    const o4 = new Optimizer4(g, COSTA, COSTB);
+    // console.debug(o4.format(i));
+    const s4 = o4.solve();
+    // console.debug("optimizer4 solution", s4);
     assertEquals(
       s4,
       s2,
