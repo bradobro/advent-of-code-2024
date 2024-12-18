@@ -1,6 +1,9 @@
 import { assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
+import { parseTerrain } from "./day_14_model.ts";
+import { moveAll } from "./day_14_model.ts";
+import { quadrantCounts } from "./day_14_model.ts";
 
 export class Day14 extends Puzzle<Results> {
   constructor() {
@@ -16,12 +19,18 @@ export class Day14 extends Puzzle<Results> {
     // }
     // assertEquals(lineCount, lines.length);
     // return { lines, lineCount };
-    return { dummy: 0 };
+    const src = await Deno.readTextFile(this.dataFilePath);
+    return parseTerrain(101, 103, src);
   }
 
   async solve1() {
-    const data = await this.load();
-    return { data };
+    const bhq0 = await this.load();
+    const bhq100 = moveAll(100, bhq0);
+    const [qa0, qa1, qa2, qa3] = quadrantCounts(bhq100.size, bhq100.movers);
+    const sfA = qa0 * qa1 * qa2 * qa3;
+    if (sfA >= 241935778) console.debug("Answer too high");
+    else console.debug("haven't seen that answer before");
+    return { qa0, qa1, qa2, qa3, sfA };
   }
 
   async solve2() {
