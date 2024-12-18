@@ -99,3 +99,13 @@ export function parseTerrain(
     movers: parseMovers(moversSrc),
   };
 }
+
+export function christmasTree(t: Terrain): boolean {
+  /*
+  IDEAS:
+  - look for vertical or horizontal lines?
+  - look for few (or no) stacks
+  - similarly, look for high number of distinct occupied cells
+  */
+  return false;
+}

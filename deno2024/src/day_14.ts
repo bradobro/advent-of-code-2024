@@ -34,16 +34,20 @@ export class Day14 extends Puzzle<Results> {
   }
 
   async solve2() {
-    const data = await this.load();
-    return { data };
+    let bhq = await this.load();
+    for(let second = 0; second < 500; second++){
+      if (christmasTree(bhq)) return {secondsB: second}
+      bhq = moveAll(1, bhq)
+    }
+    return { dummy: 0 };
   }
 
   override async solve(): Promise<Results> {
-    const which = 1;
+    const which = ;
     const _results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
     const _results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
     console.debug({ _results1, _results2 });
-    const results = {};
+    const results = { ..._results1 };
     return { day: this.dayNumber, hash: await this.hash(results), results };
   }
 }
