@@ -6,7 +6,7 @@ import { multinodes } from "./day_08.ts";
 import { parse } from "./day_11.ts";
 import { day13data } from "./day_13_data.ts";
 import { min } from "./lib.ts";
-import { XY } from "./matrix.ts";
+import { XY } from "./cartesianMatrix.ts";
 import { assertGreater } from "@std/assert/greater";
 import { assertGreaterOrEqual } from "@std/assert/greater-or-equal";
 import { assert } from "@std/assert/assert";

@@ -1,18 +1,18 @@
 import { assert, assertEquals, assertGreater } from "@std/assert";
 import { Puzzle, Results } from "./Puzzle.ts";
 import {
+  CartesianMatrix,
   CellColoredFormatter,
   Direction,
   Directions,
   left,
-  Matrix,
   nColors,
   right,
   XY,
   xyAdd,
   xyEqual,
-} from "./matrix.ts";
-import { ConsoleForegroundBackgrounds } from "./matrix.ts";
+} from "./cartesianMatrix.ts";
+import { ConsoleForegroundBackgrounds } from "./cartesianMatrix.ts";
 // https://adventofcode.com/2024/day/12
 
 export interface Region12 {
@@ -55,7 +55,7 @@ function parseLoc(crop: string, x: number, y: number): Loc12 {
   };
 }
 
-export type FieldMap12 = Matrix<Loc12>;
+export type FieldMap12 = CartesianMatrix<Loc12>;
 
 export class PuzzleModel12 {
   readonly RegionNeighbors: Direction[] = [Direction.S, Direction.W];
@@ -382,7 +382,7 @@ export class PuzzleModel12 {
   // Loading
 
   static parse(src: string): PuzzleModel12 {
-    const grid = Matrix.parse(src.trim()).mapCells(parseLoc);
+    const grid = CartesianMatrix.parse(src.trim()).mapCells(parseLoc);
     return new PuzzleModel12(grid);
   }
 
