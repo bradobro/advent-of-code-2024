@@ -10,6 +10,7 @@ import { XY } from "./matrix.ts";
 import { assertGreater } from "@std/assert/greater";
 import { assertGreaterOrEqual } from "@std/assert/greater-or-equal";
 import { assert } from "@std/assert/assert";
+import { assertAlmostEquals } from "@std/assert/almost-equals";
 
 const nOfficialGames = day13data.length;
 
@@ -149,6 +150,12 @@ export function findb(g: Game, buttona: number): number {
 
 type Optimizer = (g: Game, costa: number, costb: number) => Solution;
 
+/**
+ * @param g optimize2 solves the puzzle, fast enough for part a, but not fast enough for part b
+ * @param costa
+ * @param costb
+ * @returns
+ */
 export function optimize2(g: Game, costa: number, costb: number): Solution {
   let [abest, bbest, costbest] = [0, 0, 0];
   for (let a = maxA(g); a >= 0; a--) {
@@ -210,6 +217,7 @@ export function solveMachine(
   return { nWinnable, tCost };
 }
 
+// ===== Optimize3, an aborted effort to analyze the strides of the error size
 /**
  * @param g
  * @param buttona
@@ -300,7 +308,10 @@ export function findStrideAndStart(g: Game, n = 50): [number, number] {
   return [stride, lowA];
 }
 
+//===== Optimize4, solve 2 linear equations and check
 // tries to look at the progression of errors
+// recognize the double sawtooth progression of the graph
+// and only check the locations that matter
 export function optimize3(g: Game, costa: number, costb: number): Solution {
   let [abest, bbest, costbest] = [0, 0, 0];
   // console.debug("game", g);
@@ -322,4 +333,114 @@ export function optimize3(g: Game, costa: number, costb: number): Solution {
     }
   }
   return { buttona: abest, buttonb: bbest, cost: costbest };
+}
+
+/**
+ * optimize4 is an Optimizer that, I think, nails it. After a few days of
+ * thinking about it, I think:
+ *
+ * I'll use these variable names:
+ *  - aN, aDx, aDy: number of button A pushes and how far it moves (delta) on
+ *    the X and Y axes
+ *  - bN, bDx, bDy: same for button B
+ *  - px, py: location of the prize
+ *
+ * 1.  We're solving 2 linear equations (slope intercept format on the right)
+ *  - Equation X: `aDx*aN + bDx*bN = pX` -> `bN = -(aDx*aN)/bDx + pX/bDx
+ *  - Equation Y: `aDy*aN + bDy*bN = py` -> `bN = -(aDy*aN)/bDy + py/bDy
+ *
+ * I get tricked by:
+ * - in slope-intercept format, X=aN, Y=bN, but they are the only things NOT
+ *   named X or Y; I named the equations because they solve for prize XY
+ * - We get instructed to find the optimal values for each, BUT
+ *
+ * 2. Therefore, they're either parallel (no solutions), colinear (infinite
+ *    solutions), or intersectiong (single solution). *There's no optimization
+ *    except for colinear equations.*
+ *
+ * 3. This gives us rapid way to solve any problem (sos long as numeric ranges
+ *    are within our CPU capability):
+ *  - Find the slopes (slopeA, slopeB) note that these do not correspond to
+ *    button labels, but to equations which reference both buttons.
+ *  - If the slopes aren't equal, solve for the intersection and test whether
+ *    it's integral.
+ *  - If the intercepts aren't equal (parallel) no solution.
+ *  - If the intercepts are equal (colinear)--deal with this if it shows up--
+ *    - Can we know from the equation that aN and bN can't both be integers?
+ *    - Can we optimize for cost?
+ *    - Since, in the fast run, it liked our answers, I suspect (and hope!) that
+ *      there are no colinear lines
+ *
+ * @param g
+ * @param costa
+ * @param costb
+ * @returns
+ */
+export function optimize4(g: Game, costa: number, costb: number): Solution {
+  const opt = new Optimizer4(g, costa, costb);
+  return opt.solve();
+}
+
+class Optimizer4 {
+  // Equation X: `aDx*aN + bDx*bN = pX` -> `bN = -(aDx*aN)/bDx + pX/bDx
+  // Equation Y: `aDy*aN + bDy*bN = py` -> `bN = -(aDy*aN)/bDy + py/bDy
+  readonly mX: number;
+  readonly bX: number;
+  readonly mY: number;
+  readonly bY: number;
+  constructor(
+    readonly g: Game,
+    readonly costa: number,
+    readonly costb: number,
+  ) {
+    const [aDx, aDy] = g.buttona;
+    const [bDx, bDy] = g.buttonb;
+    const [px, py] = g.prize;
+
+    this.mX = -aDx / bDx; // slope of equation that finds px
+    this.bX = px / bDx; // y-intercept of equation that finds px
+    this.mY = -aDy / bDy;
+    this.bY = py / bDy;
+  }
+
+  intersection(m1: number, b1: number, m2: number, b2: number): XY {
+    const x = (b2 - b1) / (m1 - m2);
+    const y = m1 * x + b1;
+    assertAlmostEquals(
+      y,
+      m2 * x + b2,
+      0.0000001,
+      "the intersection shouild solve both equations",
+    );
+    return [x, y];
+  }
+
+  solveIntersecting() {
+    const [buttona, buttonb] = this.intersection(
+      this.mX,
+      this.bX,
+      this.mY,
+      this.bY,
+    );
+    if (Number.isInteger(buttona) && Number.isInteger(buttonb)) {
+      const cost = buttona * this.costa + buttonb * this.costb;
+      return { buttona, buttonb, cost };
+    }
+    return { buttona: 0, buttonb: 0, cost: 0 };
+  }
+
+  solveColinear() {
+    console.debug("COLINEAR GAME", this.g);
+    throw new Error("Found a colinear game");
+    return { buttona: 0, buttonb: 0, cost: 0 };
+  }
+
+  solve(): Solution {
+    if (this.mX !== this.mY) { // single solution
+      return this.solveIntersecting();
+    }
+    if (this.bX === this.bY) return this.solveColinear();
+    // else: parallel, no solution
+    return { buttona: 0, buttonb: 0, cost: 0 };
+  }
 }

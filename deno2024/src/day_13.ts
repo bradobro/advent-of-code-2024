@@ -49,7 +49,7 @@ export class Day13 extends Puzzle<Results> {
 
     const { nWinnable: winnable2, tCost: totalCost2 } = solveMachine(
       clawgame,
-      optimize3,
+      optimize2,
       true,
     );
 
