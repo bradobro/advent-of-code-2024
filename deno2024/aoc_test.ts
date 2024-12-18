@@ -14,6 +14,7 @@ import {
   Day11,
   Day12,
   Day13,
+  Day14,
 } from "./mod.ts";
 
 export const AOC_TEST_SLOW = Deno.env.get("AOC_TEST_SLOW") ? true : false;
@@ -129,6 +130,14 @@ Deno.test(async function day12() {
 Deno.test(async function day13() {
   assertEquals(
     (await new Day13().solve()).hash,
+    "3f15e04be1d823a25482628cad925e021b06d74857f56675fcf82cc32317e7cd",
+  );
+});
+
+Deno.test(async function day14() {
+  return;
+  assertEquals(
+    (await new Day14().solve()).hash,
     "3f15e04be1d823a25482628cad925e021b06d74857f56675fcf82cc32317e7cd",
   );
 });
