@@ -1,7 +1,14 @@
 // helpers for AoC
 import { TextLineStream } from "@std/streams";
-import { assertEquals } from "@std/assert/equals";
 import { assertGreaterOrEqual, assertLess } from "@std/assert";
+
+export function min(...numbs: number[]) {
+  return numbs.reduce((acc, n) => n < acc ? n : acc);
+}
+
+export function max(...numbs: number[]) {
+  return numbs.reduce((acc, n) => n > acc ? n : acc);
+}
 
 /**
  * @param path fileLines returns an async iterator that steps through the lines of a file
