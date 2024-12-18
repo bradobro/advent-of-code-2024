@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v2.9.0 - 2024-12-18
+#### Bug Fixes
+- handling early solutions but problems with no second low in game 9 - (d6bfe60) - Brad Olson
+- auditing solutions--more than I had thought - (e378ca5) - Brad Olson
+#### Features
+- solve day 13 - (86ddf8c) - Brad Olson
+- solve day 13a - (18a6c3a) - Brad Olson
+#### Tests
+- **(red)** optimize4 coded but needs debugging - (b2b8f27) - Brad Olson
+
+- - -
+
 ## v2.8.0 - 2024-12-17
 #### Bug Fixes
 - make sure old run scripts work - (dc229c1) - Brad Olson
