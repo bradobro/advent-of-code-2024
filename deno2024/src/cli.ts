@@ -5,11 +5,12 @@
 // import { Day10 } from "./day_10.ts";
 // import { Day11 } from "./day_11.ts";
 // import { Day12 } from "./day_12.ts";
-import { Day13 } from "./day_13.ts";
+// import { Day13 } from "./day_13.ts";
+import { Day14 } from "../mod.ts";
 
 export async function cli() {
   // console.log(`Running ${Deno.args}`);
-  const puz = new Day13();
+  const puz = new Day14();
   const result = await puz.solve();
   console.log(result);
 }

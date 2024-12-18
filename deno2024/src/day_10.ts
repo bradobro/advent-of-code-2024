@@ -1,7 +1,13 @@
 import { assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { Directions, directionVectors, Matrix, XY, xyAdd } from "./matrix.ts";
+import {
+  CartesianMatrix,
+  Directions,
+  directionVectors,
+  XY,
+  xyAdd,
+} from "./cartesianMatrix.ts";
 
 export interface Location {
   el: number; // elevation
@@ -16,7 +22,7 @@ export class LavaMap {
   readonly trailheads: Set<XY>;
   readonly summits: Set<XY>;
 
-  constructor(public grid: Matrix<Location>) {
+  constructor(public grid: CartesianMatrix<Location>) {
     [this.trailheads, this.summits] = this.calcNexts();
   }
 
@@ -139,7 +145,7 @@ export class LavaMap {
   }
 
   static parse(src: string): LavaMap {
-    const grid = Matrix.parse(src).mapCells(LavaMap.parseCell);
+    const grid = CartesianMatrix.parse(src).mapCells(LavaMap.parseCell);
     return new LavaMap(grid);
   }
 

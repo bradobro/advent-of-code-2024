@@ -2,7 +2,7 @@ import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
 import { assertThrows } from "@std/assert/throws";
 import { antinodes } from "./day_08.ts";
-import { XY } from "./matrix.ts";
+import { XY } from "./cartesianMatrix.ts";
 
 describe("antinodes of", () => {
   const a: XY = [1, 1]; // slash

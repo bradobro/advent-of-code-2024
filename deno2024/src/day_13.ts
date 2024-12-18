@@ -10,7 +10,7 @@ import {
   solveMachine,
   supersizeMachine,
 } from "./day_13_model.ts";
-import { XY } from "./matrix.ts";
+import { XY } from "./cartesianMatrix.ts";
 
 export class Day13 extends Puzzle<Results> {
   constructor() {

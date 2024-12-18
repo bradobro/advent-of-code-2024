@@ -1,7 +1,13 @@
 import { assertEquals, assertGreater, assertNotEquals } from "@std/assert";
 import { fileLines, iterPairsOf } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { Matrix, readMatrix, XY, xyAdd, xySub } from "./matrix.ts";
+import {
+  CartesianMatrix,
+  readMatrix,
+  XY,
+  xyAdd,
+  xySub,
+} from "./cartesianMatrix.ts";
 
 export function multinodes(onmap: (xy: XY) => boolean, c: XY, z: XY): XYs {
   const diff = xySub(c, z);
@@ -48,7 +54,7 @@ export class Map {
   readonly nFreqs: number;
   readonly unusedLetters: Set<string>;
 
-  constructor(public locs: Matrix<Location>) {
+  constructor(public locs: CartesianMatrix<Location>) {
     this.size = locs.sizeXY();
     this.towers = {};
     locs.mapCells((c, x, y) => {

@@ -1,6 +1,12 @@
 import { assert } from "@std/assert/assert";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { Direction, Matrix, readMatrix, XY, xyEqual } from "./matrix.ts";
+import {
+  CartesianMatrix,
+  Direction,
+  readMatrix,
+  XY,
+  xyEqual,
+} from "./cartesianMatrix.ts";
 import { assertEquals } from "@std/assert/equals";
 
 interface Location {
@@ -19,7 +25,7 @@ enum MoveType {
   leave, // x,y is the (old) location left
 }
 
-type Lab = Matrix<Location>;
+type Lab = CartesianMatrix<Location>;
 
 interface Move {
   kind: MoveType;
@@ -146,7 +152,7 @@ export class Day06 extends Puzzle<Results> {
     return { day: 6, hash: await this.hash(results), results };
   }
 
-  solvePuzzle1(lab: Matrix<Location>, startXY: XY) {
+  solvePuzzle1(lab: CartesianMatrix<Location>, startXY: XY) {
     const guard = new Guard(startXY);
     let exitAt: XY = [-1, -1];
     // console.debug("Guard starting at ", startXY);

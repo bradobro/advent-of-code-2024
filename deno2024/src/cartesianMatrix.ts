@@ -73,7 +73,7 @@ export type CellFormatter<T> = (cell: T) => string;
 // returns color number and string
 export type CellColoredFormatter<T> = (cell: T) => [number, string];
 
-export class Matrix<T> {
+export class CartesianMatrix<T> {
   private nrows = 0;
   private ncols = 0;
 
@@ -205,11 +205,11 @@ export class Matrix<T> {
     return this.store.slice(0);
   }
 
-  mapCells<U>(fn: (cell: T, x: number, y: number) => U): Matrix<U> {
+  mapCells<U>(fn: (cell: T, x: number, y: number) => U): CartesianMatrix<U> {
     const store = this.store.map((row, r) =>
       row.map((cell, c) => fn(cell, c, this.nrows - 1 - r))
     );
-    return new Matrix(store);
+    return new CartesianMatrix(store);
   }
 
   *iterCells(): Generator<T> {
@@ -270,7 +270,7 @@ export class Matrix<T> {
     return this.look(locA, right(d));
   }
 
-  static async read(path: string): Promise<Matrix<string>> {
+  static async read(path: string): Promise<CartesianMatrix<string>> {
     let len = -1;
     const store: string[][] = [];
     for await (const line of fileLines(path)) {
@@ -287,7 +287,7 @@ export class Matrix<T> {
         );}
       store.push(row);
     }
-    return new Matrix(store);
+    return new CartesianMatrix(store);
   }
 
   static tryAddLine(line: string, store: string[][], len: number): number {
@@ -309,13 +309,13 @@ export class Matrix<T> {
     return rowLen; // we've now captured a length and will check deviations
   }
 
-  static parse(multiLineSource: string): Matrix<string> {
+  static parse(multiLineSource: string): CartesianMatrix<string> {
     let len = -1;
     const store: string[][] = [];
     for (const line of multiLineSource.split(/[\r\n]+/)) {
-      len = Matrix.tryAddLine(line, store, len);
+      len = CartesianMatrix.tryAddLine(line, store, len);
     }
-    return new Matrix(store);
+    return new CartesianMatrix(store);
   }
 }
 
@@ -324,8 +324,8 @@ export class Matrix<T> {
  * @param path
  * @returns
  */
-export function readMatrix(path: string): Promise<Matrix<string>> {
-  return Matrix.read(path);
+export function readMatrix(path: string): Promise<CartesianMatrix<string>> {
+  return CartesianMatrix.read(path);
   // let len = -1;
   // const store: string[][] = [];
   // for await (const line of fileLines(path)) {

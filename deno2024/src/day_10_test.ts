@@ -1,6 +1,6 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { XY } from "./matrix.ts";
+import { XY } from "./cartesianMatrix.ts";
 import { LavaMap } from "./day_10.ts";
 
 const example5 = `
