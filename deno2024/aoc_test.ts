@@ -135,10 +135,9 @@ Deno.test(async function day13() {
 });
 
 Deno.test(async function day14() {
-  return;
   assertEquals(
     (await new Day14().solve()).hash,
-    "3f15e04be1d823a25482628cad925e021b06d74857f56675fcf82cc32317e7cd",
+    "84f10b49630af74c4bec577e56cea8dae3b2fbff5e16c90f4e0f86643e7e277d",
   );
 });
 

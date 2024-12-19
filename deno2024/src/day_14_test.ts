@@ -1,6 +1,8 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
 import {
+  formatMatrix,
+  iterGrids,
   move,
   moveAll,
   Mover,
@@ -48,5 +50,12 @@ describe("day14", () => {
     const bhq100 = moveAll(100, bhq0);
     console.debug(bhq100);
     console.debug(quadrantCounts(bhq100.size, bhq100.movers));
+  });
+  it("shows successive maps", () => {
+    for (const bhq of iterGrids(parseTerrain(11, 7, src1))) {
+      if (bhq.generation >= 5) break;
+      console.debug(`========== GENERATION ${bhq.generation} ==========`);
+      console.debug(formatMatrix(bhq.grid), "\n\n");
+    }
   });
 });
