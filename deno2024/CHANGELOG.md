@@ -2,6 +2,17 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.0.0 - 2024-12-19
+#### Features
+- solved day 14 - (a9a3b53) - Brad Olson
+- solve day 14a - (8372807) - Brad Olson
+#### Refactoring
+- **(green)** rename Matrix to CartesianMatrix - (48df629) - Brad Olson
+#### Tests
+- add day 14 to regression tests - (b10915d) - Brad Olson
+
+- - -
+
 ## v2.9.0 - 2024-12-18
 #### Bug Fixes
 - handling early solutions but problems with no second low in game 9 - (d6bfe60) - Brad Olson
