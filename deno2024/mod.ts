@@ -1,4 +1,3 @@
-export { cli } from "./src/cli.ts";
 export { Day01 } from "./src/day_01.ts";
 export { Day02 } from "./src/day_02.ts";
 export { Day03 } from "./src/day_03.ts";
@@ -18,3 +17,4 @@ export {
 } from "./src/day_12.ts";
 export { Day13 } from "./src/day_13.ts";
 export { Day14 } from "./src/day_14.ts";
+export { Day15 } from "./src/day_15.ts";
