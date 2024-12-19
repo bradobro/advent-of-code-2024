@@ -12,6 +12,8 @@ at this point, I don't even need to realize the map, just the positions on it. F
 */
 import { assertExists } from "@std/assert/exists";
 import { Puzzle, Results } from "./Puzzle.ts";
+import { assertEquals } from "@std/assert/equals";
+import { assertLessOrEqual } from "@std/assert/less-or-equal";
 
 export type XR = { x: number; r: number }; // R is y measured from the top left
 
@@ -42,19 +44,20 @@ export function move(times: number, area: XR, mvr: Mover): XR {
 export interface Terrain {
   size: XR;
   movers: Mover[];
+  generation: number;
 }
 
-export function moveAll(times: number, { size, movers }: Terrain): Terrain {
+export function moveAll(
+  times: number,
+  { size, movers, generation }: Terrain,
+): Terrain {
+  if (times === 0) return { size, movers, generation };
   const newMovers = movers.map((mvr) => ({
     ...mvr,
     loc: move(times, size, mvr),
   }));
-  return { size, movers: newMovers };
+  return { size, movers: newMovers, generation: generation + times };
 }
-
-// export function quadrantOf({x: w, r:h}: XR, {x, r}:XR){
-
-// }
 
 export function quadrantCounts(area: XR, mvrs: Mover[]) {
   const quadrants = [0, 0, 0, 0];
@@ -97,6 +100,7 @@ export function parseTerrain(
   return {
     size: { x: xwidth, r: rheight },
     movers: parseMovers(moversSrc),
+    generation: 0,
   };
 }
 
@@ -108,4 +112,64 @@ export function christmasTree(t: Terrain): boolean {
   - similarly, look for high number of distinct occupied cells
   */
   return false;
+}
+
+type NMatrix = number[][];
+
+export function makeMatrix(rows: number, cols: number, value = 0): NMatrix {
+  const result: NMatrix = [];
+  for (let i = 0; i < rows; i++) result.push(Array(cols).fill(value));
+  return result;
+}
+
+interface GriddedTerrain extends Terrain {
+  grid: NMatrix;
+}
+
+type NFormatter = (n: number) => string;
+
+function defaultCellFormatter(n: number): string {
+  if (n < 0) return "-";
+  if (n === 0) return ".";
+  if (n < (10)) return String.fromCharCode(n + "0".charCodeAt(0));
+  if (n < (37)) return String.fromCharCode(n + "a".charCodeAt(0));
+  return "*";
+}
+
+export function formatMatrix(
+  m: NMatrix,
+  cells = defaultCellFormatter,
+  rowJoin = "\n",
+): string {
+  return m.map((row) => row.map(cells).join("")).join(rowJoin);
+}
+
+export function addGrid(t: Terrain): GriddedTerrain {
+  const grid = makeMatrix(t.size.r, t.size.x);
+  for (const m of t.movers) {
+    grid[m.loc.r][m.loc.x] += 1;
+  }
+  return { ...t, grid };
+}
+
+export function* iterGrids(
+  terrain: Terrain,
+  start = 0,
+  step = 1,
+  limit = 1000000000,
+): Generator<GriddedTerrain> {
+  assertEquals(terrain.generation, 0, "pristine terrain only");
+  const current = addGrid(moveAll(start, terrain));
+  while (current.generation < limit) { // caller must halt!
+    yield { ...current };
+    const grid = makeMatrix(current.size.r, current.size.x);
+    const movers = current.movers.map((mvr) => {
+      const loc = move(step, current.size, mvr); // find the new location
+      grid[loc.r][loc.x] += 1; // add an occupant to the count at the new location
+      return { ...mvr, loc };
+    });
+    current.generation += step;
+    current.grid = grid;
+    current.movers = movers;
+  }
 }

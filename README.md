@@ -12,6 +12,7 @@ I love computer languages. These repos look interesting:
 - Interesting stats: https://jeroenheijmans.github.io/advent-of-code-surveys/
 - Here are some repos with nice Deno answers:
   - https://github.com/mabenj/aoc-deno-ts: I tend to look at this one when I'm done and say, Wow, I should've thought of that. Terse and to the point.
+  - https://github.com/davidanastasov/advent-of-code
 
 ## Thoughts Along the Way
 

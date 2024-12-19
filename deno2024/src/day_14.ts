@@ -1,9 +1,10 @@
 import { assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { parseTerrain } from "./day_14_model.ts";
+import { formatMatrix, iterGrids, parseTerrain } from "./day_14_model.ts";
 import { moveAll } from "./day_14_model.ts";
 import { quadrantCounts } from "./day_14_model.ts";
+import { format } from "@std/path/format";
 
 export class Day14 extends Puzzle<Results> {
   constructor() {
@@ -34,16 +35,23 @@ export class Day14 extends Puzzle<Results> {
   }
 
   async solve2() {
-    let bhq = await this.load();
-    for(let second = 0; second < 500; second++){
-      if (christmasTree(bhq)) return {secondsB: second}
-      bhq = moveAll(1, bhq)
+    let bhq0 = await this.load();
+    for (const bhq of iterGrids(bhq0, 5000, 1, 25000)) {
+      const header = `========== GENERATION ${
+        bhq.generation.toString().padStart(6, "0")
+      } ==========\n`;
+      const grid = formatMatrix(bhq.grid);
+      const matches = grid.search("1111111111");
+      if (matches > 0) {
+        return { generation2: bhq.generation };
+      }
     }
-    return { dummy: 0 };
+
+    return { unfound: 1 };
   }
 
   override async solve(): Promise<Results> {
-    const which = ;
+    const which = 3;
     const _results1 = which & 1 ? await this.solve1() : { puz1Skip: 1 };
     const _results2 = which & 2 ? await this.solve2() : { puz2Skip: 1 };
     console.debug({ _results1, _results2 });
