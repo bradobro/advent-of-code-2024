@@ -2,13 +2,42 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.1.0 - 2024-12-23
+#### Features
+- solve day 15 - (9c6c8e1) - Brad Olson
+- add more matrix methods - (e40e4db) - Brad Olson
+- solved day-15-a - (9f75915) - Brad Olson
+- - -
+## v3.0.0 - 2024-12-19
+#### Features
+- solved day 14 - (a9a3b53) - Brad Olson
+- solve day 14a - (8372807) - Brad Olson
+#### Refactoring
+- **(green)** rename Matrix to CartesianMatrix - (48df629) - Brad Olson
+- - -
+## v2.9.0 - 2024-12-18
+#### Bug Fixes
+- handling early solutions but problems with no second low in game 9 - (d6bfe60) - Brad Olson
+- auditing solutions--more than I had thought - (e378ca5) - Brad Olson
+#### Features
+- solve day 13 - (86ddf8c) - Brad Olson
+- solve day 13a - (18a6c3a) - Brad Olson
+- - -
+## v2.8.0 - 2024-12-17
+#### Documentation
+- readme - (c80bc92) - Brad Olson
+#### Features
+- solved day 12b - (1454059) - Brad Olson
+- displaying map poorly - (2ca42a0) - Brad Olson
+- added slow test flag - (657c205) - Brad Olson
+- add Fresh project to help see why Day 12b broke - (f04d2aa) - Brad Olson
+- solve day 12a - (690ff15) - Brad Olson
+- - -
 ## v2.7.0 - 2024-12-11
 #### Features
 - solve day 11 - (5e5196d) - Brad Olson
 - solve 11a - (9cdfe8b) - Brad Olson
-
 - - -
-
 ## v2.6.0 - 2024-12-10
 #### Features
 - solve day 10 - (c829d26) - Brad Olson
@@ -16,9 +45,7 @@ All notable changes to this project will be documented in this file. See [conven
 #### Tests
 - **(green)** testing next counts - (be9f22b) - Brad Olson
 - fix day one test - (828d229) - Brad Olson
-
 - - -
-
 ## v2.5.0 - 2024-12-10
 #### Features
 - solve day 9 - (53a5220) - Brad Olson
