@@ -1,9 +1,11 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
 import {
+  BotInWarehouse,
   doublesize,
   findRobot,
   moveBot,
+  moveBot2,
   parseWarehouse,
   tally,
 } from "./day_15_model.ts";
@@ -76,12 +78,9 @@ describe("day 15 examples", () => {
   });
   it("can execute the moves of the simple example", () => {
     const { wh, inst } = parseWarehouse(src2);
-    // console.debug(formatMatrix((s) => s, wh));
-    let bot = findRobot(wh);
+    let state: BotInWarehouse = { wh, bot: findRobot(wh) };
     for (const d of inst) {
-      bot = moveBot(wh, bot, d);
-      // console.debug(`\n===== Moving ${d}=====`);
-      // console.debug(formatMatrix((s) => s, wh));
+      state = moveBot2(state, d);
     }
     expect(tally(wh)).toEqual(2028);
     expect(formatMatrix((s) => s, wh)).toEqual(
@@ -97,9 +96,9 @@ describe("day 15 examples", () => {
   });
   it("can execute the moves of the first, larger example", () => {
     const { wh, inst } = parseWarehouse(src1);
-    let bot = findRobot(wh);
+    let state: BotInWarehouse = { wh, bot: findRobot(wh) };
     for (const d of inst) {
-      bot = moveBot(wh, bot, d);
+      state = moveBot2(state, d);
     }
     expect(tally(wh)).toEqual(10092);
     expect(formatMatrix((s) => s, wh)).toEqual(`##########

@@ -94,6 +94,23 @@ export function moveBot(wh: Warehouse, bot: XR, dir: Direction): XR {
   assert(false, `should not be able to successfully push off board`);
 }
 
+export interface BotInWarehouse {
+  wh: Warehouse;
+  bot: XR;
+}
+export function moveBot2(
+  { wh, bot }: BotInWarehouse,
+  move: Direction,
+): BotInWarehouse {
+  const wh2 = push(wh, bot, move);
+  if (!wh2) return { wh, bot }; // couldn't move, no change
+
+  // success
+  const bot2 = atXR(wh, bot, move);
+  assertExists(bot2); // perimeter should keep us on the board
+  return { wh: wh2, bot: bot2 };
+}
+
 export function push(wh: Warehouse, loc: XR, dir: Direction): Warehouse | null {
   const entity = wh[loc.r][loc.x];
   if (entity === BLANK) return wh;

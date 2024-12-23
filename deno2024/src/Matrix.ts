@@ -25,6 +25,11 @@ export type XR = { x: X; r: Row };
 
 // export const xr2cr = ([x, r]: XR) => [x as Col, r];
 
+// make, copy
+export const cloneMatrix = <T>(m: Matrix<T>) => structuredClone(m);
+export const makeMatrix = <T>(wh: WH, value: T) =>
+  Array(wh.h).map((_) => Array(wh.w).fill(value));
+
 // I/O
 export type CellParser<T> = (s: string) => T;
 export const parseMatrix = <T>(p: CellParser<T>, src: string): Matrix<T> =>
