@@ -5,6 +5,7 @@
 import { assert } from "@std/assert/assert";
 import { Direction } from "./Direction.ts";
 import { atXR, dim, iterCells, Matrix, rows, XR } from "./Matrix.ts";
+import { assertExists } from "@std/assert/exists";
 
 const BLANK = ".";
 const BARRIER = "#";
@@ -84,31 +85,29 @@ export function findRobot(wh: Warehouse): XR {
   assert(false, `no bot found`);
 }
 
-export function moveBot(wh: Warehouse, loc: XR, dir: Direction): XR {
-  if (!push(wh, loc, dir)) return loc;
-  const loc2 = atXR(wh, loc, dir);
+export function moveBot(wh: Warehouse, bot: XR, dir: Direction): XR {
+  // if (!) return loc;
+  const wh2 = push(wh, bot, dir);
+  if (!wh2) return bot;
+  const loc2 = atXR(wh, bot, dir);
   if (loc2) return loc2;
   assert(false, `should not be able to successfully push off board`);
 }
 
-export function push(wh: Warehouse, loc: XR, dir: Direction): boolean {
+export function push(wh: Warehouse, loc: XR, dir: Direction): Warehouse | null {
   const entity = wh[loc.r][loc.x];
-  if (entity === BLANK) return true;
-  if (entity === BARRIER) return false;
-  // BOXL
-  if ([Direction.N, Direction.S].includes(dir)) {
-    // if BOXL, push its BOXR as well
-    // if BOXR, push its BOXL as well
-  }
+  if (entity === BLANK) return wh;
+  if (entity === BARRIER) return null;
 
   // single box or boxl boxr horizontal
   const neighbor = atXR(wh, loc, dir);
+  assertExists(neighbor); // perimeter fence should guarantee
   if (neighbor && push(wh, neighbor, dir)) {
     wh[neighbor.r][neighbor.x] = wh[loc.r][loc.x];
     wh[loc.r][loc.x] = BLANK;
-    return true;
+    return wh;
   }
-  return false;
+  return null;
 }
 
 export function tally(wh: Warehouse): number {
