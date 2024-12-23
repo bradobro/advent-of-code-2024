@@ -1,6 +1,12 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { findRobot, moveBot, parseWarehouse } from "./day_15_model.ts";
+import {
+  doublesize,
+  findRobot,
+  moveBot,
+  parseWarehouse,
+  tally,
+} from "./day_15_model.ts";
 import { Direction } from "./Direction.ts";
 import { formatMatrix } from "./Matrix.ts";
 
@@ -77,6 +83,7 @@ describe("day 15 examples", () => {
       // console.debug(`\n===== Moving ${d}=====`);
       // console.debug(formatMatrix((s) => s, wh));
     }
+    expect(tally(wh)).toEqual(2028);
     expect(formatMatrix((s) => s, wh)).toEqual(
       `########
 #....OO#
@@ -94,7 +101,7 @@ describe("day 15 examples", () => {
     for (const d of inst) {
       bot = moveBot(wh, bot, d);
     }
-    console.debug(formatMatrix((s) => s, wh));
+    expect(tally(wh)).toEqual(10092);
     expect(formatMatrix((s) => s, wh)).toEqual(`##########
 #.O.O.OOO#
 #........#
@@ -105,5 +112,18 @@ describe("day 15 examples", () => {
 #O.....OO#
 #OO....OO#
 ##########`);
+  });
+});
+
+describe("day15 part 2", () => {
+  it("handles doublesize small example", () => {
+    const { wh: wh1, inst } = parseWarehouse(src2);
+    const wh = doublesize(wh1);
+    console.debug(formatMatrix((c) => c, wh));
+  });
+  it("handles doublesize large example", () => {
+    const { wh: wh1, inst } = parseWarehouse(src1);
+    const wh = doublesize(wh1);
+    console.debug(formatMatrix((c) => c, wh));
   });
 });

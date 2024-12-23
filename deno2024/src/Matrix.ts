@@ -50,6 +50,18 @@ export function* cols<T>(m: Matrix<T>): Generator<T[]> {
   for (let i = 0; i < w; i++) yield col(m, i);
 }
 
+// processing
+export function* iterCells<T>(
+  m: Matrix<T>,
+): Generator<{ x: X; r: Row; value: T }> {
+  const { w, h } = dim(m);
+  for (let r = 0; r < h; r++) {
+    for (let x = 0; x < w; x++) {
+      yield { x, r, value: m[r][x] };
+    }
+  }
+}
+
 // directions and bounds
 const deltasXR: XR[] = [{ x: 0, r: -1 }, { x: 1, r: 0 }, { x: 0, r: 1 }, {
   x: -1,

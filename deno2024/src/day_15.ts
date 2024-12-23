@@ -1,6 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
+import { findRobot, moveBot, parseWarehouse, tally } from "./day_15_model.ts";
 
 export class Day15 extends Puzzle<Results> {
   constructor() {
@@ -8,19 +9,15 @@ export class Day15 extends Puzzle<Results> {
   }
 
   async load() {
-    let lineCount = 0;
-    const lines: string[] = [];
-    for await (const line of fileLines(this.dataFilePath)) {
-      lines.push(line);
-      lineCount++;
-    }
-    assertEquals(lineCount, lines.length);
-    return { lines, lineCount };
+    const src = await Deno.readTextFile(this.dataFilePath);
+    return parseWarehouse(src);
   }
 
   async solve1() {
-    const data = await this.load();
-    return { data };
+    const { wh, inst } = await this.load();
+    inst.reduce((loc, d) => moveBot(wh, loc, d), findRobot(wh));
+    const gpsTally1 = tally(wh);
+    return { gpsTally1 };
   }
 
   async solve2() {

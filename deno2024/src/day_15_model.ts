@@ -4,14 +4,22 @@
 
 import { assert } from "@std/assert/assert";
 import { Direction } from "./Direction.ts";
-import { atXR, dim, Matrix, XR } from "./Matrix.ts";
+import { atXR, dim, iterCells, Matrix, rows, XR } from "./Matrix.ts";
 
 const BLANK = ".";
 const BARRIER = "#";
 const BOX = "O";
+const BOXL = "[";
+const BOXR = "]";
 const BOT = "@";
 
-export type Occupant = typeof BLANK | typeof BARRIER | typeof BOX | typeof BOT;
+export type Occupant =
+  | typeof BLANK
+  | typeof BARRIER
+  | typeof BOX
+  | typeof BOXL
+  | typeof BOXR
+  | typeof BOT;
 
 export type Warehouse = Matrix<Occupant>;
 
@@ -45,6 +53,27 @@ export function parseWarehouse(
   return { wh, inst };
 }
 
+export function doublesize(wh: Warehouse): Warehouse {
+  const result: Warehouse = [];
+  const trans: Record<string, [Occupant, Occupant]> = {
+    BLANK: [BLANK, BLANK],
+    BARRIER: [BARRIER, BARRIER],
+    BOX: [BOXL, BOXR],
+    BOT: [BOT, BLANK],
+  };
+  // return Array.from(rows(wh).map((r) => r.flatMap((c) => trans[c])));
+  for (const r of rows(wh)) {
+    const r2: Occupant[] = r.flatMap((c) => {
+      if (c === BLANK) return [BLANK, BLANK];
+      if (c === BOT) return [BOT, BLANK];
+      if (c === BARRIER) return [BARRIER, BARRIER];
+      return [BOXL, BOXR];
+    });
+    result.push(r2);
+  }
+  return result;
+}
+
 export function findRobot(wh: Warehouse): XR {
   const { h, w } = dim(wh);
   for (let r = 0; r < h; r++) {
@@ -66,6 +95,13 @@ export function push(wh: Warehouse, loc: XR, dir: Direction): boolean {
   const entity = wh[loc.r][loc.x];
   if (entity === BLANK) return true;
   if (entity === BARRIER) return false;
+  // BOXL
+  if ([Direction.N, Direction.S].includes(dir)) {
+    // if BOXL, push its BOXR as well
+    // if BOXR, push its BOXL as well
+  }
+
+  // single box or boxl boxr horizontal
   const neighbor = atXR(wh, loc, dir);
   if (neighbor && push(wh, neighbor, dir)) {
     wh[neighbor.r][neighbor.x] = wh[loc.r][loc.x];
@@ -73,4 +109,11 @@ export function push(wh: Warehouse, loc: XR, dir: Direction): boolean {
     return true;
   }
   return false;
+}
+
+export function tally(wh: Warehouse): number {
+  return iterCells(wh).reduce(
+    (acc, { x, r, value }) => value === BOX ? r * 100 + x + acc : acc,
+    0,
+  );
 }
