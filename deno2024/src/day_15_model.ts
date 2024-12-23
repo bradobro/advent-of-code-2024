@@ -8,8 +8,10 @@ import {
   atXR,
   cloneMatrix,
   dim,
+  formatMatrix,
   iterCells,
   Matrix,
+  okXR,
   rows,
   XR,
 } from "./Matrix.ts";
@@ -31,6 +33,10 @@ export type Occupant =
   | typeof BOT;
 
 export type Warehouse = Matrix<Occupant>;
+
+export function formatWarehouse(wh: Warehouse): string {
+  return formatMatrix((c) => c, wh);
+}
 
 export type Instructions = Direction[];
 
@@ -62,14 +68,16 @@ export function parseWarehouse(
   return { wh, inst };
 }
 
+export function parseWideWarehouse(
+  src: string,
+): { wh: Warehouse; inst: Instructions } {
+  const { wh, inst } = parseWarehouse(src);
+  return { wh: doublesize(wh), inst };
+}
+
 export function doublesize(wh: Warehouse): Warehouse {
   const result: Warehouse = [];
-  const trans: Record<string, [Occupant, Occupant]> = {
-    BLANK: [BLANK, BLANK],
-    BARRIER: [BARRIER, BARRIER],
-    BOX: [BOXL, BOXR],
-    BOT: [BOT, BLANK],
-  };
+
   // return Array.from(rows(wh).map((r) => r.flatMap((c) => trans[c])));
   for (const r of rows(wh)) {
     const r2: Occupant[] = r.flatMap((c) => {
@@ -143,6 +151,7 @@ export function push2(
   wh: Warehouse,
   loc: XR,
   dir: Direction,
+  wide = true,
 ): Warehouse | null {
   const entity = wh[loc.r][loc.x];
   if (entity === BLANK) return cloneMatrix(wh);
@@ -152,16 +161,31 @@ export function push2(
   const neighbor = atXR(wh, loc, dir);
   assertExists(neighbor); // perimeter fence should guarantee
 
-  if ([BOX, BOT].includes(entity)) {
-    const wh2 = push2(wh, neighbor, dir); // SHOULD be a clone if there were any successful pushes
-    if (wh2) {
-      wh2[neighbor.r][neighbor.x] = wh2[loc.r][loc.x];
-      wh2[loc.r][loc.x] = BLANK;
-      return wh2;
-    }
-    return null;
+  let wh2 = wh;
+  // if pushing part of a wide box vertically and widely (we haven't already done it's counterpart)
+  if ([BOXL, BOXR].includes(entity) && (dir % 2 === 0) && wide) {
+    // try to push it's counterpart
+    const counterpartLoc = entity === BOXL
+      ? { x: loc.x + 1, r: loc.r }
+      : { x: loc.x - 1, r: loc.r };
+    assert(
+      okXR(wh, counterpartLoc),
+      `unless map in put wrong, we should find the counterpart within bounds`,
+    );
+
+    // push NARROWLY so we don't create a loop (each side trying to push the other)
+    const whCounterpart = push2(wh, counterpartLoc, dir, false);
+    if (!whCounterpart) return null; // couldn't push the counterpart, so don't continue
+    wh2 = whCounterpart; // wharehouse AFTER moving the counterpart
   }
-  assert(false, `should never get here: entity=${entity}`);
+
+  const wh3 = push2(wh2, neighbor, dir); // SHOULD be a clone if there were any successful pushes
+  if (wh3) {
+    wh3[neighbor.r][neighbor.x] = wh3[loc.r][loc.x];
+    wh3[loc.r][loc.x] = BLANK;
+    return wh3;
+  }
+  return null;
 }
 
 export function tally(wh: Warehouse): number {

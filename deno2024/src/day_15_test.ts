@@ -4,9 +4,11 @@ import {
   BotInWarehouse,
   doublesize,
   findRobot,
+  formatWarehouse,
   moveBot1,
   moveBot2,
   parseWarehouse,
+  parseWideWarehouse,
   tally,
 } from "./day_15_model.ts";
 import { Direction } from "./Direction.ts";
@@ -51,6 +53,116 @@ const src2 = `
 <^^>>>vv<v>>v<<
 
 `;
+
+const src3 = `
+#######
+#...#.#
+#.....#
+#..OO@#
+#..O..#
+#.....#
+#######
+
+<vv<<^^<<^^
+`;
+
+const states3: string[] = [
+  `##############
+##......##..##
+##..........##
+##....[][]@.##
+##....[]....##
+##..........##
+##############`,
+
+  `##############
+##......##..##
+##..........##
+##...[][]@..##
+##....[]....##
+##..........##
+##############`,
+
+  `##############
+##......##..##
+##..........##
+##...[][]...##
+##....[].@..##
+##..........##
+##############`,
+
+  `##############
+##......##..##
+##..........##
+##...[][]...##
+##....[]....##
+##.......@..##
+##############`,
+
+  `##############
+##......##..##
+##..........##
+##...[][]...##
+##....[]....##
+##......@...##
+##############`,
+
+  `##############
+##......##..##
+##..........##
+##...[][]...##
+##....[]....##
+##.....@....##
+##############`,
+
+  `##############
+##......##..##
+##...[][]...##
+##....[]....##
+##.....@....##
+##..........##
+##############`,
+
+  `##############
+##......##..##
+##...[][]...##
+##....[]....##
+##.....@....##
+##..........##
+##############`,
+
+  `##############
+##......##..##
+##...[][]...##
+##....[]....##
+##....@.....##
+##..........##
+##############`,
+
+  `##############
+##......##..##
+##...[][]...##
+##....[]....##
+##...@......##
+##..........##
+##############`,
+
+  `##############
+##......##..##
+##...[][]...##
+##...@[]....##
+##..........##
+##..........##
+##############`,
+
+  `##############
+##...[].##..##
+##...@.[]...##
+##....[]....##
+##..........##
+##..........##
+##############`,
+];
 
 describe("day 15 examples", () => {
   it("parses the simple example", () => {
@@ -116,15 +228,36 @@ describe("day 15 examples", () => {
   });
 });
 
-describe.skip("day15 part 2", () => {
-  it("handles doublesize small example", () => {
-    const { wh: wh1, inst } = parseWarehouse(src2);
-    const wh = doublesize(wh1);
-    console.debug(formatMatrix((c) => c, wh));
+describe("day15 part 2", () => {
+  it("parses doublesize small example", () => {
+    const { wh: wh1 } = parseWarehouse(src2);
+    const _wh = doublesize(wh1);
+    // console.debug(formatMatrix((c) => c, wh));
   });
-  it("handles doublesize large example", () => {
-    const { wh: wh1, inst } = parseWarehouse(src1);
-    const wh = doublesize(wh1);
-    console.debug(formatMatrix((c) => c, wh));
+  it("parses doublesize large example", () => {
+    const { wh } = parseWideWarehouse(src1);
+    // console.debug(formatWarehouse(wh));
+    expect(formatWarehouse(wh)).toEqual(`####################
+##....[]....[]..[]##
+##............[]..##
+##..[][]....[]..[]##
+##....[]@.....[]..##
+##[]##....[]......##
+##[]....[]....[]..##
+##..[][]..[]..[][]##
+##........[]......##
+####################`);
+  });
+  it("handles the new example", () => {
+    const { wh, inst } = parseWideWarehouse(src3);
+    let [state, i] = [{ wh, bot: findRobot(wh) }, 0];
+    expect(formatWarehouse(wh)).toEqual(states3[i]);
+    for (const d of inst) {
+      i++;
+      state = moveBot2(state, d);
+      const theMap = formatWarehouse(state.wh);
+      // console.debug(`\n===== Move ${i}: ${d} =====\n${theMap}\n\n`);
+      expect(theMap).toEqual(states3[i]);
+    }
   });
 });
