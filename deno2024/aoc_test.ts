@@ -15,6 +15,7 @@ import {
   Day12,
   Day13,
   Day14,
+  Day15,
 } from "./mod.ts";
 
 export const AOC_TEST_SLOW = Deno.env.get("AOC_TEST_SLOW") ? true : false;
@@ -63,7 +64,7 @@ Deno.test(async function day5() {
 });
 
 Deno.test({
-  name: "day7",
+  name: "day6",
   ignore: !AOC_TEST_SLOW,
   async fn() {
     assertEquals(
@@ -92,7 +93,7 @@ Deno.test(async function day8() {
 });
 
 Deno.test({
-  name: "day7",
+  name: "day9",
   ignore: !AOC_TEST_SLOW,
   async fn() {
     assertEquals(
@@ -139,6 +140,17 @@ Deno.test(async function day14() {
     (await new Day14().solve()).hash,
     "84f10b49630af74c4bec577e56cea8dae3b2fbff5e16c90f4e0f86643e7e277d",
   );
+});
+
+Deno.test({
+  name: "day15",
+  ignore: !AOC_TEST_SLOW,
+  async fn() {
+    assertEquals(
+      (await new Day15().solve()).hash,
+      "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    );
+  },
 });
 
 /**
