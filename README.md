@@ -14,6 +14,8 @@ I love computer languages. These repos look interesting:
   - https://github.com/mabenj/aoc-deno-ts: I tend to look at this one when I'm done and say, Wow, I should've thought of that. Terse and to the point.
   - https://github.com/davidanastasov/advent-of-code
 
+  - Libs I could use: https://mobily.github.io/ts-belt/
+
 ## Thoughts Along the Way
 
 I used some of the exercises to play with iterators and async iterators. I've used them a fair bit in other languages but haven't so much in TypeScript.

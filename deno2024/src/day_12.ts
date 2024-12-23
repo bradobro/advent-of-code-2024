@@ -3,15 +3,12 @@ import { Puzzle, Results } from "./Puzzle.ts";
 import {
   CartesianMatrix,
   CellColoredFormatter,
-  Direction,
-  Directions,
-  left,
   nColors,
-  right,
   XY,
   xyAdd,
   xyEqual,
 } from "./cartesianMatrix.ts";
+import { Direction, Directions, left, right } from "./Direction.ts";
 import { ConsoleForegroundBackgrounds } from "./cartesianMatrix.ts";
 // https://adventofcode.com/2024/day/12
 
