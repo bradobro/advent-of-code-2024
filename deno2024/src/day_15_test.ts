@@ -103,7 +103,7 @@ describe("day 15 examples", () => {
       state = moveBot2(state, d);
     }
     expect(tally(state.wh)).toEqual(10092);
-    expect(formatMatrix((s) => s, wh)).toEqual(`##########
+    expect(formatMatrix((s) => s, state.wh)).toEqual(`##########
 #.O.O.OOO#
 #........#
 #OO......#
