@@ -3,11 +3,11 @@ import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
 import {
   CartesianMatrix,
-  Directions,
   directionVectors,
   XY,
   xyAdd,
 } from "./cartesianMatrix.ts";
+import { Directions } from "./Direction.ts";
 
 export interface Location {
   el: number; // elevation

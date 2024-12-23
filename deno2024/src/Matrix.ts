@@ -4,6 +4,8 @@
  * Row,Col, like Cartesian Matrix.
  */
 
+import { Direction } from "./Direction.ts";
+
 export type Matrix<T> = T[][];
 
 //===== Coordinate Systems
@@ -29,7 +31,7 @@ export const parseMatrix = <T>(p: CellParser<T>, src: string): Matrix<T> =>
   src.split("\n").map((r) => r.split("").map(p));
 export type CellFormatter<T> = (c: T) => string;
 export const formatMatrix = <T>(f: CellFormatter<T>, m: Matrix<T>): string =>
-  m.map((r) => r.map(f)).join("\n");
+  m.map((r) => r.map(f).join("")).join("\n");
 
 // Manipulations
 export const dim = <T>(m: Matrix<T>): WH => ({ h: m.length, w: m[0].length });
@@ -46,4 +48,26 @@ export const col = <T>(m: Matrix<T>, c: number): T[] => m.map((r) => r[c]);
 export function* cols<T>(m: Matrix<T>): Generator<T[]> {
   const w = m[0].length;
   for (let i = 0; i < w; i++) yield col(m, i);
+}
+
+// directions and bounds
+const deltasXR: XR[] = [{ x: 0, r: -1 }, { x: 1, r: 0 }, { x: 0, r: 1 }, {
+  x: -1,
+  r: 0,
+}];
+
+export function okXR<T>(m: Matrix<T>, { x, r }: XR): boolean {
+  const { w, h } = dim(m);
+  return x <= w && r <= h;
+}
+export function atXR<T>(
+  m: Matrix<T>,
+  { x: x1, r: r1 }: XR,
+  d: Direction,
+  dist = 1,
+): null | XR {
+  const { x: dx, r: dr } = deltasXR[d];
+  const result = { x: x1 + dx * dist, r: r1 + dr * dist };
+  if (okXR(m, result)) return result;
+  return null;
 }

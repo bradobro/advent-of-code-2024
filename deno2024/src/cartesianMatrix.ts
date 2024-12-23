@@ -7,6 +7,7 @@ import {
 } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Row } from "./day_07.ts";
+import { Direction, left, right } from "./Direction.ts";
 
 export const ConsoleForegroundBackgrounds: [string, string][] = [
   ["white", "black"], // foreground, background
@@ -24,28 +25,6 @@ export const nColors = ConsoleForegroundBackgrounds.length;
 export function getFgBg(n: number): [string, string] {
   return ConsoleForegroundBackgrounds[n % nColors];
 }
-
-export enum Direction {
-  N = 0,
-  E,
-  S,
-  W,
-}
-
-export function right(d: Direction): Direction {
-  return (d + 1) % 4;
-}
-
-export function left(d: Direction): Direction {
-  return (d + 3) % 4;
-}
-
-export const Directions: Direction[] = [
-  Direction.N,
-  Direction.E,
-  Direction.S,
-  Direction.W,
-];
 
 export type XY = [number, number];
 

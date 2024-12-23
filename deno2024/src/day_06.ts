@@ -1,12 +1,7 @@
 import { assert } from "@std/assert/assert";
 import { Puzzle, Results } from "./Puzzle.ts";
-import {
-  CartesianMatrix,
-  Direction,
-  readMatrix,
-  XY,
-  xyEqual,
-} from "./cartesianMatrix.ts";
+import { CartesianMatrix, readMatrix, XY, xyEqual } from "./cartesianMatrix.ts";
+import { Direction } from "./Direction.ts";
 import { assertEquals } from "@std/assert/equals";
 
 interface Location {
