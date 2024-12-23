@@ -234,20 +234,6 @@ describe("day15 part 2", () => {
     const _wh = doublesize(wh1);
     // console.debug(formatMatrix((c) => c, wh));
   });
-  it("parses doublesize large example", () => {
-    const { wh } = parseWideWarehouse(src1);
-    // console.debug(formatWarehouse(wh));
-    expect(formatWarehouse(wh)).toEqual(`####################
-##....[]....[]..[]##
-##............[]..##
-##..[][]....[]..[]##
-##....[]@.....[]..##
-##[]##....[]......##
-##[]....[]....[]..##
-##..[][]..[]..[][]##
-##........[]......##
-####################`);
-  });
   it("handles the new example", () => {
     const { wh, inst } = parseWideWarehouse(src3);
     let [state, i] = [{ wh, bot: findRobot(wh) }, 0];
@@ -259,5 +245,34 @@ describe("day15 part 2", () => {
       // console.debug(`\n===== Move ${i}: ${d} =====\n${theMap}\n\n`);
       expect(theMap).toEqual(states3[i]);
     }
+  });
+  it("parses, moves, and tallies the doublesize large example", () => {
+    const { wh, inst } = parseWideWarehouse(src1);
+    // console.debug(formatWarehouse(wh));
+    expect(formatWarehouse(wh)).toEqual(`####################
+##....[]....[]..[]##
+##............[]..##
+##..[][]....[]..[]##
+##....[]@.....[]..##
+##[]##....[]......##
+##[]....[]....[]..##
+##..[][]..[]..[][]##
+##........[]......##
+####################`);
+    let state = { wh, bot: findRobot(wh) };
+    for (const d of inst) {
+      state = moveBot2(state, d);
+    }
+    expect(formatWarehouse(state.wh)).toEqual(`####################
+##[].......[].[][]##
+##[]...........[].##
+##[]........[][][]##
+##[]......[]....[]##
+##..##......[]....##
+##..[]............##
+##..@......[].[][]##
+##......[][]..[]..##
+####################`);
+    expect(tally(state.wh)).toEqual(9021);
   });
 });

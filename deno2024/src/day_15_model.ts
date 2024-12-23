@@ -190,7 +190,8 @@ export function push2(
 
 export function tally(wh: Warehouse): number {
   return iterCells(wh).reduce(
-    (acc, { x, r, value }) => value === BOX ? r * 100 + x + acc : acc,
+    (acc, { x, r, value }) =>
+      [BOX, BOXL].includes(value) ? r * 100 + x + acc : acc,
     0,
   );
 }
