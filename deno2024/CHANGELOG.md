@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.1.0 - 2024-12-23
+#### Bug Fixes
+- inmutability seems to work - (a8e3e20) - Brad Olson
+#### Features
+- solve day 15 - (9c6c8e1) - Brad Olson
+- day15b reproduces example moves - (5958f5d) - Brad Olson
+- add more matrix methods - (e40e4db) - Brad Olson
+- solved day-15-a - (9f75915) - Brad Olson
+#### Refactoring
+- simplify cloneMatrix - (c09e4df) - Brad Olson
+- all but movebot return wh, about to refactor moveBot - (4ab31a7) - Brad Olson
+#### Tests
+- add day 15 to tests - (ae6450a) - Brad Olson
+
+- - -
+
 ## v3.0.0 - 2024-12-19
 #### Features
 - solved day 14 - (a9a3b53) - Brad Olson
