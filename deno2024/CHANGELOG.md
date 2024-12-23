@@ -3,18 +3,10 @@ All notable changes to this project will be documented in this file. See [conven
 
 - - -
 ## v3.1.0 - 2024-12-23
-#### Bug Fixes
-- inmutability seems to work - (a8e3e20) - Brad Olson
 #### Features
 - solve day 15 - (9c6c8e1) - Brad Olson
-- day15b reproduces example moves - (5958f5d) - Brad Olson
 - add more matrix methods - (e40e4db) - Brad Olson
 - solved day-15-a - (9f75915) - Brad Olson
-#### Refactoring
-- simplify cloneMatrix - (c09e4df) - Brad Olson
-- all but movebot return wh, about to refactor moveBot - (4ab31a7) - Brad Olson
-#### Tests
-- add day 15 to tests - (ae6450a) - Brad Olson
 
 - - -
 
@@ -24,8 +16,6 @@ All notable changes to this project will be documented in this file. See [conven
 - solve day 14a - (8372807) - Brad Olson
 #### Refactoring
 - **(green)** rename Matrix to CartesianMatrix - (48df629) - Brad Olson
-#### Tests
-- add day 14 to regression tests - (b10915d) - Brad Olson
 
 - - -
 
@@ -36,15 +26,10 @@ All notable changes to this project will be documented in this file. See [conven
 #### Features
 - solve day 13 - (86ddf8c) - Brad Olson
 - solve day 13a - (18a6c3a) - Brad Olson
-#### Tests
-- **(red)** optimize4 coded but needs debugging - (b2b8f27) - Brad Olson
 
 - - -
 
 ## v2.8.0 - 2024-12-17
-#### Bug Fixes
-- make sure old run scripts work - (dc229c1) - Brad Olson
-- fixed endless loop on perimiter walk - (6b08f5d) - Brad Olson
 #### Documentation
 - readme - (c80bc92) - Brad Olson
 #### Features
@@ -53,17 +38,6 @@ All notable changes to this project will be documented in this file. See [conven
 - added slow test flag - (657c205) - Brad Olson
 - add Fresh project to help see why Day 12b broke - (f04d2aa) - Brad Olson
 - solve day 12a - (690ff15) - Brad Olson
-#### Refactoring
-- re-init ui in /freshui - (24596a2) - Brad Olson
-- move original aoc2024 project to subdir - (c2e3151) - Brad Olson
-#### Tests
-- **(green)** part2 works with islands on examples 1-3 - (c1938e5) - Brad Olson
-- **(green)** examples 1,2 pass, 3 fails - (d581596) - Brad Olson
-- **(green)** example 1 passes completely - (02c32b3) - Brad Olson
-- **(red)** part2 fails islands example 2 - (ccf8852) - Brad Olson
-- part2 passes all examples - (ad4c7b7) - Brad Olson
-- part2 passes example 1 and 3 - (44f934f) - Brad Olson
-- example 3 passes - (d05c062) - Brad Olson
 
 - - -
 
