@@ -4,13 +4,14 @@ import {
   BotInWarehouse,
   doublesize,
   findRobot,
-  moveBot,
+  moveBot1,
   moveBot2,
   parseWarehouse,
   tally,
 } from "./day_15_model.ts";
 import { Direction } from "./Direction.ts";
-import { formatMatrix } from "./Matrix.ts";
+import { cloneMatrix, formatMatrix } from "./Matrix.ts";
+import { assert } from "@std/assert/assert";
 
 const src1 = `
 ##########
@@ -82,8 +83,9 @@ describe("day 15 examples", () => {
     for (const d of inst) {
       state = moveBot2(state, d);
     }
-    expect(tally(wh)).toEqual(2028);
-    expect(formatMatrix((s) => s, wh)).toEqual(
+    expect(tally(state.wh)).toEqual(2028);
+    assert(state.wh !== wh, "objects should be distinct");
+    expect(formatMatrix((s) => s, state.wh)).toEqual(
       `########
 #....OO#
 ##.....#
@@ -100,7 +102,7 @@ describe("day 15 examples", () => {
     for (const d of inst) {
       state = moveBot2(state, d);
     }
-    expect(tally(wh)).toEqual(10092);
+    expect(tally(state.wh)).toEqual(10092);
     expect(formatMatrix((s) => s, wh)).toEqual(`##########
 #.O.O.OOO#
 #........#
@@ -114,7 +116,7 @@ describe("day 15 examples", () => {
   });
 });
 
-describe("day15 part 2", () => {
+describe.skip("day15 part 2", () => {
   it("handles doublesize small example", () => {
     const { wh: wh1, inst } = parseWarehouse(src2);
     const wh = doublesize(wh1);

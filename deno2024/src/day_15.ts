@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { findRobot, moveBot, parseWarehouse, tally } from "./day_15_model.ts";
+import { findRobot, moveBot1, parseWarehouse, tally } from "./day_15_model.ts";
 
 export class Day15 extends Puzzle<Results> {
   constructor() {
@@ -15,7 +15,7 @@ export class Day15 extends Puzzle<Results> {
 
   async solve1() {
     const { wh, inst } = await this.load();
-    inst.reduce((loc, d) => moveBot(wh, loc, d), findRobot(wh));
+    inst.reduce((loc, d) => moveBot1(wh, loc, d), findRobot(wh));
     const gpsTally1 = tally(wh);
     return { gpsTally1 };
   }

@@ -4,7 +4,15 @@
 
 import { assert } from "@std/assert/assert";
 import { Direction } from "./Direction.ts";
-import { atXR, dim, iterCells, Matrix, rows, XR } from "./Matrix.ts";
+import {
+  atXR,
+  cloneMatrix,
+  dim,
+  iterCells,
+  Matrix,
+  rows,
+  XR,
+} from "./Matrix.ts";
 import { assertExists } from "@std/assert/exists";
 
 const BLANK = ".";
@@ -85,13 +93,33 @@ export function findRobot(wh: Warehouse): XR {
   assert(false, `no bot found`);
 }
 
-export function moveBot(wh: Warehouse, bot: XR, dir: Direction): XR {
+export function moveBot1(wh: Warehouse, bot: XR, dir: Direction): XR {
   // if (!) return loc;
-  const wh2 = push(wh, bot, dir);
+  const wh2 = push1(wh, bot, dir);
   if (!wh2) return bot;
   const loc2 = atXR(wh, bot, dir);
   if (loc2) return loc2;
   assert(false, `should not be able to successfully push off board`);
+}
+
+export function push1(
+  wh: Warehouse,
+  loc: XR,
+  dir: Direction,
+): Warehouse | null {
+  const entity = wh[loc.r][loc.x];
+  if (entity === BLANK) return wh;
+  if (entity === BARRIER) return null;
+
+  // single box or boxl boxr horizontal
+  const neighbor = atXR(wh, loc, dir);
+  assertExists(neighbor); // perimeter fence should guarantee
+  if (neighbor && push1(wh, neighbor, dir)) {
+    wh[neighbor.r][neighbor.x] = wh[loc.r][loc.x];
+    wh[loc.r][loc.x] = BLANK;
+    return wh;
+  }
+  return null;
 }
 
 export interface BotInWarehouse {
@@ -102,29 +130,38 @@ export function moveBot2(
   { wh, bot }: BotInWarehouse,
   move: Direction,
 ): BotInWarehouse {
-  const wh2 = push(wh, bot, move);
+  const wh2 = push2(wh, bot, move);
   if (!wh2) return { wh, bot }; // couldn't move, no change
 
   // success
-  const bot2 = atXR(wh, bot, move);
+  const bot2 = atXR(wh2, bot, move);
   assertExists(bot2); // perimeter should keep us on the board
   return { wh: wh2, bot: bot2 };
 }
 
-export function push(wh: Warehouse, loc: XR, dir: Direction): Warehouse | null {
+export function push2(
+  wh: Warehouse,
+  loc: XR,
+  dir: Direction,
+): Warehouse | null {
   const entity = wh[loc.r][loc.x];
-  if (entity === BLANK) return wh;
+  if (entity === BLANK) return cloneMatrix(wh);
   if (entity === BARRIER) return null;
 
   // single box or boxl boxr horizontal
   const neighbor = atXR(wh, loc, dir);
   assertExists(neighbor); // perimeter fence should guarantee
-  if (neighbor && push(wh, neighbor, dir)) {
-    wh[neighbor.r][neighbor.x] = wh[loc.r][loc.x];
-    wh[loc.r][loc.x] = BLANK;
-    return wh;
+
+  if ([BOX, BOT].includes(entity)) {
+    const wh2 = push2(wh, neighbor, dir); // SHOULD be a clone if there were any successful pushes
+    if (wh2) {
+      wh2[neighbor.r][neighbor.x] = wh2[loc.r][loc.x];
+      wh2[loc.r][loc.x] = BLANK;
+      return wh2;
+    }
+    return null;
   }
-  return null;
+  assert(false, `should never get here: entity=${entity}`);
 }
 
 export function tally(wh: Warehouse): number {
