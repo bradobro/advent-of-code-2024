@@ -34,4 +34,11 @@ Interesting to me, that is, pertaining to this year's AoC as I solve it.
   - https://github.com/mabenj/aoc-deno-ts: I tend to look at this one when I'm done and say, Wow, I should've thought of that. Terse and to the point.
   - https://github.com/davidanastasov/advent-of-code
 
-- Libs I could use: https://mobily.github.io/ts-belt/
+- Libs I could use:
+  - https://mobily.github.io/ts-belt/ maybe? for array manipulation
+  - https://github.com/digitsensitive/astar-typescript
+  - https://github.com/craigdallimore/a-star
+  - https://github.com/ciaranashton/graphs-adt
+  - https://github.com/theAlgorithmist/AStar-Waypoints, also refs reading https://www.cs.utexas.edu/~fussell/courses/cs378/lectures/cs378-20.pdf
+  - https://github.com/JSuder-xx/abstract-astar
+  - https://github.com/evilkiwi/astar
