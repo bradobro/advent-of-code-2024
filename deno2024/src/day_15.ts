@@ -7,7 +7,7 @@ import {
   moveBot1,
   moveBot2,
   parseWarehouse,
-  tally,
+  tally15,
 } from "./day_15_model.ts";
 
 export class Day15 extends Puzzle<Results> {
@@ -24,7 +24,7 @@ export class Day15 extends Puzzle<Results> {
     console.debug("running 1");
     const { wh, inst } = await this.load();
     inst.reduce((loc, d) => moveBot1(wh, loc, d), findRobot(wh));
-    const gpsTally1 = tally(wh);
+    const gpsTally1 = tally15(wh);
     return { gpsTally1 };
   }
 
@@ -34,7 +34,7 @@ export class Day15 extends Puzzle<Results> {
     const whd = doublesize(wh);
     let state = { wh: whd, bot: findRobot(whd) };
     for (const d of inst) state = moveBot2(state, d);
-    const gpsTally2 = tally(state.wh);
+    const gpsTally2 = tally15(state.wh);
     return { gpsTally2 };
   }
 

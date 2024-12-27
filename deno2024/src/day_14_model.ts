@@ -15,16 +15,16 @@ import { Puzzle, Results } from "./Puzzle.ts";
 import { assertEquals } from "@std/assert/equals";
 import { assertLessOrEqual } from "@std/assert/less-or-equal";
 
-export type XR = { x: number; r: number }; // R is y measured from the top left
+export type XR14 = { x: number; r: number }; // R is y measured from the top left
 
 // guard bunnies
 export interface Mover {
-  loc: XR;
+  loc: XR14;
   dx: number;
   dr: number;
 }
 
-export function move(times: number, area: XR, mvr: Mover): XR {
+export function move(times: number, area: XR14, mvr: Mover): XR14 {
   const positiveModulo = (
     n: number,
     area: number,
@@ -42,7 +42,7 @@ export function move(times: number, area: XR, mvr: Mover): XR {
 
 // BHQ
 export interface Terrain {
-  size: XR;
+  size: XR14;
   movers: Mover[];
   generation: number;
 }
@@ -59,7 +59,7 @@ export function moveAll(
   return { size, movers: newMovers, generation: generation + times };
 }
 
-export function quadrantCounts(area: XR, mvrs: Mover[]) {
+export function quadrantCounts(area: XR14, mvrs: Mover[]) {
   const quadrants = [0, 0, 0, 0];
   // returns [a,b] where n<=a means lower quadrant, n>=b upper quadrant
   function dividers(n: number): [number, number] {
@@ -114,16 +114,16 @@ export function christmasTree(t: Terrain): boolean {
   return false;
 }
 
-type NMatrix = number[][];
+type NMatrix14 = number[][];
 
-export function makeMatrix(rows: number, cols: number, value = 0): NMatrix {
-  const result: NMatrix = [];
+export function makeMatrix14(rows: number, cols: number, value = 0): NMatrix14 {
+  const result: NMatrix14 = [];
   for (let i = 0; i < rows; i++) result.push(Array(cols).fill(value));
   return result;
 }
 
 interface GriddedTerrain extends Terrain {
-  grid: NMatrix;
+  grid: NMatrix14;
 }
 
 type NFormatter = (n: number) => string;
@@ -136,8 +136,8 @@ function defaultCellFormatter(n: number): string {
   return "*";
 }
 
-export function formatMatrix(
-  m: NMatrix,
+export function formatMatrix14(
+  m: NMatrix14,
   cells = defaultCellFormatter,
   rowJoin = "\n",
 ): string {
@@ -145,14 +145,14 @@ export function formatMatrix(
 }
 
 export function addGrid(t: Terrain): GriddedTerrain {
-  const grid = makeMatrix(t.size.r, t.size.x);
+  const grid = makeMatrix14(t.size.r, t.size.x);
   for (const m of t.movers) {
     grid[m.loc.r][m.loc.x] += 1;
   }
   return { ...t, grid };
 }
 
-export function* iterGrids(
+export function* iterGrids14(
   terrain: Terrain,
   start = 0,
   step = 1,
@@ -162,7 +162,7 @@ export function* iterGrids(
   const current = addGrid(moveAll(start, terrain));
   while (current.generation < limit) { // caller must halt!
     yield { ...current };
-    const grid = makeMatrix(current.size.r, current.size.x);
+    const grid = makeMatrix14(current.size.r, current.size.x);
     const movers = current.movers.map((mvr) => {
       const loc = move(step, current.size, mvr); // find the new location
       grid[loc.r][loc.x] += 1; // add an occupant to the count at the new location

@@ -10,6 +10,16 @@ export interface Results {
   };
 }
 
+export function puzzleDataFile(day: number): string {
+  const dataDir = join(import.meta.dirname || "", "../data");
+  const dayId = day.toString().padStart(2, "0");
+  return join(dataDir, `day_${dayId}.txt`);
+}
+
+export function puzzleData(day: number): string {
+  return Deno.readTextFileSync(puzzleDataFile(day));
+}
+
 export class Puzzle<T> {
   // readonly dataDir = import.meta.resolve("../data").slice(7);
   readonly dataDir = join(import.meta.dirname || "", "../data");

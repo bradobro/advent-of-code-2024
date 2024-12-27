@@ -1,15 +1,15 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
 import {
-  formatMatrix,
-  iterGrids,
+  formatMatrix14,
+  iterGrids14,
   move,
   moveAll,
   Mover,
   parseMovers,
   parseTerrain,
   quadrantCounts,
-  XR,
+  XR14,
 } from "./day_14_model.ts";
 
 const src1 = `
@@ -34,7 +34,7 @@ describe("day14", () => {
     expect(bnys[11]).toEqual({ loc: { x: 9, r: 5 }, dx: -3, dr: -3 });
   });
   it("moves a bunny", () => {
-    const area: XR = { x: 11, r: 7 };
+    const area: XR14 = { x: 11, r: 7 };
     const bunny: Mover = { loc: { x: 2, r: 4 }, dx: 2, dr: -3 };
     expect(move(0, area, bunny)).toEqual(bunny.loc);
     expect(move(1, area, bunny)).toEqual({ x: 4, r: 1 });
@@ -52,10 +52,10 @@ describe("day14", () => {
     console.debug(quadrantCounts(bhq100.size, bhq100.movers));
   });
   it("shows successive maps", () => {
-    for (const bhq of iterGrids(parseTerrain(11, 7, src1))) {
+    for (const bhq of iterGrids14(parseTerrain(11, 7, src1))) {
       if (bhq.generation >= 5) break;
       console.debug(`========== GENERATION ${bhq.generation} ==========`);
-      console.debug(formatMatrix(bhq.grid), "\n\n");
+      console.debug(formatMatrix14(bhq.grid), "\n\n");
     }
   });
 });

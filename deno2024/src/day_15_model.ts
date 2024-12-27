@@ -5,10 +5,10 @@
 import { assert } from "@std/assert/assert";
 import { Direction } from "./Direction.ts";
 import {
-  atXR,
   cloneMatrix,
   dim,
   formatMatrix,
+  fromXR,
   iterCells,
   Matrix,
   okXR,
@@ -105,7 +105,7 @@ export function moveBot1(wh: Warehouse, bot: XR, dir: Direction): XR {
   // if (!) return loc;
   const wh2 = push1(wh, bot, dir);
   if (!wh2) return bot;
-  const loc2 = atXR(wh, bot, dir);
+  const loc2 = fromXR(wh, bot, dir);
   if (loc2) return loc2;
   assert(false, `should not be able to successfully push off board`);
 }
@@ -120,7 +120,7 @@ export function push1(
   if (entity === BARRIER) return null;
 
   // single box or boxl boxr horizontal
-  const neighbor = atXR(wh, loc, dir);
+  const neighbor = fromXR(wh, loc, dir);
   assertExists(neighbor); // perimeter fence should guarantee
   if (neighbor && push1(wh, neighbor, dir)) {
     wh[neighbor.r][neighbor.x] = wh[loc.r][loc.x];
@@ -142,7 +142,7 @@ export function moveBot2(
   if (!wh2) return { wh, bot }; // couldn't move, no change
 
   // success
-  const bot2 = atXR(wh2, bot, move);
+  const bot2 = fromXR(wh2, bot, move);
   assertExists(bot2); // perimeter should keep us on the board
   return { wh: wh2, bot: bot2 };
 }
@@ -158,7 +158,7 @@ export function push2(
   if (entity === BARRIER) return null;
 
   // single box or boxl boxr horizontal
-  const neighbor = atXR(wh, loc, dir);
+  const neighbor = fromXR(wh, loc, dir);
   assertExists(neighbor); // perimeter fence should guarantee
 
   let wh2 = wh;
@@ -188,7 +188,7 @@ export function push2(
   return null;
 }
 
-export function tally(wh: Warehouse): number {
+export function tally15(wh: Warehouse): number {
   return iterCells(wh).reduce(
     (acc, { x, r, value }) =>
       [BOX, BOXL].includes(value) ? r * 100 + x + acc : acc,

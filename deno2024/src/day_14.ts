@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert";
 import { fileLines } from "./lib.ts";
 import { Puzzle, Results } from "./Puzzle.ts";
-import { formatMatrix, iterGrids, parseTerrain } from "./day_14_model.ts";
+import { formatMatrix14, iterGrids14, parseTerrain } from "./day_14_model.ts";
 import { moveAll } from "./day_14_model.ts";
 import { quadrantCounts } from "./day_14_model.ts";
 import { format } from "@std/path/format";
@@ -36,11 +36,11 @@ export class Day14 extends Puzzle<Results> {
 
   async solve2() {
     const bhq0 = await this.load();
-    for (const bhq of iterGrids(bhq0, 5000, 1, 25000)) {
+    for (const bhq of iterGrids14(bhq0, 5000, 1, 25000)) {
       // const header = `========== GENERATION ${
       //   bhq.generation.toString().padStart(6, "0")
       // } ==========\n`;
-      const grid = formatMatrix(bhq.grid);
+      const grid = formatMatrix14(bhq.grid);
       const matches = grid.search("1111111111");
       if (matches > 0) {
         return { generation2: bhq.generation };

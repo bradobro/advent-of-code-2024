@@ -9,7 +9,7 @@ import {
   moveBot2,
   parseWarehouse,
   parseWideWarehouse,
-  tally,
+  tally15,
 } from "./day_15_model.ts";
 import { Direction } from "./Direction.ts";
 import { cloneMatrix, formatMatrix } from "./Matrix.ts";
@@ -195,7 +195,7 @@ describe("day 15 examples", () => {
     for (const d of inst) {
       state = moveBot2(state, d);
     }
-    expect(tally(state.wh)).toEqual(2028);
+    expect(tally15(state.wh)).toEqual(2028);
     assert(state.wh !== wh, "objects should be distinct");
     expect(formatMatrix((s) => s, state.wh)).toEqual(
       `########
@@ -214,7 +214,7 @@ describe("day 15 examples", () => {
     for (const d of inst) {
       state = moveBot2(state, d);
     }
-    expect(tally(state.wh)).toEqual(10092);
+    expect(tally15(state.wh)).toEqual(10092);
     expect(formatMatrix((s) => s, state.wh)).toEqual(`##########
 #.O.O.OOO#
 #........#
@@ -273,6 +273,6 @@ describe("day15 part 2", () => {
 ##..@......[].[][]##
 ##......[][]..[]..##
 ####################`);
-    expect(tally(state.wh)).toEqual(9021);
+    expect(tally15(state.wh)).toEqual(9021);
   });
 });
