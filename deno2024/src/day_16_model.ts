@@ -21,6 +21,7 @@ import { left } from "./Direction.ts";
 import { right } from "./Direction.ts";
 import { aStar } from "./astarJSuder.ts";
 import { assertEquals } from "@std/assert/equals";
+import { getFromXR } from "./Matrix.ts";
 
 export const COST16_MOVE = 1;
 export const COST16_TURN = 1000;
@@ -79,18 +80,19 @@ function estimateTaxi(w: World16, from: XR): number {
 }
 
 export function leastCost16a(w: World16): number {
-  const solver = new solver16a(w);
-  const path = solver.findPath();
-  if (path) {
-    console.debug("found path", path);
-    return solver.cost(path);
-  } else {
-    console.debug("no path found");
-    return Infinity;
-  }
+  // const solver = new solver16a(w);
+  // const path = solver.findPath();
+  // if (path) {
+  //   console.debug("found path", path);
+  //   return solver.cost(path);
+  // } else {
+  //   console.debug("no path found");
+  return Infinity;
+  // }
 }
 
-export class solver16a {
+// This A* looked right, but hangs
+export class solver16aHangs {
   readonly estimates: number[][];
   neighbors: Matrix<null | Node16[]>;
 
@@ -173,5 +175,74 @@ export class solver16a {
       }
     }
     return result;
+  }
+}
+
+type Distance = number;
+
+// following along with Stuxf's Dijkstra solution to part 1
+export class solver16aStuxf {
+  readonly w: number;
+  readonly h: number;
+
+  constructor(readonly world: World16) {
+    const { w, h } = dim(world.grid);
+    [this.w, this.h] = [w, h];
+  }
+
+  hash(loc: XR, dir: Direction) {
+    return `${loc.x},${loc.r},${dir}`;
+  }
+
+  dijkstra(
+    startDirection: Direction,
+  ): Map<string, number> {
+    const costs = new Map<string, Distance>();
+    // position queue
+    const pq: [Distance, XR, Direction][] = [[
+      0,
+      this.world.start,
+      startDirection,
+    ]];
+    costs.set(this.hash(this.world.start, startDirection), 0);
+
+    // dijkstra loop
+    while (pq.length > 0) {
+      pq.sort((a, b) => a[0] - b[0]);
+      const [cost1, loc1, dir1] = pq.shift()!;
+      // if we haven't found a shorter cost, don't bother
+      if (cost1 > (costs.get(this.hash(loc1, dir1)) ?? Infinity)) continue;
+      // if we can move ahead, mark it
+      const loc2 = fromXR(this.world.grid, loc1, dir1);
+      if (loc2 && getXR(this.world.grid, loc2).passable) {
+        const cost2 = cost1 + COST16_MOVE;
+        const key = this.hash(loc2, dir1);
+        if (cost2 < (costs.get(key) ?? Infinity)) {
+          costs.set(key, cost2);
+          pq.push([cost2, loc2, dir1]);
+        }
+      }
+
+      // if we can turn, mark it
+      const cost3 = cost1 + COST16_TURN;
+      for (const dir3 of [left(dir1), right(dir1)]) {
+        const key = this.hash(loc1, dir3);
+        if (cost3 < (costs.get(key) ?? Infinity)) {
+          costs.set(key, cost3);
+          pq.push([cost3, loc1, dir3]);
+        }
+      }
+    }
+
+    return costs;
+  }
+
+  solveA() {
+    const costs = this.dijkstra(Direction.E);
+    const minFinishA = Math.min(...Directions.map(
+      (dir) => (costs.get(this.hash(this.world.finish, dir)) ?? Infinity),
+    ));
+    // console.log({ minFinishA });
+    return minFinishA;
   }
 }
