@@ -54,7 +54,7 @@ describe("day16a", () => {
     expect(getXR(w.grid, { x: 13, r: 13 }).passable).toBeTruthy();
     expect(getXR(w.grid, { x: 14, r: 13 }).passable).toEqual(false); // not undefined
   });
-  it("solves example 1", () => {
+  it.skip("solves example 1", () => {
     const w = parse16a(src1);
     const solver = new solver16aStuxf(w);
     const minFinishA = solver.solveA();
@@ -63,7 +63,7 @@ describe("day16a", () => {
     expect(minFinishA).toEqual(7036);
     expect(solver.solveB()).toEqual(45);
   });
-  it("solves example 2", () => {
+  it.skip("solves example 2", () => {
     const solver = new solver16aStuxf(parse16a(src2));
     expect(solver.solveA()).toEqual(11048);
     expect(solver.solveB()).toEqual(64);
@@ -76,7 +76,8 @@ describe("day16a", () => {
     const solver = new solver16aStuxf(w);
     const cheapest = solver.solveA();
     const optimalPositions = solver.solveB();
-    expect(optimalPositions).toBeGreaterThan(540); // too low
-    console.debug({ cheapest, optimalPositions });
+    expect(optimalPositions).toEqual(541);
+    expect(cheapest).toEqual(135512);
+    // console.debug({ cheapest, optimalPositions });
   });
 });

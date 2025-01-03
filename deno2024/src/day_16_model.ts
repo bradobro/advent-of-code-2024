@@ -257,6 +257,8 @@ export class solver16aStuxf {
     const stack: [XR, Direction, Distance][] = [];
     const hash = (l: XR) => `${l.x},${l.r}`;
 
+    path_positions.add(hash(this.world.start));
+
     for (const dir of Directions) {
       const cost = costs.get(this.hash(this.world.finish, dir)) ?? Infinity;
 
@@ -277,6 +279,7 @@ export class solver16aStuxf {
         }
       }
 
+      // I have an off-by-1 error from stuxf and AoC here
       for (const dir3 of [left(dir1), right(dir1)]) {
         const key = this.hash(loc1, dir3);
         const cost3 = costs.get(key);
