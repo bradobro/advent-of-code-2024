@@ -109,3 +109,17 @@ export function getFromXR<T>(
   if (okXR(m, result)) return getXR(m, result);
   return null;
 }
+
+export class FlatMatrix<T> {
+  readonly ndim: number;
+  readonly names: string[] = [];
+  readonly dims: number[] = [];
+
+  constructor(namedDimensions: [string, number][]) {
+    this.ndim = namedDimensions.length;
+    for (const [name, dim] of namedDimensions) {
+      this.names.push(name);
+      this.dims.push(dim);
+    }
+  }
+}
