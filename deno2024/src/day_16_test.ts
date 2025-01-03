@@ -61,10 +61,12 @@ describe("day16a", () => {
     // console.log({ minFinishA });
     // const cheapest = leastCost16a(w);
     expect(minFinishA).toEqual(7036);
+    expect(solver.solveB()).toEqual(45);
   });
   it("solves example 2", () => {
     const solver = new solver16aStuxf(parse16a(src2));
     expect(solver.solveA()).toEqual(11048);
+    expect(solver.solveB()).toEqual(64);
   });
   it("reads the first puzzle's data", () => {
     const w = load16a();
@@ -73,6 +75,8 @@ describe("day16a", () => {
     // expect(w.finish).toEqual({ x: 139, r: 1 });
     const solver = new solver16aStuxf(w);
     const cheapest = solver.solveA();
-    console.debug({ cheapest });
+    const optimalPositions = solver.solveB();
+    expect(optimalPositions).toBeGreaterThan(540); // too low
+    console.debug({ cheapest, optimalPositions });
   });
 });

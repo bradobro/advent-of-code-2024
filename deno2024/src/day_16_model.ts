@@ -12,7 +12,7 @@ import { CellParser } from "./Matrix.ts";
 import { XR } from "./Matrix.ts";
 import { Matrix } from "./Matrix.ts";
 import { okXR } from "./Matrix.ts";
-import { Direction, Directions } from "./Direction.ts";
+import { aft, Direction, Directions } from "./Direction.ts";
 import { PuzzleModel12 } from "../mod.ts";
 import { puzzleData } from "./Puzzle.ts";
 import { findStrideAndStart } from "./day_13_model.ts";
@@ -194,6 +194,7 @@ export class solver16aStuxf {
     return `${loc.x},${loc.r},${dir}`;
   }
 
+  // following stuxf, thanks for sharing the example
   dijkstra(
     startDirection: Direction,
   ): Map<string, number> {
@@ -244,5 +245,47 @@ export class solver16aStuxf {
     ));
     // console.log({ minFinishA });
     return minFinishA;
+  }
+
+  solveB() {
+    const costs = this.dijkstra(Direction.E);
+    const minCost = Math.min(...Directions.map(
+      (dir) => (costs.get(this.hash(this.world.finish, dir)) ?? Infinity),
+    ));
+
+    const path_positions = new Set<string>();
+    const stack: [XR, Direction, Distance][] = [];
+    const hash = (l: XR) => `${l.x},${l.r}`;
+
+    for (const dir of Directions) {
+      const cost = costs.get(this.hash(this.world.finish, dir)) ?? Infinity;
+
+      if (cost === minCost) {
+        stack.push([this.world.finish, dir, minCost]);
+      }
+    }
+
+    while (stack.length) {
+      const [loc1, dir1, cost] = stack.pop()!;
+      path_positions.add(hash(loc1));
+
+      const loc0 = fromXR(this.world.grid, loc1, aft(dir1));
+      if (loc0) {
+        const cost0 = costs.get(this.hash(loc0, dir1));
+        if (cost0 && cost0 + COST16_MOVE === cost) {
+          stack.push([loc0, dir1, cost0]);
+        }
+      }
+
+      for (const dir3 of [left(dir1), right(dir1)]) {
+        const key = this.hash(loc1, dir3);
+        const cost3 = costs.get(key);
+        if (cost3 && cost3 + COST16_TURN === cost) {
+          stack.push([loc1, dir3, cost3]);
+        }
+      }
+    }
+
+    return path_positions.size;
   }
 }
