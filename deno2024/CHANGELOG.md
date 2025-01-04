@@ -2,6 +2,18 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.3.0 - 2025-01-04
+#### Bug Fixes
+- translate machine code to js - (4b5ef64) - Brad Olson
+- change run to just return output numbers - (719f8f7) - Brad Olson
+#### Features
+- solve day 17 - (0c3389c) - Brad Olson
+- solve day 17a - (74580c0) - Brad Olson
+#### Refactoring
+- **(green)** yield generator only if there's output - (77bfb37) - Brad Olson
+
+- - -
+
 ## v3.2.0 - 2025-01-03
 #### Bug Fixes
 - still complying - (81c0f99) - Brad Olson
