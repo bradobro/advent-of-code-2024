@@ -20,13 +20,13 @@ describe("problem a", () => {
     const eg = new Cpu17({ a: 10, b: 0, c: 0 }, [5, 0, 5, 1, 5, 4]);
     // eg.trace = true;
     const output = eg.run();
-    expect(output).toEqual("0,1,2");
+    expect(output).toEqual([0, 1, 2]);
   });
   it("handles example 3", () => {
     const eg = new Cpu17({ a: 2024, b: 0, c: 0 }, [0, 1, 5, 4, 3, 0]);
     // eg.trace = true;
     const output = eg.run();
-    expect(output).toEqual("4,2,5,6,7,7,7,7,3,1,0");
+    expect(output).toEqual([4, 2, 5, 6, 7, 7, 7, 7, 3, 1, 0]);
     expect(eg.snapshot().a).toEqual(0);
   });
   it("handles example 4", () => {
@@ -37,7 +37,7 @@ describe("problem a", () => {
   });
   it("handles example 5", () => {
     const eg = new Cpu17({ a: 0, b: 2024, c: 43690 }, [4, 0]);
-    eg.trace = true;
+    // eg.trace = true;
     eg.run();
     expect(eg.snapshot().b).toEqual(44354);
   });
@@ -46,13 +46,13 @@ describe("problem a", () => {
     const eg = example1();
     // eg.trace = true;
     const output = eg.run();
-    expect(output).toEqual("4,6,3,5,6,3,5,2,1,0");
+    expect(output).toEqual([4, 6, 3, 5, 6, 3, 5, 2, 1, 0]);
   });
   it("solves part a", () => {
     const eg = getInput17a();
     // eg.trace = true;
     const output = eg.run();
-    console.debug({ output });
+    console.debug({ solutionA: output });
   });
 });
 

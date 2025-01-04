@@ -40,7 +40,7 @@ export class Cpu17 {
     const [_, combo] = this.getOperand();
     if (this.trace) console.debug({ combo });
     this.state.a = Math.trunc(this.state.a / 2 ** combo);
-    return "";
+    return 1000;
   }
 
   // PAUSE: possibly an alternative unusual solution exists
@@ -51,7 +51,7 @@ export class Cpu17 {
     const [lit, _] = this.getOperand();
     if (this.trace) console.debug({ lit });
     this.state.b ^= lit;
-    return "";
+    return 1000;
   }
 
   // The bst instruction (opcode 2) calculates the value of its combo operand
@@ -61,7 +61,7 @@ export class Cpu17 {
     const [_, combo] = this.getOperand();
     if (this.trace) console.debug({ combo });
     this.state.b = combo % 8;
-    return "";
+    return 1000;
   }
 
   // The jnz instruction (opcode 3) does nothing if the A register is 0.
@@ -74,7 +74,7 @@ export class Cpu17 {
       if (this.trace) console.debug({ lit });
       this.pc = lit;
     }
-    return "";
+    return 1000;
   }
 
   // The bxc instruction (opcode 4) calculates the bitwise XOR of register B and
@@ -84,7 +84,7 @@ export class Cpu17 {
     if (this.trace) console.debug(`skipping operand ${this.program[this.pc]}`);
     this.pc++;
     this.state.b ^= this.state.c;
-    return "";
+    return 1000;
   }
 
   // The out instruction (opcode 5) calculates the value of its combo operand
@@ -92,7 +92,7 @@ export class Cpu17 {
   // they are separated by commas.)
   out() {
     const [_, combo] = this.getOperand();
-    const output = (combo % 8).toString();
+    const output = combo % 8;
     if (this.trace) console.debug({ combo, output });
     return output;
   }
@@ -104,7 +104,7 @@ export class Cpu17 {
     const [_, combo] = this.getOperand();
     if (this.trace) console.debug({ combo });
     this.state.b = Math.trunc(this.state.a / 2 ** combo);
-    return "";
+    return 1000;
   }
 
   // The cdv instruction (opcode 7) works exactly like the adv instruction
@@ -115,7 +115,7 @@ export class Cpu17 {
     if (this.trace) console.debug({ combo });
     this.state.c = Math.trunc(this.state.a / 2 ** combo);
 
-    return "";
+    return 1000;
   }
 
   readonly instructions = [
@@ -178,7 +178,7 @@ export class Cpu17 {
 
   run() {
     this.reset();
-    const output = Array.from(this.step()).filter((a) => a).join(",");
+    const output = Array.from(this.step()).filter((a) => a < 8);
     return output;
   }
 
