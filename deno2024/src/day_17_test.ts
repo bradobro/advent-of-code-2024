@@ -113,10 +113,14 @@ describe("part 2", () => {
       [560819901, -6],
     ];
     for (const [a, missing] of partials) {
-      console.debug(a.toString(2).padStart(17 * 3), missing);
+      console.debug(
+        `[0o${a.toString(8)}, 0b${a.toString(2)}, 0x${
+          a.toString(16)
+        },  ${missing}]`,
+      );
     }
   });
-  it.only("solves part b", async () => {
+  it.skip("solves part b", async () => {
     // console.debug(day17js(560819901)); // gets 10 of 16
     console.debug(day17js(0b100001011011010110111010111101)); // gets 10 of 16
     // console.debug(day17js(0b100101010110100100100001011011010110111010111101)); // appends on naive solution
@@ -134,5 +138,22 @@ describe("part 2", () => {
     // greater than 35184372088838);
     const output = day17js(answer);
     console.debug({ output, expected });
+  });
+
+  it.only("hacks from the back", async () => {
+    const expected = [...day17code];
+    // much beyond this and we get negative
+    const answers = [0o4, 0o5, 2, 6, 4, 4, 6, 0, 7];
+    const sample = expected.slice(expected.length - 1 - answers.length);
+    const start = answers.reduce((acc, a) => (acc << 3) + a, 0) << 3;
+    const answer = await scan17(start, start + 1024, sample);
+    const output = day17js(answer);
+    console.debug({
+      expected,
+      sample,
+      start: start.toString(8),
+      answer: answer.toString(8),
+      output,
+    });
   });
 });
