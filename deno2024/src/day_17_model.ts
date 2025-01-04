@@ -207,20 +207,21 @@ export function getInput17a() {
   }, day17code);
 }
 
-export function day17js(initialA: number): number[] {
+export function day17js(initialA: bigint): number[] {
   const result: number[] = [];
-  let [a, b, c] = [initialA, 0, 0];
-  while (a !== 0) {
-    console.debug({ a: a.toString(2), b: b.toString(2), c: c.toString(2) });
+  let [a, b, c] = [initialA, 0n, 0n];
+  while (a !== 0n) {
+    // console.debug({ a: a.toString(2), b: b.toString(2), c: c.toString(2) });
 
-    b = a % 8;
-    b ^= 1;
+    b = a % 8n; //
+    b ^= 1n;
     // console.debug({ a, b, c });
-    c = Math.trunc(a / 2 ** b);
-    b ^= 5;
+    c = a / 2n ** b;
+    b ^= 5n;
     b ^= c;
-    result.push(b % 8);
-    a >>= 3;
+    // result.push(b % 8);
+    result.push(Number(BigInt.asUintN(3, b)));
+    a >>= 3n;
   }
   return result;
 }
@@ -230,36 +231,37 @@ export function day17js(initialA: number): number[] {
  * @param pattern
  * @returns negative means how many unmatched, 0 = exact, 1 = too many
  */
-export function day17Match(initialA: number, pattern: number[]): number {
+export function day17Match(initialA: bigint, pattern: number[]): number {
   const n = pattern.length;
   let i = 0;
-  let [a, b, c] = [initialA, 0, 0];
-  while (a !== 0) {
+  let [a, b, c] = [initialA, 0n, 0n];
+  while (a !== 0n) {
     // console.debug({ a: a.toString(2), b: b.toString(2), c: c.toString(2) });
-    b = a % 8;
-    b ^= 1;
-    c = Math.trunc(a / 2 ** b);
-    b ^= 5;
+    b = a % 8n;
+    b ^= 1n;
+    // c = Math.trunc(a / 2 ** b);
+    c = a / 2n ** b;
+    b ^= 5n;
     b ^= c;
     // check output
-    const outp = b % 8;
+    const outp = Number(b % 8n);
     if (i >= n) return 1; // too many
     // console.debug({ outp, inp: pattern[i], i, n });
     if (outp !== pattern[i]) return i - n; // too few
     i++;
-    a >>= 3;
+    a >>= 3n;
   }
   // might have gotten here because program ended early
   return i - n;
 }
 
 export async function scan17(
-  start: number,
-  finish: number,
+  start: bigint,
+  finish: bigint,
   pattern: number[],
-): Promise<number> {
+): Promise<bigint> {
   // assertEquals(Math.trunc(Math.log2(got)), bits - 1);
-  const increment = 2 ** 0;
+  const increment = 1n; //2 ** 0;
   console.debug({ start, finish, increment });
   let minSoFar = -10000000;
   const logfile = "day17.log";
@@ -287,5 +289,5 @@ export async function scan17(
   } finally {
     f.close();
   }
-  return 0;
+  return 0n;
 }

@@ -60,8 +60,8 @@ describe("problem a", () => {
     // eg.trace = true;
     const output = eg.run();
     // check our fast port for part b
-    const output2 = day17js(64854237);
-    console.debug({ solutionA: output, fastA: output2 });
+    const output2 = day17js(64854237n);
+    // console.debug({ solutionA: output, fastA: output2 });
     expect(output2).toEqual(output);
   });
 });
@@ -79,7 +79,7 @@ describe("part 2", () => {
   });
   it("checks matching output from actual code", () => {
     const expected = [4, 7, 4, 5, 2, 0, 0, 7];
-    const a = 6543216;
+    const a = 6543216n;
     const output = day17js(a);
     expect(output).toEqual(expected);
     expect(day17Match(a, expected)).toEqual(0);
@@ -122,38 +122,39 @@ describe("part 2", () => {
   });
   it.skip("solves part b", async () => {
     // console.debug(day17js(560819901)); // gets 10 of 16
-    console.debug(day17js(0b100001011011010110111010111101)); // gets 10 of 16
+    console.debug(day17js(0b100001011011010110111010111101n)); // gets 10 of 16
     // console.debug(day17js(0b100101010110100100100001011011010110111010111101)); // appends on naive solution
     // console.debug(day17js(0b111111000101011100001011011010110111010111101)); // gets 10 of 16
 
-    return;
+    // return;
     const eg = getInput17a();
     const expected = [...eg.program].slice(10);
     const n = expected.length;
     // const minA = 2 ** ((n - 1) * 3);
     // const minA = 35184372088838 + 1; // too low
-    const minA = 0;
+    const minA = 0n;
     // console.debug(day17js(minA), expected);
-    const answer = await scan17(minA, 2 ** 64, expected);
+    const answer = await scan17(minA, 2n ** 64n, expected);
     // greater than 35184372088838);
-    const output = day17js(answer);
+    const output = day17js(BigInt(answer));
     console.debug({ output, expected });
   });
 
-  it.only("hacks from the back", async () => {
+  it("hacks from the back", async () => {
     const expected = [...day17code];
     // Fails after 0o4526446072. Maybe need bigint?
-    const answers = [4, 5, 2, 6, 4, 4, 6, 0, 7];
+    const answers = [4, 5, 2, 6, 4, 4, 6, 0, 7, 3, 2, 6, 7, 2, 7];
     const sample = expected.slice(expected.length - 1 - answers.length);
-    const start = answers.reduce((acc, a) => (acc << 3) + a, 0) << 3;
+    const start = answers.reduce((acc, a) => (acc << 3n) + BigInt(a), 0n) << 3n;
     // const start = 0o4526446072 * 8;
-    const answer = await scan17(start, start + 1024, sample);
-    const output = day17js(answer);
+    const answer = await scan17(start, start + 1024n, sample);
+    const output = day17js(BigInt(answer));
     console.debug({
       expected,
       sample,
       start: start.toString(8),
       answer: answer.toString(8),
+      answerDecimal: answer.toString(),
       output,
     });
   });
