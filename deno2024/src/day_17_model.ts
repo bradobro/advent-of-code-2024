@@ -195,10 +195,27 @@ export class Cpu17 {
   }
 }
 
+const day17code = [2, 4, 1, 1, 7, 5, 1, 5, 4, 0, 5, 5, 0, 3, 3, 0];
+
 export function getInput17a() {
   return new Cpu17({
     a: 64854237,
     b: 0,
     c: 0,
-  }, [2, 4, 1, 1, 7, 5, 1, 5, 4, 0, 5, 5, 0, 3, 3, 0]);
+  }, day17code);
+}
+
+export function day17js(initialA: number): number[] {
+  const result: number[] = [];
+  let [a, b, c] = [initialA, 0, 0];
+  while (a !== 0) {
+    b = a % 8;
+    b ^= 1;
+    c = Math.trunc(a / 2 ** b);
+    b ^= 5;
+    b ^= c;
+    result.push(b % 8);
+    a >>= 3;
+  }
+  return result;
 }

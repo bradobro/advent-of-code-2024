@@ -1,6 +1,6 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { Cpu17, getInput17a } from "./day_17_model.ts";
+import { Cpu17, day17js, getInput17a } from "./day_17_model.ts";
 
 function example1() {
   return new Cpu17(
@@ -48,11 +48,14 @@ describe("problem a", () => {
     const output = eg.run();
     expect(output).toEqual([4, 6, 3, 5, 6, 3, 5, 2, 1, 0]);
   });
-  it("solves part a", () => {
+  it.only("solves part a", () => {
     const eg = getInput17a();
     // eg.trace = true;
     const output = eg.run();
-    console.debug({ solutionA: output });
+    // check our fast port for part b
+    const output2 = day17js(64854237);
+    console.debug({ solutionA: output, fastA: output2 });
+    expect(output2).toEqual(output);
   });
 });
 
@@ -67,4 +70,8 @@ describe("part 2", () => {
     const output = eg.run();
     expect(output).toEqual(program);
   });
+  // it("confirms our js port of the program", ()=>{
+  //   const output = day17js(64854237);
+  //   expect(output).toEqual()
+  // })
 });
