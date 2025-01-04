@@ -169,7 +169,8 @@ export class Cpu17 {
     while (this.pc < this.program.length) {
       step++;
       const instruction = this.getInstruction(this.program[this.pc]);
-      yield instruction();
+      const output = instruction();
+      if (output < 8) yield output;
       if (this.trace) {
         console.debug({ afterstep: step, ...this.snapshot() });
       }
