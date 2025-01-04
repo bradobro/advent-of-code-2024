@@ -1,6 +1,13 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { Cpu17, day17js, getInput17a } from "./day_17_model.ts";
+import {
+  Cpu17,
+  day17code,
+  day17js,
+  day17Match,
+  getInput17a,
+  scan17,
+} from "./day_17_model.ts";
 
 function example1() {
   return new Cpu17(
@@ -48,7 +55,7 @@ describe("problem a", () => {
     const output = eg.run();
     expect(output).toEqual([4, 6, 3, 5, 6, 3, 5, 2, 1, 0]);
   });
-  it.only("solves part a", () => {
+  it("solves part a", () => {
     const eg = getInput17a();
     // eg.trace = true;
     const output = eg.run();
@@ -70,8 +77,56 @@ describe("part 2", () => {
     const output = eg.run();
     expect(output).toEqual(program);
   });
-  // it("confirms our js port of the program", ()=>{
-  //   const output = day17js(64854237);
-  //   expect(output).toEqual()
-  // })
+  it("checks matching output from actual code", () => {
+    const expected = [4, 7, 4, 5, 2, 0, 0, 7];
+    const a = 6543216;
+    const output = day17js(a);
+    expect(output).toEqual(expected);
+    expect(day17Match(a, expected)).toEqual(0);
+    for (let i = 0; i < expected.length; i++) {
+      const sample = [...expected];
+      sample[i] = -1000;
+      const missing = day17Match(a, sample);
+      // console.debug(i, missing, sample);
+      expect(missing).toEqual(i - expected.length);
+    }
+    // console.debug(output);
+  });
+  it("examines partial solutions for part b", () => {
+    const partials = [
+      // [35184372088846, -14],
+      // [35184372089164, -13],
+      // [35184372119989, -12],
+      // [35184373168565, -11],
+      // [35184375066301, -10],
+      // [35184379260605, -9],
+      // [35184396037821, -7],
+      [0, -16],
+      [6, -15],
+      [14, -14],
+      [332, -13],
+      [31157, -12],
+      [1079733, -11],
+      [2977469, -10],
+      [7171773, -9],
+      [23948989, -7],
+      [560819901, -6],
+    ];
+    for (const [a, missing] of partials) {
+      console.debug(a.toString(2).padStart(17 * 3), missing);
+    }
+  });
+  it.only("solves part b", async () => {
+    const eg = getInput17a();
+    const expected = [...eg.program];
+    const n = expected.length;
+    // const minA = 2 ** ((n - 1) * 3);
+    // const minA = 35184372088838 + 1; // too low
+    const minA = 560819901;
+    // console.debug(day17js(minA), expected);
+    const answer = await scan17(minA, 2 ** 64, expected);
+    // greater than 35184372088838);
+    const output = day17js(answer);
+    console.debug({ output, expected });
+  });
 });

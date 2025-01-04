@@ -1,3 +1,5 @@
+import { assertEquals } from "@std/assert/equals";
+
 export interface State17 {
   a: number;
   b: number;
@@ -195,7 +197,7 @@ export class Cpu17 {
   }
 }
 
-const day17code = [2, 4, 1, 1, 7, 5, 1, 5, 4, 0, 5, 5, 0, 3, 3, 0];
+export const day17code = [2, 4, 1, 1, 7, 5, 1, 5, 4, 0, 5, 5, 0, 3, 3, 0];
 
 export function getInput17a() {
   return new Cpu17({
@@ -211,6 +213,7 @@ export function day17js(initialA: number): number[] {
   while (a !== 0) {
     b = a % 8;
     b ^= 1;
+    // console.debug({ a, b, c });
     c = Math.trunc(a / 2 ** b);
     b ^= 5;
     b ^= c;
@@ -218,4 +221,69 @@ export function day17js(initialA: number): number[] {
     a >>= 3;
   }
   return result;
+}
+
+/**
+ * @param initialA
+ * @param pattern
+ * @returns negative means how many unmatched, 0 = exact, 1 = too many
+ */
+export function day17Match(initialA: number, pattern: number[]): number {
+  const n = pattern.length;
+  let i = 0;
+  let [a, b, c] = [initialA, 0, 0];
+  while (a !== 0) {
+    b = a % 8;
+    b ^= 1;
+    // console.debug({ a, b, c });
+    c = Math.trunc(a / 2 ** b);
+    b ^= 5;
+    b ^= c;
+    // check output
+    const outp = b % 8;
+    if (i >= n) return 1; // too many
+    // console.debug({ outp, inp: pattern[i], i, n });
+    if (outp !== pattern[i]) return i - n; // too few
+    i++;
+    a >>= 3;
+  }
+  // might have gotten here because program ended early
+  return i - n;
+}
+
+export async function scan17(
+  start: number,
+  finish: number,
+  pattern: number[],
+): Promise<number> {
+  // assertEquals(Math.trunc(Math.log2(got)), bits - 1);
+  const increment = 2 ** 21;
+  console.debug({ start, finish, increment });
+  let minSoFar = -10000000;
+  const logfile = "day17.log";
+  const enc = new TextEncoder();
+  console.debug("writing to log file", logfile);
+  const f = await Deno.open(logfile, {
+    write: true,
+    create: true,
+    truncate: true,
+  });
+  try {
+    for (let i = start; i < finish; i += increment) {
+      // const x = (i << bits + 1) | got;
+      const missing = day17Match(i, pattern);
+      if (missing === 0) {
+        await f.write(enc.encode(`${i.toString(2)},${missing}\n`));
+        console.debug("FOUND IT", 1);
+        return i;
+      }
+      if (missing > minSoFar) {
+        await f.write(enc.encode(`${i.toString(2).padStart(40)},${missing}\n`));
+        minSoFar = missing;
+      }
+    }
+  } finally {
+    f.close();
+  }
+  return 0;
 }

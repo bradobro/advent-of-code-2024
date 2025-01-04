@@ -12,7 +12,7 @@ Part 2 makes me want to disassemble the input program. Notice that JNZ can jump 
 | 03  | 1    |              |
 | 04  | 7    | CDV A / 2**B |
 | 05  | 5    |              |
-| 06  | 1    | ADV A / 2**B |
+| 06  | 1    | BXL B ^ 5 |
 | 07  | 5    |              |
 | 08  | 4    | BXC B^C      |
 | 09  | 0    |              |
@@ -25,4 +25,20 @@ Part 2 makes me want to disassemble the input program. Notice that JNZ can jump 
 
 Translated into TypeScript:
 
-function day17(a: number):
+```typescript
+export function day17js(initialA: number): number[] {
+  const result: number[] = [];
+  let [a, b, c] = [initialA, 0, 0];
+  while (a !== 0) {
+    b = a % 8;
+    b ^= 1;
+    // console.debug({ a, b, c });  // shows the patterrn
+    c = Math.trunc(a / 2 ** b);
+    b ^= 5;
+    b ^= c;
+    result.push(b % 8);
+    a >>= 3;
+  }
+  return result;
+}
+```
