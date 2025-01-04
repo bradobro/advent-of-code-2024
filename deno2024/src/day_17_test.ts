@@ -142,10 +142,11 @@ describe("part 2", () => {
 
   it.only("hacks from the back", async () => {
     const expected = [...day17code];
-    // much beyond this and we get negative
-    const answers = [0o4, 0o5, 2, 6, 4, 4, 6, 0, 7];
+    // Fails after 0o4526446072. Maybe need bigint?
+    const answers = [4, 5, 2, 6, 4, 4, 6, 0, 7];
     const sample = expected.slice(expected.length - 1 - answers.length);
     const start = answers.reduce((acc, a) => (acc << 3) + a, 0) << 3;
+    // const start = 0o4526446072 * 8;
     const answer = await scan17(start, start + 1024, sample);
     const output = day17js(answer);
     console.debug({
