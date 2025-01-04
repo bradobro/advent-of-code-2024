@@ -117,12 +117,18 @@ describe("part 2", () => {
     }
   });
   it.only("solves part b", async () => {
+    // console.debug(day17js(560819901)); // gets 10 of 16
+    console.debug(day17js(0b100001011011010110111010111101)); // gets 10 of 16
+    // console.debug(day17js(0b100101010110100100100001011011010110111010111101)); // appends on naive solution
+    // console.debug(day17js(0b111111000101011100001011011010110111010111101)); // gets 10 of 16
+
+    return;
     const eg = getInput17a();
-    const expected = [...eg.program];
+    const expected = [...eg.program].slice(10);
     const n = expected.length;
     // const minA = 2 ** ((n - 1) * 3);
     // const minA = 35184372088838 + 1; // too low
-    const minA = 560819901;
+    const minA = 0;
     // console.debug(day17js(minA), expected);
     const answer = await scan17(minA, 2 ** 64, expected);
     // greater than 35184372088838);

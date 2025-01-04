@@ -211,6 +211,8 @@ export function day17js(initialA: number): number[] {
   const result: number[] = [];
   let [a, b, c] = [initialA, 0, 0];
   while (a !== 0) {
+    console.debug({ a: a.toString(2), b: b.toString(2), c: c.toString(2) });
+
     b = a % 8;
     b ^= 1;
     // console.debug({ a, b, c });
@@ -233,9 +235,9 @@ export function day17Match(initialA: number, pattern: number[]): number {
   let i = 0;
   let [a, b, c] = [initialA, 0, 0];
   while (a !== 0) {
+    // console.debug({ a: a.toString(2), b: b.toString(2), c: c.toString(2) });
     b = a % 8;
     b ^= 1;
-    // console.debug({ a, b, c });
     c = Math.trunc(a / 2 ** b);
     b ^= 5;
     b ^= c;
@@ -257,7 +259,7 @@ export async function scan17(
   pattern: number[],
 ): Promise<number> {
   // assertEquals(Math.trunc(Math.log2(got)), bits - 1);
-  const increment = 2 ** 21;
+  const increment = 2 ** 0;
   console.debug({ start, finish, increment });
   let minSoFar = -10000000;
   const logfile = "day17.log";
