@@ -3,10 +3,21 @@ import { assert } from "@std/assert/assert";
 
 export type FlatStore<T> = T[];
 
-export function _abcToI(coords: number[], numerators: number[]): number {
+/**
+ * @param coords coordinate array: [x, y, z, ...]
+ * @param numerators "place" multipliers, e.g. [1, 10, 100] for a 10*10*10
+ * @returns the integer offset into a single flat array
+ */
+export function xy2i(coords: number[], numerators: number[]): number {
   return coords.reduce((acc, coord, i) => acc + (coord * numerators[i]), 0);
 }
-export function _iToAbc(id: number, divisors: number[]): number[] {
+
+/**
+ * @param id integer offset into a single flat array
+ * @param divisors modulus value for each "place", e.g. [10, 100, 1000] for a 10*10*10
+ * @returns coordinate array, [x, y, z, ...]
+ */
+export function i2xy(id: number, divisors: number[]): number[] {
   let rest = id;
   let numerator = 1;
   return divisors.map((div) => {
@@ -19,7 +30,7 @@ export function _iToAbc(id: number, divisors: number[]): number[] {
 }
 
 // bounds checked
-export function safeAbcToI<T>(
+export function xy2iSafe(
   coords: number[],
   numerators: number[],
   dims: number[],
@@ -83,10 +94,10 @@ export class FlatMatrix<T> {
   }
 
   id(coords: number[]): number {
-    return _abcToI(coords, this.nums);
+    return xy2i(coords, this.nums);
   }
 
   coords(id: number): number[] {
-    return _iToAbc(id, this.divs);
+    return i2xy(id, this.divs);
   }
 }
