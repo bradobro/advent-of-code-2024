@@ -216,7 +216,7 @@ describe("pathfinder with multiple paths", () => {
     const paths = Array.from(finder.iterAllPaths(0, 27));
     expect(paths).toEqual([[0, 7, 14, 21, 22, 23, 24, 25, 26, 27]]);
   });
-  it.skip("finds the two best paths", () => {
+  it("finds the two best paths", () => {
     const world = new DijkMap(src2, { x: 6, r: 3 });
     const finder = new DijkstrasPathfinder(world);
     finder.exploreAll(0);

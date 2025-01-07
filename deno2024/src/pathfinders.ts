@@ -119,8 +119,13 @@ export class DijkstrasPathfinder<NodeId> {
    * @param finish
    */
   *iterAllPaths(start: NodeId, finish: NodeId): Generator<NodeId[]> {
-    const path: NodeId[] = this.reportPath(start, finish);
+    const path: NodeId[] = this.reportPath(start, finish); // dummy
     yield path;
+    // stack or recurse?
+    let cur = finish;
+    while (true) {
+      yield [cur];
+    }
   }
 
   //===== Helpers
