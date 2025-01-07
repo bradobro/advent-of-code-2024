@@ -159,8 +159,14 @@ const src1 = `
 .######
 .......
 `;
+const src2 = `
+.......
+.#####.
+.#####.
+.......
+`;
 
-describe("pathfinder", () => {
+describe("pathfinder with single path", () => {
   it("parser seems to work", () => {
     const map = parseMap(src1);
     const { w, h } = dim(map);
@@ -191,7 +197,6 @@ describe("pathfinder", () => {
     // expect(dm.next()).toEqual({ value: 7 }); // should pop the lowest cost item
     // expect(dm.isDone(27)).toBeTruthy();
   });
-
   it("finds the path", () => {
     const dm = new DijkMap(src1, { x: 6, r: 3 });
     const finder = new DijkstrasPathfinder(dm);
@@ -200,5 +205,27 @@ describe("pathfinder", () => {
     expect(path).toEqual([0, 7, 14, 21, 22, 23, 24, 25, 26, 27]);
     const cost = dm.statNode(27)[0];
     expect(cost).toEqual(9);
+  });
+});
+
+describe("pathfinder with multiple paths", () => {
+  it("finds the single path as a list of one paths", () => {
+    const world = new DijkMap(src1, { x: 6, r: 3 });
+    const finder = new DijkstrasPathfinder(world);
+    finder.exploreAll(0);
+    const paths = Array.from(finder.iterAllPaths(0, 27));
+    expect(paths).toEqual([[0, 7, 14, 21, 22, 23, 24, 25, 26, 27]]);
+  });
+  it.skip("finds the two best paths", () => {
+    const world = new DijkMap(src2, { x: 6, r: 3 });
+    const finder = new DijkstrasPathfinder(world);
+    finder.exploreAll(0);
+    const paths = Array.from(finder.iterAllPaths(0, 27));
+    expect(new Set(paths)).toEqual(
+      new Set([
+        [0, 7, 14, 21, 22, 23, 24, 25, 26, 27],
+        [0, 1, 2, 3, 4, 5, 6, 13, 20, 27],
+      ]),
+    );
   });
 });

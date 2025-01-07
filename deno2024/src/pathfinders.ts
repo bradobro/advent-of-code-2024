@@ -108,23 +108,19 @@ export class DijkstrasPathfinder<NodeId> {
   }
 
   reportPath(start: NodeId, finish: NodeId): NodeId[] {
-    let result: NodeId[] = [];
-    for (const node of this.walkBack(start, finish)) {
-      result.push(node);
-    }
+    const result = Array.from(this.walkBack(start, finish));
     result.reverse();
     return result;
   }
 
-  // UNTESTED
-  reportPaths(dest: NodeId): NodeId[][] {
-    const [_cost, _explored, _open, _froms] = this.world.statNode(dest);
-    // BUG: I'm hung up on the difference between Iterable and Iterator
-    // const froms = Array.from(_froms[Symbol.iterator]);
-    // if (froms.length < 1) return [[dest]]; // we found the start
-    // recursive condition, we materialize all subpaths
-    // return this.reportPaths(dest).map((prepath) => [...prepath, dest]);
-    throw new Error("TBD");
+  /**
+   * Iterate all the best paths
+   * @param start
+   * @param finish
+   */
+  *iterAllPaths(start: NodeId, finish: NodeId): Generator<NodeId[]> {
+    const path: NodeId[] = this.reportPath(start, finish);
+    yield path;
   }
 
   //===== Helpers
