@@ -46,9 +46,13 @@ export interface Dijkstrable<Node> extends Iterable<Node> {
    */
   push: (n: Node, from: Node, cost: number) => void; // store a node we later want to search from
   // next: () => IteratorResult<Node, undefined>; // the iterator interface
-  more: () => boolean; // true if we can pop another node
-  pop: () => Node; // get the next node to explore
+  // more: () => boolean; // true if we can pop another node
+  // pop: () => Node; // get the next node to explore
   mark: (n: Node) => void; // mark a node as explored
+  /**
+   * @param n Visitable neighbors
+   * @returns
+   */
   neighbors: (n: Node) => Node[];
   /**
    * travel cost from one node to the other
@@ -59,31 +63,14 @@ export interface Dijkstrable<Node> extends Iterable<Node> {
    */
   costFrom: (from: Node, to: Node) => number;
   /**
-   * @param n
-   * @returns cost to travel from start to n
-   */
-  cost: (n: Node) => number;
-  /**
    * @param id Node
-   * @returns [
-   *    cost (to travel from start to this node),
-   *    explored (whether this node has been explored already),
-   *    open (whether this node can be traveled)],
-   *    froms (list of nodes to travel from for resultant cost)
+   * @returns [cost, explored, open, froms] where
+   *    cost: cost to travel from start to this node)
+   *    explored: whether this node has been explored already
+   *    open: whether this node can be traveled
+   *    froms: Iterator of nodes to travel from for resultant cost)
    */
   statNode: (id: Node) => [number, boolean, boolean, Iterator<Node>];
-  // /**
-  //  * Used to realize a single optimal path
-  //  * @param destination
-  //  * @returns null if we're at the start
-  //  */
-  // from?: (destination: Node) => Node | null;
-  // /**
-  //  * Used to realize multiple (usually all) optimal paths
-  //  * @param destination
-  //  * @returns
-  //  */
-  // froms?: (destination: Node) => Iterable<Node>;
 }
 
 export class DijkstrasPathfinder<Node> {
@@ -122,20 +109,22 @@ export class DijkstrasPathfinder<Node> {
   reportPaths(dest: Node): Node[][] {
     const [_cost, _explored, _open, _froms] = this.world.statNode(dest);
     // BUG: I'm hung up on the difference between Iterable and Iterator
-    const froms = Array.from(_froms);
+    // const froms = Array.from(_froms[Symbol.iterator]);
     if (froms.length < 1) return [[dest]]; // we found the start
     // recursive condition, we materialize all subpaths
-    return this.reportPaths(dest).map((prepath) => [...prepath, dest]);
+    // return this.reportPaths(dest).map((prepath) => [...prepath, dest]);
+    throw new Error("TBD");
   }
 
   //===== Helpers
   exploreNode(from: Node) {
     this.world.mark(from);
+    const costToFrom = this.world.statNode(from)[0];
     for (const dest of this.world.neighbors(from)) {
       this.world.push(
         dest,
         from,
-        this.world.cost(from) + this.world.costFrom(from, dest),
+        costToFrom + this.world.costFrom(from, dest),
       );
     }
     return from;
@@ -145,7 +134,7 @@ export class DijkstrasPathfinder<Node> {
     let cur = n;
     while (true) {
       yield cur;
-      const [_cost, _explored, _open, froms] = this.world.statNode(n);
+      const froms = this.world.statNode(n)[3];
       // get the first from or break
       const { value, done } = froms.next();
       if (done) break;

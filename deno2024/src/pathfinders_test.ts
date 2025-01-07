@@ -119,6 +119,7 @@ class DijkMap implements Dijkstrable<number> {
     return this.pqueue.shift() ?? -1;
   }
 
+  // Implements Iterable
   *[Symbol.iterator]() {
     while (true) {
       const value = this.pqueue.shift();
