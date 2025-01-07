@@ -14,13 +14,12 @@ import { parseMatrix } from "./Matrix.ts";
 import { assert } from "@std/assert/assert";
 import { Dijkstrable, DijkstrasPathfinder } from "./pathfinders.ts";
 import { i2xy, numeratorsAndDenominators, xy2i } from "./FlatMatrix.ts";
-import { Direction, Directions } from "./Direction.ts";
+import { Directions } from "./Direction.ts";
 
 interface Node {
   open: boolean;
   explored: boolean;
   cost: number;
-  from: number;
   froms: Set<number>;
 }
 
@@ -68,17 +67,22 @@ class DijkMap implements Dijkstrable<number> {
     return getXR(this.world, this.i2xr(id));
   }
 
+  statNode(id: number): [number, boolean, boolean, froms: Iterator<number>] {
+    const xr = this.i2xr(id);
+    const { cost, explored, open, froms } = getXR(this.world, xr);
+    return [cost, explored, open, froms.values()];
+  }
+
   push(id: number, from: number, cost: number) {
     const node = this.getId(id);
     if (cost < node.cost) {
       node.cost = cost;
-      node.from = from;
       node.froms.clear();
       node.froms.add(from);
     } else if (cost === node.cost) {
       node.froms.add(from);
     }
-    if (!this.pqueue.includes(id)) {
+    if (!this.pqueue.includes(id)) { // check out deno pqueue?
       this.pqueue.push(id);
       this.pqueue.sort((a, b) =>
         getXR(this.world, this.i2xr(a)).cost -
@@ -87,18 +91,40 @@ class DijkMap implements Dijkstrable<number> {
     }
   }
 
-  from(destination: number): number | null {
-    const fromNode = this.getId(destination);
-    if (fromNode.from < 0) return null;
-    return fromNode.from;
-  }
+  // from(destination: number): number | null {
+  //   const [_cost, _explored, _open, froms] = this.statNode(destination);
+  //   if (froms.size < 1) return null;
+  //   const { done, value } = froms.values().next();
+  //   if (done) return null;
+  //   return value;
+  // }
 
+  // froms(destination: number): Iterable<number> {
+  //   const [_cost, _explored, _open, froms] = this.statNode(destination);
+  //   return froms;
+  // }
+
+  /**
+   * @deprecated
+   * @returns
+   */
   more(): boolean {
     return this.pqueue.length > 0;
   }
 
+  /**
+   * @returns @deprecated
+   */
   pop(): number {
     return this.pqueue.shift() ?? -1;
+  }
+
+  *[Symbol.iterator]() {
+    while (true) {
+      const value = this.pqueue.shift();
+      if (!value) break;
+      yield value;
+    }
   }
 
   mark(id: number): void {
