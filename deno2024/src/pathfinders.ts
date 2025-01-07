@@ -42,7 +42,7 @@ export interface Dijkstrable<Node> {
    *
    * @param n The node we've traveled too
    * @param from the node we've traveled from
-   * @param cost the cost to travel from that node
+   * @param cost the cost to travel from start to n
    */
   push: (n: Node, from: Node, cost: number) => void; // store a node we later want to search from
   more: () => boolean; // true if we can pop another node
@@ -50,12 +50,18 @@ export interface Dijkstrable<Node> {
   mark: (n: Node) => void; // mark a node as explored
   neighbors: (n: Node) => Node[];
   /**
-   * A* just adds estimated cost to finish; straight Dijkstra adds only travel cost
+   * travel cost from one node to the other
+   * for a*, don't add estimate here, add when sorting pqueue
    * @param from
    * @param to
    * @returns
    */
   costFrom: (from: Node, to: Node) => number;
+  /**
+   * @param n
+   * @returns cost to travel from start to n
+   */
+  cost: (n: Node) => number;
   /**
    * Used to realize a single optimal path
    * @param destination
@@ -138,7 +144,11 @@ export class DijkstrasPathfinder<Node> {
   exploreNode(from: Node) {
     this.world.mark(from);
     for (const dest of this.world.neighbors(from)) {
-      this.world.push(dest, from, this.world.costFrom(from, dest));
+      this.world.push(
+        dest,
+        from,
+        this.world.cost(from) + this.world.costFrom(from, dest),
+      );
     }
     return from;
   }

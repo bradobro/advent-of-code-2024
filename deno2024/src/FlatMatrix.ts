@@ -29,6 +29,20 @@ export function i2xy(id: number, divisors: number[]): number[] {
   });
 }
 
+export function numeratorsAndDenominators(
+  dims: number[],
+): [number[], number[]] {
+  const nums: number[] = [];
+  const divs: number[] = [];
+  let size = 1;
+  for (const dim of dims) {
+    nums.push(size);
+    size *= dim;
+    divs.push(size);
+  }
+  return [nums, divs];
+}
+
 // bounds checked
 export function xy2iSafe(
   coords: number[],
