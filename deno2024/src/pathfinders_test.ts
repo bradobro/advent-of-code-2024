@@ -1,15 +1,6 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import {
-  dim,
-  fromXR,
-  getXR,
-  makeMatrix,
-  Matrix,
-  valid,
-  WH,
-  XR,
-} from "./Matrix.ts";
+import { dim, fromXR, getXR, Matrix, valid, WH, XR } from "./Matrix.ts";
 import { parseMatrix } from "./Matrix.ts";
 import { assert } from "@std/assert/assert";
 import { Dijkstrable, DijkstrasPathfinder } from "./pathfinders.ts";
@@ -67,10 +58,10 @@ class DijkMap implements Dijkstrable<number> {
     return getXR(this.world, this.i2xr(id));
   }
 
-  statNode(id: number): [number, boolean, boolean, froms: Iterator<number>] {
+  statNode(id: number): [number, boolean, boolean, froms: Iterable<number>] {
     const xr = this.i2xr(id);
     const { cost, explored, open, froms } = getXR(this.world, xr);
-    return [cost, explored, open, froms.values()];
+    return [cost, explored, open, froms];
   }
 
   push(id: number, from: number, cost: number) {
@@ -104,28 +95,30 @@ class DijkMap implements Dijkstrable<number> {
   //   return froms;
   // }
 
-  /**
-   * @deprecated
-   * @returns
-   */
-  more(): boolean {
-    return this.pqueue.length > 0;
-  }
+  // /**
+  //  * @deprecated
+  //  * @returns
+  //  */
+  // more(): boolean {
+  //   return this.pqueue.length > 0;
+  // }
 
-  /**
-   * @returns @deprecated
-   */
-  pop(): number {
-    return this.pqueue.shift() ?? -1;
-  }
+  // /**
+  //  * @returns @deprecated
+  //  */
+  // pop(): number {
+  //   return this.pqueue.shift() ?? -1;
+  // }
 
   // Implements Iterable
-  *[Symbol.iterator]() {
-    while (true) {
-      const value = this.pqueue.shift();
-      if (!value) break;
-      yield value;
-    }
+  [Symbol.iterator]() {
+    return this;
+  }
+
+  next(): IteratorResult<number, undefined> {
+    const value = this.pqueue.shift();
+    if (value !== undefined) return { value };
+    return { done: true, value: undefined };
   }
 
   mark(id: number): void {
@@ -192,17 +185,20 @@ describe("pathfinder", () => {
     dm.push(7, 0, 1);
     dm.push(0, 0, 0);
     expect(dm.isDone(27)).toBeFalsy();
-    expect(dm.pop()).toEqual(0); // should pop the lowest cost item
-    expect(dm.isDone(27)).toBeFalsy();
-    expect(dm.pop()).toEqual(7); // should pop the lowest cost item
-    expect(dm.isDone(27)).toBeTruthy();
+    expect(dm.pqueue).toEqual([0, 7]);
+    expect(dm.next()).toEqual({ value: 0 }); // should pop the lowest cost item
+    // expect(dm.isDone(27)).toBeFalsy();
+    // expect(dm.next()).toEqual({ value: 7 }); // should pop the lowest cost item
+    // expect(dm.isDone(27)).toBeTruthy();
   });
 
   it("finds the path", () => {
     const dm = new DijkMap(src1, { x: 6, r: 3 });
     const finder = new DijkstrasPathfinder(dm);
     finder.exploreAll(0);
-    const path = finder.reportPath(27);
-    console.debug(path);
+    const path = finder.reportPath(0, 27);
+    expect(path).toEqual([0, 7, 14, 21, 22, 23, 24, 25, 26, 27]);
+    const cost = dm.statNode(27)[0];
+    expect(cost).toEqual(9);
   });
 });

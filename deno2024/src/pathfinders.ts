@@ -13,26 +13,23 @@
  * It's also typical for nodes to be small-ish id's (keys into a Map or indexes
  * into an array) of Node objects that can record their cost information, their
  * from-nodes, etc., and that in the course of searching, we may revise the best
- * cost and from-node (of yet-unexplored nodes.) FlatMatrix.xy2i and .i2xy are one way to do this,
- * as is `${x},${y},${z}
+ * cost and from-node (of yet-unexplored nodes.) FlatMatrix.xy2i and .i2xy are
+ * one way to do this, as is `${x},${y},${z}
  *
- * [Dijkstra's Algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm):
- * finds the cheapest path from one source node to every other node in the
- * graph. **Summary**: starting at the source node, whose cost to "reach" itself
- * is 0, explore all neighbors: push each (unexplored) immediately reachable node
- * ("neighbor") onto a priority-queue the node it came from (from-node) and it's
- * cost (from-node's plus the cost from the from node). If a lower cost is
- * found, the from-node and cost replace the existing. If it matches lowest
- * cost, some applications may add it to the list of optimal from-nodes.
+ * THIS IS WHY I name the generic type NodeId instead of Node. Mostly to remind
+ * myself (because I use this infrequently) that typically we'll keep node
+ * details in some other data structure and manipulate only the ids in the
+ * Dijkstra Algorithm.
  */
-export interface Dijkstrable<Node> extends Iterable<Node> {
+export interface Dijkstrable<NodeId>
+  extends Iterable<NodeId>, Iterator<NodeId> {
   /**
    * Decide whether to finish the search. This might be decided simply by coordinates of the node,
    * but could also depend on state within the search, such as whether all reachable nodes have been searched.
    * @param n the node we have just reached
    * @returns true if we should stop the search
    */
-  isDone: (n: Node) => void; // if we've just reached a node, are we finished?
+  isDone: (n: NodeId) => void; // if we've just reached a node, are we finished?
   /**
    * Store a node for later exploration, revising it's stored optimal path information if needed, depending on
    * the algorithm. Typically:
@@ -44,16 +41,13 @@ export interface Dijkstrable<Node> extends Iterable<Node> {
    * @param from the node we've traveled from
    * @param cost the cost to travel from start to n
    */
-  push: (n: Node, from: Node, cost: number) => void; // store a node we later want to search from
-  // next: () => IteratorResult<Node, undefined>; // the iterator interface
-  // more: () => boolean; // true if we can pop another node
-  // pop: () => Node; // get the next node to explore
-  mark: (n: Node) => void; // mark a node as explored
+  push: (n: NodeId, from: NodeId, cost: number) => void; // store a node we later want to search from
+  mark: (n: NodeId) => void; // mark a node as explored
   /**
    * @param n Visitable neighbors
    * @returns
    */
-  neighbors: (n: Node) => Node[];
+  neighbors: (n: NodeId) => NodeId[];
   /**
    * travel cost from one node to the other
    * for a*, don't add estimate here, add when sorting pqueue
@@ -61,7 +55,7 @@ export interface Dijkstrable<Node> extends Iterable<Node> {
    * @param to
    * @returns
    */
-  costFrom: (from: Node, to: Node) => number;
+  costFrom: (from: NodeId, to: NodeId) => number;
   /**
    * @param id Node
    * @returns [cost, explored, open, froms] where
@@ -70,16 +64,31 @@ export interface Dijkstrable<Node> extends Iterable<Node> {
    *    open: whether this node can be traveled
    *    froms: Iterator of nodes to travel from for resultant cost)
    */
-  statNode: (id: Node) => [number, boolean, boolean, Iterator<Node>];
+  statNode: (id: NodeId) => [number, boolean, boolean, Iterable<NodeId>];
 }
 
-export class DijkstrasPathfinder<Node> {
+/**
+ * [Dijkstra's Algorithm](https://en.wikipedia.org/wiki/Dijkstra%27s_algorithm):
+ * finds the cheapest path from one source node to every other node in the
+ * graph. **Summary**: starting at the source node, whose cost to "reach" itself
+ * is 0, explore all neighbors: push each (unexplored) immediately reachable
+ * node ("neighbor") onto a priority-queue the node it came from (from-node) and
+ * it's cost (from-node's plus the cost from the from node). If a lower cost is
+ * found, the from-node and cost replace the existing. If it matches lowest
+ * cost, some applications may add it to the list of optimal from-nodes.
+ *
+ * Notice that this class will also run an A* algorithm if you sort the pQueue
+ * (usually updated with world.push()) not by the cost to reach the node but
+ * that cost PLUS estimated cost to goal and finish (world.isDone()) when the
+ * goal is reached, not when the queue is depleted.
+ */
+export class DijkstrasPathfinder<NodeId> {
   debug = false;
 
-  constructor(readonly world: Dijkstrable<Node>) {}
+  constructor(readonly world: Dijkstrable<NodeId>) {}
 
   //===== Main Interface
-  exploreAll(start: Node) {
+  exploreAll(start: NodeId) {
     this.world.push(start, start, 0);
     for (const exploredNode of this.iterExplore()) {
       if (this.debug) {
@@ -92,32 +101,34 @@ export class DijkstrasPathfinder<Node> {
 
   // driving the explorations interatively can be helpful for handling maps that change,
   // for instance, one that gains obstacles after each move.
-  *iterExplore(): Generator<Node> {
+  *iterExplore(): Generator<NodeId> {
     for (const n of this.world) {
       yield this.exploreNode(n);
     }
   }
 
-  reportPath(destination: Node): Node[] {
-    let result: Node[] = [];
-
+  reportPath(start: NodeId, finish: NodeId): NodeId[] {
+    let result: NodeId[] = [];
+    for (const node of this.walkBack(start, finish)) {
+      result.push(node);
+    }
     result.reverse();
     return result;
   }
 
   // UNTESTED
-  reportPaths(dest: Node): Node[][] {
+  reportPaths(dest: NodeId): NodeId[][] {
     const [_cost, _explored, _open, _froms] = this.world.statNode(dest);
     // BUG: I'm hung up on the difference between Iterable and Iterator
     // const froms = Array.from(_froms[Symbol.iterator]);
-    if (froms.length < 1) return [[dest]]; // we found the start
+    // if (froms.length < 1) return [[dest]]; // we found the start
     // recursive condition, we materialize all subpaths
     // return this.reportPaths(dest).map((prepath) => [...prepath, dest]);
     throw new Error("TBD");
   }
 
   //===== Helpers
-  exploreNode(from: Node) {
+  exploreNode(from: NodeId) {
     this.world.mark(from);
     const costToFrom = this.world.statNode(from)[0];
     for (const dest of this.world.neighbors(from)) {
@@ -130,13 +141,14 @@ export class DijkstrasPathfinder<Node> {
     return from;
   }
 
-  *walkBack(n: Node): Generator<Node> {
-    let cur = n;
+  *walkBack(start: NodeId, finish: NodeId): Generator<NodeId> {
+    let cur = finish;
     while (true) {
       yield cur;
-      const froms = this.world.statNode(n)[3];
+      if (cur === start) break;
+      const froms = this.world.statNode(cur)[3];
       // get the first from or break
-      const { value, done } = froms.next();
+      const { value, done } = froms[Symbol.iterator]().next();
       if (done) break;
       cur = value;
     }
