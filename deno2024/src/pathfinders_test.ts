@@ -392,7 +392,7 @@ S..#...#..
     expect(paths.length).toEqual(1);
     expect(paths[0]).toContain(30);
   });
-  it.skip("Finds the east-first path", () => {
+  it("Finds the east-first path", () => {
     const map = new DijkMap(eastOnly, finish);
     const pf = new DijkstrasPathfinder(map);
     pf.exploreAll(0);
