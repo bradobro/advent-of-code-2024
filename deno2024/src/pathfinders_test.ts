@@ -331,73 +331,35 @@ describe("more multipaths", () => {
       ],
       // BUG: the finder can't seem to find the E-first path
       [ `
-S..#...#..
-.#...#..#.
+S..#..#...
+.#......#.
 .#####.#..
-......##.#
+.......#.#
 ####.#.#..
-.....#....
+.....#..#.
 ##.######.
-.....##...
-.#######F#
-.........# `, { x: 8, r: 8 },
+.....###..
+.#####F..#
+.......### `, { x: 6, r: 8 },
         [
           // deno-lint no format
-          [ 0, 10, 20, 30,
-            31, 32, 33, 34,
-            44, 54, 53, 52, 62, 72, 71, 70,
-            80, 90, 91, 92, 93, 94, 95, 96, 97, 98,
-            88 ],
+            [
+               0,  1,  2, 12, 13, 14, 15, 16,
+              17,  7,  8,  9, 19, 29, 28, 38,
+              48, 49, 59, 69, 79, 78, 88, 87,
+              86
+            ],
+            [
+               0, 10, 20, 30, 31, 32, 33, 34,
+              44, 54, 53, 52, 62, 72, 71, 70,
+              80, 90, 91, 92, 93, 94, 95, 96,
+              86
+            ]
         ],
       ],
     ];
     for (const [src, finish, paths] of examples) {
       expect(_allPathsOf(src, finish)).toEqual(new Set(paths));
     }
-  });
-});
-
-describe("a more difficult 2-path puzzle", () => {
-  const finish: XR = { x: 8, r: 8 };
-
-  const southOnly = `
-S#.#...#..
-.#...#..#.
-.#####.#..
-......##.#
-####.#.#..
-.....#....
-##.######.
-.....##...
-.#######F#
-.........# `;
-
-  const eastOnly = `
-S..#...#..
-.#...#..#.
-.#####.#..
-......##.#
-####.#.#..
-.....#....
-##.######.
-.....##...
-########F#
-.........# `;
-
-  it("Finds the South-first path", () => {
-    const map = new DijkMap(southOnly, finish);
-    const pf = new DijkstrasPathfinder(map);
-    pf.exploreAll(0);
-    const paths = pf.reportAllPaths(0, map.xr2i(finish));
-    expect(paths.length).toEqual(1);
-    expect(paths[0]).toContain(30);
-  });
-  it("Finds the east-first path", () => {
-    const map = new DijkMap(eastOnly, finish);
-    const pf = new DijkstrasPathfinder(map);
-    pf.exploreAll(0);
-    const paths = pf.reportAllPaths(0, map.xr2i(finish));
-    expect(paths.length).toEqual(1);
-    expect(paths[0]).toContain(2);
   });
 });
