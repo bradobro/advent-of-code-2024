@@ -2,6 +2,22 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.4.0 - 2025-01-08
+#### Bug Fixes
+- **(green)** repaired tests - (2914603) - Brad Olson
+- **(red)** single cell works, but 4 cell doesn't - (3d744cd) - Brad Olson
+#### Features
+- **(green)** materializing multiple best paths works with iterators - (3cc9375) - Brad Olson
+- **(green)** add FlatMatrix and tests - (8814bfc) - Brad Olson
+- solved day 18 - (d8bfa09) - Brad Olson
+- solved day 18a, some start on b - (0ea3a08) - Brad Olson
+- finish pathfinder - (03088dc) - Brad Olson
+- added (untested) pathfinder library - (54bcd1d) - Brad Olson
+#### Refactoring
+- cleanup reportPath - (5b62ac0) - Brad Olson
+
+- - -
+
 ## v3.3.0 - 2025-01-04
 #### Bug Fixes
 - translate machine code to js - (4b5ef64) - Brad Olson
