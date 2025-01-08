@@ -40,6 +40,10 @@ export const formatMatrix = <T>(f: CellFormatter<T>, m: Matrix<T>): string =>
 
 // Manipulations
 export const dim = <T>(m: Matrix<T>): WH => ({ h: m.length, w: m[0].length });
+export function valid<T>(m: Matrix<T>): boolean {
+  const { w } = dim(m);
+  return m.reduce((acc, row) => (row.length === w) && acc, true);
+}
 export type CellTransformer<T, U> = (c: T, xr: XR) => U;
 export const transformMatrix = <T, U>(
   t: CellTransformer<T, U>,
@@ -75,7 +79,7 @@ const deltasXR: XR[] = [{ x: 0, r: -1 }, { x: 1, r: 0 }, { x: 0, r: 1 }, {
 
 export function okXR<T>(m: Matrix<T>, { x, r }: XR): boolean {
   const { w, h } = dim(m);
-  return x <= w && r <= h;
+  return x >= 0 && x < w && r >= 0 && r < h;
 }
 // get the value at XR without error checking
 export function getXR<T>(

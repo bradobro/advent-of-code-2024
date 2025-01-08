@@ -1,6 +1,6 @@
 import { describe, it } from "jsr:@std/testing/bdd";
 import { expect } from "jsr:@std/expect";
-import { _abcToI, _iToAbc, FlatMatrix } from "./FlatMatrix.ts";
+import { FlatMatrix, i2xy, xy2i } from "./FlatMatrix.ts";
 
 describe("FlatMatrix Basics", () => {
   it("makes a matrix", () => {
@@ -25,9 +25,9 @@ describe("FlatMatrix Basics", () => {
       for (let c = 0; c < nc; c++) {
         for (let b = 0; b < nb; b++) {
           for (let a = 0; a < na; a++) {
-            const id = _abcToI([a, b, c, d], mat1.nums);
+            const id = xy2i([a, b, c, d], mat1.nums);
             expect(id).toEqual(mat1.id([a, b, c, d]));
-            const coords = _iToAbc(id, mat1.divs);
+            const coords = i2xy(id, mat1.divs);
             expect(coords).toEqual([a, b, c, d]);
             expect(coords).toEqual(mat1.coords(id));
             expect(mat1.store[id]).toEqual(i);
