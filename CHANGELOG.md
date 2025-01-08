@@ -2,6 +2,32 @@
 All notable changes to this project will be documented in this file. See [conventional commits](https://www.conventionalcommits.org/) for commit guidelines.
 
 - - -
+## v3.4.0 - 2025-01-08
+#### Features
+- **(green)** add FlatMatrix and tests - (8814bfc) - Brad Olson
+- solved day 18 - (d8bfa09) - Brad Olson
+- added pathfinder library - (03088dc) - Brad Olson
+#### Refactoring
+- cleanup reportPath - (5b62ac0) - Brad Olson
+
+- - -
+
+## v3.3.0 - 2025-01-04
+#### Features
+- solve day 17 - (0c3389c) - Brad Olson
+- solve day 17a - (74580c0) - Brad Olson
+
+- - -
+
+## v3.2.0 - 2025-01-03
+#### Documentation
+- add notes about a-star libs - (4bcc494) - Brad Olson
+#### Features
+- **(green)** solve day 16 - (82dcc50) - Brad Olson
+- **(green)** solve day 16a - (a075a1a) - Brad Olson
+- add John Suder's abstract-astar code - (0eb6da6) - Brad Olson
+
+- - -
 ## v3.1.0 - 2024-12-23
 #### Features
 - solve day 15 - (9c6c8e1) - Brad Olson
