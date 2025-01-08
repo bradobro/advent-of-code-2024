@@ -81,34 +81,6 @@ class DijkMap implements Dijkstrable<number> {
     }
   }
 
-  // from(destination: number): number | null {
-  //   const [_cost, _explored, _open, froms] = this.statNode(destination);
-  //   if (froms.size < 1) return null;
-  //   const { done, value } = froms.values().next();
-  //   if (done) return null;
-  //   return value;
-  // }
-
-  // froms(destination: number): Iterable<number> {
-  //   const [_cost, _explored, _open, froms] = this.statNode(destination);
-  //   return froms;
-  // }
-
-  // /**
-  //  * @deprecated
-  //  * @returns
-  //  */
-  // more(): boolean {
-  //   return this.pqueue.length > 0;
-  // }
-
-  // /**
-  //  * @returns @deprecated
-  //  */
-  // pop(): number {
-  //   return this.pqueue.shift() ?? -1;
-  // }
-
   // Implements Iterable
   [Symbol.iterator]() {
     return this;

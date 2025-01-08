@@ -1,5 +1,7 @@
 // various pathfinding algorithms
 
+import { assertEquals } from "@std/assert/equals";
+
 /**
  * Dijkstrable objects lend themselves to a family of pathfinding and
  * graph-traversal algorithms. I'll use the word "cheapest" below to describe
@@ -23,13 +25,6 @@
  */
 export interface Dijkstrable<NodeId>
   extends Iterable<NodeId>, Iterator<NodeId> {
-  /**
-   * Decide whether to finish the search. This might be decided simply by coordinates of the node,
-   * but could also depend on state within the search, such as whether all reachable nodes have been searched.
-   * @param n the node we have just reached
-   * @returns true if we should stop the search
-   */
-  isDone: (n: NodeId) => void; // if we've just reached a node, are we finished?
   /**
    * Store a node for later exploration, revising it's stored optimal path information if needed, depending on
    * the algorithm. Typically:
@@ -95,6 +90,7 @@ export class DijkstrasPathfinder<NodeId> {
         console.debug(`explored node ${exploredNode}`);
       }
     }
+
     // when finished, this.world should have stored the cost of the shortest
     // path(s) in the finish node.
   }
@@ -110,9 +106,16 @@ export class DijkstrasPathfinder<NodeId> {
   reportPath(start: NodeId, finish: NodeId): NodeId[] {
     const result = Array.from(this.walkBack(start, finish));
     result.reverse();
+    if (result[0] !== start) return [];
+    assertEquals(result[result.length - 1], finish);
     return result;
   }
 
+  /**
+   * @param start
+   * @param finish
+   * @returns when there's no path, SHOULD return [] but not well tested
+   */
   reportAllPaths(start: NodeId, finish: NodeId) {
     return Array.from(this.iterAllPaths(start, finish, []));
   }
