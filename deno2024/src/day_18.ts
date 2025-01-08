@@ -174,7 +174,7 @@ const BIG = Number.MAX_SAFE_INTEGER - 5;
 
 function bisect(
   map: Day18,
-  pf: DijkstrasPathfinder,
+  pf: DijkstrasPathfinder<number>,
   highestGood: number,
   lowestBad: number,
 ): number {
@@ -197,6 +197,7 @@ function bisect(
     }
   }
   console.debug("FINAL", { good, bad, coords: map.drops[bad - 1] });
+  return bad;
 }
 
 export function day18a() {
