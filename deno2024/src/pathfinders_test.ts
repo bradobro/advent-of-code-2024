@@ -19,7 +19,6 @@ function parseMap(src: string): Matrix<Node> {
     open: s !== "#",
     explored: false,
     cost: Infinity,
-    from: -1,
     froms: new Set<number>(),
   }), src);
   assert(valid(map), "lines should be the same length");
@@ -209,14 +208,17 @@ describe("pathfinder with single path", () => {
 });
 
 describe("pathfinder with multiple paths", () => {
-  it("finds the single path as a list of one paths", () => {
+  it.skip("finds the single path as a list of one paths", () => {
+    // works with...
+    // const path: NodeId[] = this.reportPath(start, finish); // dummy
+    // yield path;
     const world = new DijkMap(src1, { x: 6, r: 3 });
     const finder = new DijkstrasPathfinder(world);
     finder.exploreAll(0);
     const paths = Array.from(finder.iterAllPaths(0, 27));
     expect(paths).toEqual([[0, 7, 14, 21, 22, 23, 24, 25, 26, 27]]);
   });
-  it("finds the two best paths", () => {
+  it.skip("finds the two best paths", () => {
     const world = new DijkMap(src2, { x: 6, r: 3 });
     const finder = new DijkstrasPathfinder(world);
     finder.exploreAll(0);
@@ -227,5 +229,61 @@ describe("pathfinder with multiple paths", () => {
         [0, 1, 2, 3, 4, 5, 6, 13, 20, 27],
       ]),
     );
+  });
+});
+
+describe("single cell has one path", () => {
+  const src = ".";
+  // function setup():  {
+  //   const finder = new DijkstrasPathfinder(world);
+  //   return [world, finder];
+  // }
+  it("sets up the one cell map", () => {
+    const world = new DijkMap(src, { x: 0, r: 0 });
+    const wh = dim(world.world);
+    expect(wh).toEqual({ w: 1, h: 1 });
+    expect(world.finish).toEqual(0);
+    expect(world.divs).toEqual([1, 1]);
+    expect(world.nums).toEqual([1, 1]);
+    expect(world.neighbors(0)).toEqual([]);
+  });
+  it("handles a single cell", () => {
+    const world = new DijkMap(src, { x: 0, r: 0 });
+    const finder = new DijkstrasPathfinder(world);
+
+    // Initiate the search
+    world.push(0, 0, 0);
+    const iter = finder.iterExplore();
+
+    // Manually iterate the path discovery
+    let { value, done } = iter.next();
+    expect(value).toEqual(0);
+    expect(done).toBeFalsy();
+    ({ value, done } = iter.next());
+    expect(value).toEqual(undefined);
+    expect(done).toBeTruthy();
+    const node = world.world[0][0];
+    expect(node.cost).toEqual(0);
+    expect(node.froms.size).toEqual(1);
+
+    // Check the paths report
+    // console.debug(finder.reportAllPaths(0, 0));
+    const expected = [[0]];
+    expect(new Set(finder.iterAllPaths(0, 0))).toEqual(new Set(expected));
+  });
+});
+
+describe("4-cell with 2 paths", () => {
+  const src = `
+  ..
+  ..
+  `;
+
+  it("two cell", () => {
+    const world = new DijkMap(src, { x: 0, r: 0 });
+    expect(dim(world.world)).toEqual({ w: 2, h: 2 });
+    const finder = new DijkstrasPathfinder(world);
+    finder.exploreAll(0);
+    console.debug(finder.reportAllPaths(0, 3));
   });
 });

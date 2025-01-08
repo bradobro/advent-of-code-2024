@@ -113,19 +113,8 @@ export class DijkstrasPathfinder<NodeId> {
     return result;
   }
 
-  /**
-   * Iterate all the best paths
-   * @param start
-   * @param finish
-   */
-  *iterAllPaths(start: NodeId, finish: NodeId): Generator<NodeId[]> {
-    const path: NodeId[] = this.reportPath(start, finish); // dummy
-    yield path;
-    // stack or recurse?
-    let cur = finish;
-    while (true) {
-      yield [cur];
-    }
+  reportAllPaths(start: NodeId, finish: NodeId) {
+    return Array.from(this.iterAllPaths(start, finish));
   }
 
   //===== Helpers
@@ -152,6 +141,22 @@ export class DijkstrasPathfinder<NodeId> {
       const { value, done } = froms[Symbol.iterator]().next();
       if (done) break;
       cur = value;
+    }
+  }
+
+  /**
+   * Iterate all the best paths
+   * @param start
+   * @param finish
+   */
+  *iterAllPaths(start: NodeId, finish: NodeId): Generator<NodeId[]> {
+    // const path: NodeId[] = this.reportPath(start, finish); // dummy
+    // yield path;
+    // stack or recurse?
+    const cur = finish;
+    while (true) {
+      yield [cur];
+      if (cur === start) break;
     }
   }
 }
