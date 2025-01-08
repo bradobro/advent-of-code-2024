@@ -114,7 +114,7 @@ export class DijkstrasPathfinder<NodeId> {
   }
 
   reportAllPaths(start: NodeId, finish: NodeId) {
-    return Array.from(this.iterAllPaths(start, finish));
+    return Array.from(this.iterAllPaths(start, finish, []));
   }
 
   //===== Helpers
@@ -145,18 +145,28 @@ export class DijkstrasPathfinder<NodeId> {
   }
 
   /**
-   * Iterate all the best paths
    * @param start
    * @param finish
+   * @param suffix start with []
    */
-  *iterAllPaths(start: NodeId, finish: NodeId): Generator<NodeId[]> {
-    // const path: NodeId[] = this.reportPath(start, finish); // dummy
-    // yield path;
-    // stack or recurse?
-    const cur = finish;
-    while (true) {
-      yield [cur];
-      if (cur === start) break;
+  *iterAllPaths(
+    start: NodeId,
+    finish: NodeId, // we'll successifuly move this closer to the start
+    suffix: NodeId[],
+  ): Generator<NodeId[]> {
+    // console.debug({ start, finish, suffix });
+    if (finish === start) {
+      yield [start, ...suffix];
+    } else {
+      const predecessors = this.world.statNode(finish)[3];
+      for (const pred of predecessors) {
+        // we append our suffix to the subpaths to each predecessor
+        for (
+          const subpath of this.iterAllPaths(start, pred, [finish, ...suffix])
+        ) {
+          yield subpath;
+        }
+      }
     }
   }
 }

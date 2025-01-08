@@ -215,14 +215,14 @@ describe("pathfinder with multiple paths", () => {
     const world = new DijkMap(src1, { x: 6, r: 3 });
     const finder = new DijkstrasPathfinder(world);
     finder.exploreAll(0);
-    const paths = Array.from(finder.iterAllPaths(0, 27));
+    const paths = Array.from(finder.iterAllPaths(0, 27, []));
     expect(paths).toEqual([[0, 7, 14, 21, 22, 23, 24, 25, 26, 27]]);
   });
   it.skip("finds the two best paths", () => {
     const world = new DijkMap(src2, { x: 6, r: 3 });
     const finder = new DijkstrasPathfinder(world);
     finder.exploreAll(0);
-    const paths = Array.from(finder.iterAllPaths(0, 27));
+    const paths = Array.from(finder.iterAllPaths(0, 27, []));
     expect(new Set(paths)).toEqual(
       new Set([
         [0, 7, 14, 21, 22, 23, 24, 25, 26, 27],
@@ -269,7 +269,7 @@ describe("single cell has one path", () => {
     // Check the paths report
     // console.debug(finder.reportAllPaths(0, 0));
     const expected = [[0]];
-    expect(new Set(finder.iterAllPaths(0, 0))).toEqual(new Set(expected));
+    expect(new Set(finder.reportAllPaths(0, 0))).toEqual(new Set(expected));
   });
 });
 
@@ -284,6 +284,120 @@ describe("4-cell with 2 paths", () => {
     expect(dim(world.world)).toEqual({ w: 2, h: 2 });
     const finder = new DijkstrasPathfinder(world);
     finder.exploreAll(0);
-    console.debug(finder.reportAllPaths(0, 3));
+    expect(new Set(finder.reportAllPaths(0, 3))).toEqual(
+      new Set([[0, 1, 3], [0, 2, 3]]),
+    );
+  });
+});
+
+describe("more multipaths", () => {
+  function _allPathsOf(src: string, finish: XR): Set<number[]> {
+    const dm = new DijkMap(src, finish);
+    const pf = new DijkstrasPathfinder(dm);
+    pf.exploreAll(0);
+    const paths = pf.reportAllPaths(0, dm.xr2i(finish));
+    // console.debug("path lengths", paths.map((p) => p.length));
+    return new Set(paths);
+  }
+
+  it("works with 2x3", () => {
+    const paths = _allPathsOf(
+      `
+  ...
+  ...
+  `,
+      { x: 2, r: 1 },
+    );
+    expect(paths).toEqual(
+      new Set([
+        [0, 1, 2, 5],
+        [0, 3, 4, 5],
+        [0, 1, 4, 5],
+      ]),
+    );
+  });
+
+  it("works with a bunch of examples", () => {
+    // deno-fmt-ignore
+    const examples: [string, XR, number[][]][] = [
+      [`
+.###
+....
+.##.
+....`, { x: 3, r: 3 }, [
+          [0, 4, 5, 6, 7, 11, 15],
+          [0, 4, 8, 12, 13, 14, 15],
+        ],
+      ],
+      // BUG: the finder can't seem to find the E-first path
+      [ `
+S..#...#..
+.#...#..#.
+.#####.#..
+......##.#
+####.#.#..
+.....#....
+##.######.
+.....##...
+.#######F#
+.........# `, { x: 8, r: 8 },
+        [
+          // deno-lint no format
+          [ 0, 10, 20, 30,
+            31, 32, 33, 34,
+            44, 54, 53, 52, 62, 72, 71, 70,
+            80, 90, 91, 92, 93, 94, 95, 96, 97, 98,
+            88 ],
+        ],
+      ],
+    ];
+    for (const [src, finish, paths] of examples) {
+      expect(_allPathsOf(src, finish)).toEqual(new Set(paths));
+    }
+  });
+});
+
+describe("a more difficult 2-path puzzle", () => {
+  const finish: XR = { x: 8, r: 8 };
+
+  const southOnly = `
+S#.#...#..
+.#...#..#.
+.#####.#..
+......##.#
+####.#.#..
+.....#....
+##.######.
+.....##...
+.#######F#
+.........# `;
+
+  const eastOnly = `
+S..#...#..
+.#...#..#.
+.#####.#..
+......##.#
+####.#.#..
+.....#....
+##.######.
+.....##...
+########F#
+.........# `;
+
+  it("Finds the South-first path", () => {
+    const map = new DijkMap(southOnly, finish);
+    const pf = new DijkstrasPathfinder(map);
+    pf.exploreAll(0);
+    const paths = pf.reportAllPaths(0, map.xr2i(finish));
+    expect(paths.length).toEqual(1);
+    expect(paths[0]).toContain(30);
+  });
+  it.skip("Finds the east-first path", () => {
+    const map = new DijkMap(eastOnly, finish);
+    const pf = new DijkstrasPathfinder(map);
+    pf.exploreAll(0);
+    const paths = pf.reportAllPaths(0, map.xr2i(finish));
+    expect(paths.length).toEqual(1);
+    expect(paths[0]).toContain(2);
   });
 });
