@@ -1,8 +1,9 @@
 import { assertEquals } from "@std/assert/equals";
 import { i2xy, numeratorsAndDenominators, xy2i } from "./FlatMatrix.ts";
-import { fromXR, getXR, WH, XR } from "./Matrix.ts";
+import { fromXR, getXR, iterCells, WH, XR } from "./Matrix.ts";
 import { Dijkstrable, DijkstrasPathfinder } from "./pathfinders.ts";
 import { Directions } from "./Direction.ts";
+import { assertGreaterOrEqual } from "@std/assert/greater-or-equal";
 
 interface Loc18 {
   // open: boolean; tClobbered < 0
@@ -38,7 +39,7 @@ export class Day18 implements Dijkstrable<number> {
           {
             tClobbered: -1,
             explored: false,
-            cost: Infinity,
+            cost: Number.MAX_SAFE_INTEGER,
             froms: new Set<number>(),
           },
         );
@@ -49,6 +50,25 @@ export class Day18 implements Dijkstrable<number> {
     this.start = this.xr2i(start);
     this.finish = this.xr2i(finish);
   }
+
+  // part b
+
+  runAtT(numberofdrops: number): XR {
+    this.resetPaths();
+    this.dropN(numberofdrops);
+    return this.drops[numberofdrops - 1];
+  }
+
+  resetPaths() {
+    for (const { value: c } of iterCells(this.grid)) {
+      c.cost = Number.MAX_SAFE_INTEGER;
+      c.explored = false;
+      c.tClobbered = -1;
+      c.froms.clear();
+    }
+  }
+
+  // helpers
 
   xr2i({ x, r }: XR): number {
     return xy2i([x, r], this.nums);
@@ -83,7 +103,6 @@ export class Day18 implements Dijkstrable<number> {
   }
 
   *iterDrops() {
-    assertEquals(this.tNS, 0);
     for (this.tNS = 0; this.tNS < this.drops.length; this.tNS++) {
       const clobberingAt = this.drops[this.tNS];
       getXR(this.grid, clobberingAt).tClobbered = this.tNS;
@@ -151,6 +170,35 @@ export class Day18 implements Dijkstrable<number> {
   }
 }
 
+const BIG = Number.MAX_SAFE_INTEGER - 5;
+
+function bisect(
+  map: Day18,
+  pf: DijkstrasPathfinder,
+  highestGood: number,
+  lowestBad: number,
+): number {
+  let good = highestGood;
+  let bad = lowestBad;
+  while (good < bad - 1) {
+    const mid = (bad - good) > 1
+      ? Math.trunc((bad - good) / 2) + good
+      : good + 1;
+    map.resetPaths();
+    map.dropN(mid);
+    pf.exploreAll(0);
+    const cost = map.endCost();
+    if (cost < BIG) {
+      console.debug({ ok: true, drops: mid, cost });
+      good = mid;
+    } else {
+      console.debug({ ok: false, drops: mid });
+      bad = mid;
+    }
+  }
+  console.debug("FINAL", { good, bad, coords: map.drops[bad - 1] });
+}
+
 export function day18a() {
   console.debug("running a8a");
   const src = Deno.readTextFileSync("./data/day_18.txt");
@@ -162,5 +210,13 @@ export function day18a() {
   const pf = new DijkstrasPathfinder(map);
   pf.exploreAll(0);
   // 140 is too low
-  console.log({ solutionACost: map.endCost() });
+  console.log({ solutionACost: map.endCost(), totalDrops: map.drops.length });
+
+  console.log("starting part b");
+  // validate bounds
+  map.resetPaths();
+  map.dropN(map.drops.length);
+  pf.exploreAll(0);
+  assertGreaterOrEqual(map.endCost(), BIG);
+  bisect(map, pf, 1024, map.drops.length);
 }
