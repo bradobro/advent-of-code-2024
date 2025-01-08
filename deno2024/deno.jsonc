@@ -7,7 +7,7 @@
     "runw": "deno run --allow-read --allow-write --allow-net --watch aoc.ts 1",
     "test": "deno test --allow-read --allow-write --allow-env --allow-net",
     "testw": "deno test --allow-read --allow-write --allow-env --allow-net --watch",
-    "test1": "deno test --allow-read --allow-write --allow-env --allow-net --watch ./src/day_17_test.ts"
+    "test1": "deno test --allow-read --allow-write --allow-env --allow-net --watch ./src/day_18_test.ts"
   },
 
   "imports": {
