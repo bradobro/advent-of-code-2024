@@ -1,7 +1,7 @@
 import { assertEquals } from "@std/assert/equals";
 import { DIGEST_ALGORITHM_NAMES } from "@std/crypto/crypto";
 import { toNamespacedPath } from "@std/path/to-namespaced-path";
-import { assert } from "@std/assert";
+import { assert, assertGreater } from "@std/assert";
 
 export function parseDay19(src: string): [string[], string[]] {
   const parts = src.trim().split("\n\n");
@@ -27,20 +27,30 @@ export class Stripe19 {
   }
 }
 
+// sort by length, then alphabetic
+export function shortestThenAbc(a: string, b: string): number {
+  const byLength = a.length - b.length;
+  if (byLength === 0) return b < a ? 1 : -1;
+  return byLength;
+}
+
 /**
  * A pattern matcher that makes designes out of towels.
  */
 export class Onsen19 {
   trie: Stripe19; // head of the trie
   nodes: Stripe19[] = []; // just because
+  words: string[] = []; // words in the order added
   constructor(
-    readonly alphabet: string,
-    readonly towels: string[],
-    readonly designs: string[],
+    readonly alphabet: string, // the colors of the towels
+    readonly towels: string[], // the "words"
+    readonly designs: string[], // the "sentences"
     addWords: boolean,
   ) {
     towels.forEach((t) => this.validate(t, "invalid towel"));
     designs.forEach((t) => this.validate(t, "invalid design"));
+    this.towels.sort(shortestThenAbc);
+    this.designs.sort(shortestThenAbc);
     this.trie = this.newNode();
     if (addWords) {
       towels.forEach((t) => this.addWord(t));
@@ -82,6 +92,7 @@ export class Onsen19 {
    * @param word
    */
   addWord(word: string): Stripe19 {
+    assertGreater(word.length, 0, "zero length words will mess up the trie");
     this.validate(word, "malformed word");
     return this._addWord(word, this.trie);
   }
@@ -117,6 +128,68 @@ export class Onsen19 {
     const n2 = n.k[tok];
     if (n2 === null) return false;
     return this._matchWord(word.slice(1), n2);
+  }
+
+  matchSentence(sentence: string): boolean {
+    assert(!this.trie.z); // head of trie must not be terminal or we'll loop
+    this.validate(sentence, "malformed sentence");
+    return this._matchSentenceBfs1(sentence, this.trie);
+  }
+
+  /**
+   * BFS (Breadth-First Search) version of matching concatenations that
+   * works for the example but hangs on the puzzle.
+   *
+   * @param sent
+   * @param n
+   * @returns
+   */
+  private _matchSentenceBfs1(sent: string, n: Stripe19): boolean {
+    if (sent.length < 1) return n.z; // nothing left, have to be at terminal
+    let [wordBoundary, wordContinue] = [false, false];
+    if (n.z) { // ASSUMES this.trie.z muset be false
+      wordBoundary = this._matchSentenceBfs1(sent, this.trie);
+    }
+    const char = sent[0]!;
+    const tok = this.tok(char);
+    const n2 = n.k[tok];
+    if (n2 !== null) {
+      wordContinue = this._matchSentenceBfs1(sent.slice(1), n2);
+    }
+    return wordBoundary || wordContinue;
+  }
+
+  _matchSentenceDfs1(
+    design: string,
+    node1: Stripe19,
+    depth: number,
+    wordBreaks: number[],
+  ): [boolean, number[]] {
+    console.debug({ depth, design, wordBreaks });
+    // CASE 1: no more characters to match, are we at a terminal node?
+    if (design.length < 1) return [node1.z, wordBreaks];
+
+    // Set up for other cases
+    const [tok, rest] = [this.tok(design[0]), design.slice(1)];
+    const [wordBreak, wordExtends] = [this.trie.k[tok], node1.k[tok]];
+
+    // CASE 2: we can continue matching characters, making this DFS prefer longer words
+    if (wordExtends !== null) {
+      // deno-fmt-ignore
+      const [match, breaks] = this._matchSentenceDfs1( rest, wordExtends, depth + 1, wordBreaks );
+      // we return here with success, possibly ignoring alternatives; exhaustive search would have to consider case 3 as well
+      if (match) return [match, breaks];
+    }
+
+    //CASE 3: we have a word ending and can try match a new word;
+    if (node1.z && wordBreak !== null) {
+      //deno-fmt-ignore
+      const [match, breaks] = this._matchSentenceDfs1( rest, wordBreak, depth + 1, [...wordBreaks, design.length] );
+      if (match) return [match, breaks];
+    }
+
+    // CASE 4: no further match possible from node1 or, if at a word break, from the head of the trie
+    return [false, wordBreaks];
   }
 }
 
@@ -210,4 +283,16 @@ export class Day19a1 {
 
 export function day19() {
   console.debug("designs with towels at the onsen");
+  const src = Deno.readTextFileSync("./data/day_19.txt");
+  const puz = Onsen19.parse(src);
+  const total = puz.designs.length;
+  let ok = 0;
+  for (const design of puz.designs) {
+    console.debug({ design });
+    const match = puz.matchSentence(design);
+    if (match) ok++;
+    // const match = false;
+    console.debug({ match, design });
+  }
+  console.debug(total, ok);
 }

@@ -3,6 +3,7 @@ import { Day19a1, Onsen19, parseDay19 } from "./day_19.ts";
 import { expect } from "jsr:@std/expect/expect";
 import { assertThrows } from "@std/assert/throws";
 import { assert } from "@std/assert/assert";
+import { right } from "./Direction.ts";
 
 const src1 = `r, wr, b, g, bwu, rb, gb, br
 
@@ -101,5 +102,49 @@ describe("example 1 with Onsen19", () => {
     words.forEach((w) => puz.addWord(w));
     words.forEach((w) => expect(puz.matchWord(w)).toBeTruthy());
     fakes.forEach((w) => expect(puz.matchWord(w)).toBeFalsy());
+  });
+  it("matches some simple concatenatioins", () => {
+    const words = ["rrr", "rw", "ww"];
+    const ok = ["rrr", "rw", "ww", "rrrrw", "rrrrwrrr", "wwrrrrwww", "wwww"];
+    const bad = ["rrrr", "rr", "w", "www"];
+    const puz = Onsen19.parse(src1, false);
+    words.forEach((w) => puz.addWord(w));
+    words.forEach((w) => expect(puz.matchSentence(w)).toBeTruthy());
+    ok.forEach((w) => expect(puz.matchSentence(w)).toBeTruthy());
+    bad.forEach((w) =>
+      assert(!puz.matchSentence(w), `expecting not to match ${w}`)
+    );
+  });
+  it("confirms the example without collecting components", () => {
+    const puz = Onsen19.parse(src1);
+    for (const d of puz.designs) {
+      const match = puz.matchSentence(d);
+      // console.debug({ match, d });
+    }
+  });
+});
+
+describe("puzzle part 1", () => {
+  function getPuzzle() {
+    const src = Deno.readTextFileSync("./data/day_19.txt");
+    return Onsen19.parse(src);
+  }
+  it("doesn't hang on a long example or two from the actual puzzle", () => {
+    const puz = getPuzzle();
+    console.debug({
+      // nodes: puz.nodes.length,
+      // towels: puz.towels.length,
+      // designs: puz.designs.length,
+      design0: puz.designs[0],
+      words: puz.towels.slice(0, 1000).join(","),
+    });
+    const m1 = puz._matchSentenceDfs1(
+      // puz.designs[0].slice(0, 2), // bu works as a single word, as does buw
+      puz.designs[0].slice(0, 4), // buwb doesn't work without restarting, but matches on bu-wb
+      puz.trie,
+      0,
+      [],
+    );
+    console.debug(m1);
   });
 });
