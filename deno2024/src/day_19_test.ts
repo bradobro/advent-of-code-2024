@@ -136,12 +136,14 @@ describe("puzzle part 1", () => {
       // towels: puz.towels.length,
       // designs: puz.designs.length,
       design0: puz.designs[0],
-      words: puz.towels.slice(0, 1000).join(","),
+      designLen: puz.designs[0].length,
+      // words: puz.towels.slice(0, 1000).join(","),
     });
+
     const m1 = puz._matchSentenceDfs1(
       // puz.designs[0].slice(0, 2), // bu works as a single word, as does buw
       // puz.designs[0].slice(0, 4), // buwb doesn't work without restarting, but matches on bu-wb
-      puz.designs[0], // buwb doesn't work without restarting, but matches on bu-wb
+      puz.designs[0].slice(4), // buwb doesn't work without restarting, but matches on bu-wb
       puz.trie,
       0,
       [],
