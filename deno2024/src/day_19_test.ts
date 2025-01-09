@@ -94,7 +94,7 @@ describe("example 1 with Onsen19", () => {
     expect(puz.matchWord("w")).toBeFalsy(); // nor just the last
     expect(puz.matchWord("rrw")).toBeFalsy(); // nor a superset
   });
-  it.skip("adds a few simple words and finds them all", () => {
+  it("adds a few simple words and finds them all", () => {
     const words = ["r", "rw", "wwr", "rrww"];
     const fakes = ["w", "wr", "rrw", "rrwww", "ww", "rr"];
     const puz = Onsen19.parse(src1, false);
