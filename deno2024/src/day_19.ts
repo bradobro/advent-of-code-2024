@@ -18,6 +18,8 @@ export function parseDay19(src: string): [string[], string[]] {
  * A Map<string, Stripe19> would be so much easier, but I'm feeling like thinking through how
  * I would do it on a resource-limited chip. Since the alphabet is so small, I'm using an array instead of
  * a Map and all the hash overhead that creates.
+ *
+ * Still too slow. Might need to just hack it with regex?
  */
 export class Stripe19 {
   z = false; // true if word terminates here
@@ -133,7 +135,32 @@ export class Onsen19 {
   matchSentence(sentence: string): boolean {
     assert(!this.trie.z); // head of trie must not be terminal or we'll loop
     this.validate(sentence, "malformed sentence");
-    return this._matchSentenceBfs1(sentence, this.trie);
+    // return this._matchSentenceBfs1(sentence, this.trie);
+    const [match, breaksR] = this._matchSentenceDfs1(
+      sentence,
+      this.trie,
+      0,
+      [],
+    );
+    if (!match) return false;
+
+    const parts: string[] = [];
+    let posa = 0;
+    const breaks = breaksR.map((r) => sentence.length - r);
+
+    while (true) {
+      const posz = breaks.shift();
+      if (posz) {
+        parts.push(sentence.slice(posa, posz));
+        posa = posz;
+        continue;
+      }
+      parts.push(sentence.slice(posa));
+      break;
+    }
+    console.debug({ sentence, parts });
+
+    return true;
   }
 
   /**
@@ -159,6 +186,15 @@ export class Onsen19 {
     return wordBoundary || wordContinue;
   }
 
+  /**
+   * @param design
+   * @param node1
+   * @param depth
+   * @param wordBreaks
+   * @returns [match, breaks]
+   *  match: true if the design can be matched
+   *  breaks: list of lengths of remaining design to match when a word break was used
+   */
   _matchSentenceDfs1(
     design: string,
     node1: Stripe19,
@@ -166,6 +202,9 @@ export class Onsen19 {
     wordBreaks: number[],
   ): [boolean, number[]] {
     console.debug({ depth, design, wordBreaks });
+    if (depth > 200) {
+      throw new Error("Your stack is getting pretty deep");
+    }
     // CASE 1: no more characters to match, are we at a terminal node?
     if (design.length < 1) return [node1.z, wordBreaks];
 
