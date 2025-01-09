@@ -1,6 +1,7 @@
 import { describe, it } from "jsr:@std/testing/bdd";
-import { Day19, parseDay19 } from "./day_19.ts";
+import { Day19a1, Onsen19, parseDay19 } from "./day_19.ts";
 import { expect } from "jsr:@std/expect/expect";
+import { assertThrows } from "@std/assert/throws";
 
 const src1 = `r, wr, b, g, bwu, rb, gb, br
 
@@ -14,7 +15,7 @@ brgr
 bbrgwb
 `;
 
-describe("example 1", () => {
+describe.skip("example 1 with deprecated approach Day19a1", () => {
   it("parses the source", () => {
     const [towels, designs] = parseDay19(src1);
     expect(towels).toEqual(["r", "wr", "b", "g", "bwu", "rb", "gb", "br"]);
@@ -30,17 +31,17 @@ describe("example 1", () => {
     ]);
   });
   it("adds the words", () => {
-    const puz = new Day19(src1);
+    const puz = new Day19a1(src1);
     expect(puz.nodes.length).toEqual(10);
   });
   it("finds words", () => {
-    const puz = new Day19(src1);
+    const puz = new Day19a1(src1);
     expect(puz.match("r")).toEqual([[0]]);
     // expect(puz.match("rwrb")).toEqual([0, 1, 2]);  // doesn't get consituents right
     expect(puz.match("wwwwwww")).toEqual([]);
   });
   it("finds the words in the list", () => {
-    const puz = new Day19(src1);
+    const puz = new Day19a1(src1);
     for (const d of puz.designs) {
       const pat = puz.match(d);
       if (pat.length > 0) {
@@ -49,5 +50,39 @@ describe("example 1", () => {
         console.debug({ find: false, design: d });
       }
     }
+  });
+});
+
+describe("example 1 with Onsen19", () => {
+  it("parses and validates the input", () => {
+    const puz = Onsen19.parse(src1, false);
+    expect(puz.alphabet.length).toEqual(5);
+    expect(puz.towels.length).toEqual(8);
+    expect(puz.designs.length).toEqual(8);
+    expect(puz.nodes.length).toEqual(1);
+    expect(puz.nodes[0]).toEqual(puz.trie);
+    expect(puz.trie.z).toBeFalsy();
+    expect(puz.trie.k).toEqual([null, null, null, null, null]);
+  });
+  it("adds a single single-char word and finds it", () => {
+    const puz = Onsen19.parse(src1, false);
+    puz.addWord("r");
+    // make sure the trie head looks right
+    expect(puz.nodes.length).toEqual(2); // we've added a node
+    expect(puz.trie).toEqual(puz.nodes[0]); // trie head remains constant
+    expect(puz.trie.z).toBeFalsy(); // trie head can't be terminal
+    expect(puz.trie.k).toEqual([puz.nodes[1], null, null, null, null]); // the "r" node is filled
+
+    // make sure the child node looks right
+    const r = puz.trie.k[0];
+    expect(r).toEqual(puz.nodes[1]);
+    expect(r).not.toBe(null);
+
+    // test the finding
+    expect(puz.matchWord("r")).toBeTruthy();
+    expect(puz.matchWord("rr")).toBeFalsy();
+    expect(puz.matchWord("u")).toBeFalsy();
+    expect(puz.matchWord("")).toBeFalsy();
+    assertThrows(() => puz.matchWord("q"), "illegal alphabet should throw");
   });
 });
