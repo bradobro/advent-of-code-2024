@@ -2,6 +2,7 @@ import { describe, it } from "jsr:@std/testing/bdd";
 import { Day19a1, Onsen19, parseDay19 } from "./day_19.ts";
 import { expect } from "jsr:@std/expect/expect";
 import { assertThrows } from "@std/assert/throws";
+import { assert } from "@std/assert/assert";
 
 const src1 = `r, wr, b, g, bwu, rb, gb, br
 
@@ -84,5 +85,21 @@ describe("example 1 with Onsen19", () => {
     expect(puz.matchWord("u")).toBeFalsy();
     expect(puz.matchWord("")).toBeFalsy();
     assertThrows(() => puz.matchWord("q"), "illegal alphabet should throw");
+  });
+  it("adds a single 2-letter word and finds it", () => {
+    const puz = Onsen19.parse(src1, false);
+    puz.addWord("rw");
+    expect(puz.matchWord("rw")).toBeTruthy(); // finds the whole word
+    expect(puz.matchWord("r")).toBeFalsy(); // but not just the first letter
+    expect(puz.matchWord("w")).toBeFalsy(); // nor just the last
+    expect(puz.matchWord("rrw")).toBeFalsy(); // nor a superset
+  });
+  it.skip("adds a few simple words and finds them all", () => {
+    const words = ["r", "rw", "wwr", "rrww"];
+    const fakes = ["w", "wr", "rrw", "rrwww", "ww", "rr"];
+    const puz = Onsen19.parse(src1, false);
+    words.forEach((w) => puz.addWord(w));
+    words.forEach((w) => expect(puz.matchWord(w)).toBeTruthy());
+    fakes.forEach((w) => expect(puz.matchWord(w)).toBeFalsy());
   });
 });
