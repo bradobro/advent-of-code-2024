@@ -201,7 +201,7 @@ export class Onsen19 {
     depth: number,
     wordBreaks: number[],
   ): [boolean, number[]] {
-    console.debug({ depth, design, wordBreaks });
+    // console.debug({ depth, design, wordBreaks });
     if (depth > 200) {
       throw new Error("Your stack is getting pretty deep");
     }
@@ -214,6 +214,7 @@ export class Onsen19 {
 
     // CASE 2: we can continue matching characters, making this DFS prefer longer words
     if (wordExtends !== null) {
+      // console.debug("CASE2");
       // deno-fmt-ignore
       const [match, breaks] = this._matchSentenceDfs1( rest, wordExtends, depth + 1, wordBreaks );
       // we return here with success, possibly ignoring alternatives; exhaustive search would have to consider case 3 as well
@@ -222,6 +223,7 @@ export class Onsen19 {
 
     //CASE 3: we have a word ending and can try match a new word;
     if (node1.z && wordBreak !== null) {
+      // console.debug("CASE1");
       //deno-fmt-ignore
       const [match, breaks] = this._matchSentenceDfs1( rest, wordBreak, depth + 1, [...wordBreaks, design.length] );
       if (match) return [match, breaks];

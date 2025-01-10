@@ -140,10 +140,12 @@ describe("puzzle part 1", () => {
       // words: puz.towels.slice(0, 1000).join(","),
     });
 
+    const design = puz.designs[0];
     const m1 = puz._matchSentenceDfs1(
-      // puz.designs[0].slice(0, 2), // bu works as a single word, as does buw
-      // puz.designs[0].slice(0, 4), // buwb doesn't work without restarting, but matches on bu-wb
-      puz.designs[0].slice(4), // buwb doesn't work without restarting, but matches on bu-wb
+      // BUG shortest sentence endlessly loops unless we trim the last character.
+      // failed stop condition maybe?
+      design.slice(0, design.length - 1),
+      // design,
       puz.trie,
       0,
       [],
